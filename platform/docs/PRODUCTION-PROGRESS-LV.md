@@ -39,6 +39,12 @@ Droša nākamā secība: (1) pārbaudīt Production Auth un pilnu foto/ZIP dzīv
 
 ## Lokālā pārbaude
 
+2026-09-29 atkārtoti palaisti Queue/DLQ, jobs reliability, email delivery un
+migrāciju testi: 63/63 izturēja. Tie pārbauda rindas sūtīšanas kļūmi un
+atkārtotu publicēšanu, stale job atgūšanu, dead-letter marķēšanu un retry,
+e-pasta piegādes retry/final failure un R2 cleanup retry tikai lokāli ar
+sintētiskiem datiem; tie nav dzīvas Production rindas kļūmes tests.
+
 2026-09-29 pēc EU bucket jurisdikcijas preflight papildinājuma pilnais `npm run check` izturēja: 167/167 Node testi, secret scan (253 faili), `npm audit` (0 ievainojamību), build (60 publiskie faili), pārlūka plūsmas 320–1440 px un axe/keyboard/reduced-motion/200% zoom. Pārlūka pārbaude izmantoja izolētus sintētiskus datus. Tā nepierāda Production Supabase reāla konta izveidi vai foto/ZIP dzīves ciklu.
 runtime/Restore Drill skriptiem un fokusētie migrāciju, backup un Production
 initializer testi izturēja (15/15). Migrācija 045 nav mainīta, lai saglabātu
