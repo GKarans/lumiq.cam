@@ -1,6 +1,6 @@
 # Lumiq production migrācijas progress
 
-Pēdējā pārbaude: 2026-09-29, pēc Hyperdrive paroles rotācijas, kandidāta deploy, Access pārbaudes un pilna `npm run check`. Šis ir dzīvs kontrolsaraksts ar lokāliem un
+Pēdējā pārbaude: 2026-09-30, pēc Production Queue, Worker Access un e-pasta iestatījumu read-only audita. Šis ir dzīvs kontrolsaraksts ar lokāliem un
 attālināti pārbaudītiem faktiem. Gatavs lokāls fails vai tests pats par sevi
 nenozīmē, ka izmaiņa ir palaista Production.
 
@@ -130,6 +130,15 @@ negarantē nepārtrauktu darbību bez papildu compute izmaksām.
 3. Pārbaudīt Cloudflare `$10`/`$50` budžeta brīdinājumu adresātus un testa piegādi; pašlaik adresāti nav apstiprināti.
 4. Kandidātā ar sintētiskiem datiem pārbaudīt reģistrāciju/pieslēgšanos, foto, galeriju, ZIP, dzēšanu/atjaunošanu, Queue/DLQ, slodzes robežas, brīdinājumus un restore. Kandidāta Auth URL ir iestatīts; reāla Production Auth plūsma un foto/ZIP vēl jānotestē.
 5. Pirms domēna cutover atkārtoti pārbaudīt, ka Cloudflare Access `lumiq.cam` hostname un owner-only politika ir precīzi konfigurēti; pašreizējā Cloudflare Access UI rādīja servisa degradāciju un neuzrādīja app ierakstus. Pēc TET bloķējuma noņemšanas un tehnisko vārtu izpildes piesaistīt `lumiq.cam`, saglabājot PIN/Access. Publisko piekļuvi neatvērt līdz īpašnieka atsevišķam apstiprinājumam un juridisko/maksājumu jautājumu slēgšanai.
+
+## 2026-09-30 read-only pārbaude
+
+- Production kandidāta versija `37314545-a149-416a-837b-ea5efbb8f6b0` joprojām ir 100%. Bez sesijas Worker atbild ar HTTP 302; Cloudflare Worker panelī nav custom domain vai route. `PLATFORM_RELEASE_APPROVED` ir `production`, un Access politika ir owner-only. `lumiq.cam` maršruts nav mainīts.
+- `lumiq-production-jobs` ir viens consumer ar 10 retry un `lumiq-production-jobs-dlq` kā galamērķi. DLQ pašlaik ir `Inactive`, Wrangler neuzrāda consumer, un Cloudflare Metrics rāda backlog 0, 0 ingested, 0 acknowledged un 0 retried pēdējās 24 h. Consumer pievienošana/deploy vēl nav veikta; pirms tās jāiziet tiešās Production izvietošanas apstiprinājums.
+- Production Worker `PLATFORM_EMAIL_KEY` noslēpums eksistē, bet Runtime variables panelī nav `PLATFORM_EMAIL_FROM`. `platform/server/mail.mjs` pieprasa abus, tāpēc lietotnes Resend paziņojumi pašlaik nevar tikt nosūtīti. Lokālā veidne un ignorētais Production config sagatavoti ar `Lumiq <noreply@send.lumiq.cam>`; atsevišķam deploy vajadzīgs owner apstiprinājums.
+- Supabase Production custom SMTP slēdzis ir ieslēgts, `smtp.resend.com:465`, sender name `Lumiq`; panelī `Sender email address` un `Username` lauki ir tukši. Password vērtība ir slēpta un netika atvērta. Tādēļ Auth e-pasta sūtītāja konfigurācija nav uzskatāma par verificētu; SMTP credentials jāievada īpašniekam un jāpārbauda reāla piegāde.
+- Auth template sarakstā ir Lumiq apstiprināšanas, uzaicinājuma, reset, e-pasta maiņas un drošības paziņojumu veidnes; `Password changed` un `Email address changed` paziņojumi ir ieslēgti. Reālā piegāde Gmail un otrā pasta klientā vēl nav testēta.
+- Pēc DLQ un sender konfigurācijas izmaiņām `node --test platform/tests/production-preflight.test.mjs platform/tests/worker-router.test.mjs` izturēja 19/19. Wrangler `--dry-run` kompilēja Production config un 66 assetus, neveicot deploy. Production preflight apstājās pie release gate: lokālais dzīvais config ir `production`, bet statiskais preflight pieprasa `NOT_APPROVED`; šajā skrējienā Hyperdrive remote identity pārbaude netika sasniegta. Release vārtus nedrīkst mainīt klusējot.
 
 ## Drošības robežas
 

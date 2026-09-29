@@ -15,6 +15,7 @@ function candidate() {
       PLATFORM_SUPABASE_URL: "https://prodproject123.supabase.co",
       PLATFORM_SUPABASE_PROJECT_REF: "prodproject123",
       PLATFORM_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_synthetic_test_key",
+      PLATFORM_EMAIL_FROM: "Lumiq <noreply@send.lumiq.cam>",
       R2_BUDGET_ENABLED: "true",
       R2_MAX_CLASS_A_OPS_MONTH: "10000",
       R2_MAX_CLASS_B_OPS_MONTH: "100000",
@@ -40,6 +41,7 @@ test("production starter template stays locked and has no automatic cleanup sche
   const template = JSON.parse(await readFile(new URL("../../cloudflare/worker/wrangler.production.template.json", import.meta.url), "utf8"));
   assert.equal(template.vars.PLATFORM_RELEASE_APPROVED, "NOT_APPROVED");
   assert.equal(template.triggers?.crons, undefined);
+  assert.equal(template.vars.PLATFORM_EMAIL_FROM, "Lumiq <noreply@send.lumiq.cam>");
   assert.deepEqual(template.queues.consumers.map(consumer => consumer.queue), ["lumiq-production-jobs", "lumiq-production-jobs-dlq"]);
 });
 
@@ -54,6 +56,12 @@ test("production candidate preflight refuses an approved release state", () => {
   const approved = candidate();
   approved.vars.PLATFORM_RELEASE_APPROVED = "production";
   assert.throws(() => validateProductionConfig(approved, testHyperdriveId), /must stay release-locked/);
+});
+
+test("production email sender must use the verified sending subdomain", () => {
+  const unverified = candidate();
+  unverified.vars.PLATFORM_EMAIL_FROM = "Lumiq <noreply@lumiq.cam>";
+  assert.throws(() => validateProductionConfig(unverified, testHyperdriveId), /verified Lumiq send\.lumiq\.cam/);
 });
 
 test("production R2 binding must explicitly target the EU jurisdiction", () => {
