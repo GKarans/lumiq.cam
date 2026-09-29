@@ -14,18 +14,20 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 
 ## 1. E-pasta adreses un saņemšana
 
-- [x] Sistēmas vēstules konfigurētas no `Lumiq <noreply@lumiq.cam>` pēc saknes Resend domēna verifikācijas; jāiziet reālas Auth vēstules piegādes pārbaude.
-- [ ] Ja vajadzīgs tieši `noreply@lumiq.cam`, pievienot saknes domēnu Resend ar atsevišķu Return-Path un verificēt to; pirms tam saglabāt esošos piecus Namecheap MX un Namecheap SPF ierakstu. DNS vēl nav mainīts.
-- [ ] Izveidot īstu `support@lumiq.cam` saņemšanu vai pāradresāciju un pārbaudīt ienākošo vēstuli. Galamērķa pastkaste jāapstiprina īpašniekam; jautājums ir uzdots.
-- [ ] Neveidot pagaidām `events@` vai citas pastkastes.
+- [x] Resend saknes domēns `lumiq.cam` ir verificēts ar atsevišķu `outbound` Return-Path; esošie Namecheap MX/SPF ieraksti ir saglabāti.
+- [x] Supabase Production Auth SMTP sūtītājs ir `Lumiq <noreply@lumiq.cam>`; SMTP parole palika noslēpta un netika mainīta.
+- [ ] Izveidot reālu ienākošo `support@lumiq.cam` pastkasti vai pāradresāciju. Galamērķa adrese vēl jāapstiprina īpašniekam.
+- [ ] Pēc galamērķa apstiprināšanas konfigurēt ienākošo pastu, saglabājot esošos piecus Namecheap MX un SPF ierakstus, līdz ir pārbaudīts un apstiprināts pasta maršrutēšanas plāns.
+- [ ] Nosūtīt vēstuli uz `support@lumiq.cam` un pārbaudīt saņemšanu/atbildi; tikai tad iestatīt `support@` kā Reply-To.
+- [x] Sākumā paredzētas tikai `noreply@` un `support@`; `events@` un citas atsevišķas pastkastes nav vajadzīgas.
 
 ## 2. Lumiq e-pastu dizains un pārbaude
 
-- [x] Sagatavotas un Production Supabase Auth saglabātas sešas Lumiq HTML veidnes: apstiprināšana, uzaicinājums, paroles atjaunošana, e-pasta maiņa un konta drošības paziņojumi.
+- [x] Sagatavotas un Production Supabase Auth saglabātas Lumiq HTML veidnes reģistrācijas apstiprināšanai, uzaicinājumam, paroles atjaunošanai, e-pasta maiņai un konta drošības paziņojumiem.
 - [x] Worker transakciju vēstulēm Resend payload satur gan `text`, gan `html`; `node --test platform/tests/email-templates.test.mjs platform/tests/operations.test.mjs` izturēja 9/9.
-- [ ] Supabase Auth panelī ir HTML lauks, nevis atsevišķa teksta MIME lauka. Pārbaudīt reāli saņemtās Auth vēstules MIME un izlemt, vai vajadzīgs atbalstīts Auth email hook, lai garantētu teksta alternatīvu.
-- [ ] Pārbaudīt reālas vēstules Gmail un vēl vienā pasta klientā: LV/EN, saites, mobilais izkārtojums un MIME tipi.
-- [ ] `support@lumiq.cam` iestatīt kā atbildes adresi tikai pēc ienākošās saņemšanas verificēšanas. Worker `PLATFORM_EMAIL_REPLY_TO` ir izvēles iestatījums; Supabase Auth Reply-To iespēja jāpārbauda atsevišķi.
+- [ ] Kontrolēti nosūtīt Auth vēstules uz testa pastkasti; pārbaudīt reālo piegādi, saites, LV/EN tekstu, mobilā izkārtojuma un MIME/plain-text uzvedību.
+- [ ] Pārbaudīt vēstules Gmail un vismaz vienā citā pasta klientā.
+- [ ] Pēc `support@` ienākošās saņemšanas verifikācijas iestatīt to kā Reply-To, kur tas ir atbalstīts; pārbaudīt Worker `PLATFORM_EMAIL_REPLY_TO` un Supabase Auth Reply-To atsevišķi.
 
 ## 3. Production konta plūsma aiz Access
 
@@ -62,8 +64,8 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 
 ## 7. TET atbildes sagaidīšana un atkārtots pieprasījums
 
-- [ ] Sagaidīt atbildi uz 2026-09-25 nosūtīto TET pieprasījumu. Piecu darba dienu termiņš, neieskaitot nedēļas nogali, beidzas aptuveni 2026-10-02.
-- [ ] Ja atbildes nav līdz termiņam, 2026-10-05 sazināties ar TET atkārtoti, pievienojot sākotnējā STOP ekrāna attēlu un skenēšanas rezultātus.
+- [ ] Sagaidīt atbildi uz 2026-09-25 nosūtīto TET pieprasījumu; piecu darba dienu termiņš aptuveni beidzas 2026-10-02.
+- [ ] Ja līdz 2026-10-02 atbildes nav, 2026-10-05 sazināties ar TET atkārtoti, pievienojot sākotnējā STOP ekrāna attēlu un skenēšanas rezultātus.
 - [ ] Līdz TET apstiprinājumam `lumiq.cam` maršrutu nemainīt.
 
 ## 8. Pēdējais solis pēc TET bloķējuma noņemšanas
