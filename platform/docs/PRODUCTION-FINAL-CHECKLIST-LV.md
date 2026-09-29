@@ -50,7 +50,8 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 - [x] Bez cookies kandidāta `/`, `/login` un `/healthz` katrs atgrieza `302` uz Cloudflare Access login.
 - [x] Workers → Access pašreizējā skatā kandidāta hostname un `lumiq.cam` ir piesaistīti `Lumiq closed test - owner` Allow politikai; abiem Worker nav atsevišķas Worker-level politikas.
 - [x] 2026-09-30 Cloudflare Access politikas definīcijā pārbaudīts: darbība `Allow`, vienīgais `Include` ir īpašnieka e-pasts `guntars.karans@gmail.com`; papildu `Require`/`Exclude` nav. Kandidāta un `lumiq.cam` Self-hosted lietotnes izmanto šo politiku.
-- [ ] Ar diviem testa organizatoriem pierādīt, ka pasākumi un galerijas ir savstarpēji izolēti.
+- [x] Lokālais sintētiskais migrāciju tests apliecina organizer JWT lasījumu izolāciju un šauru RPC piekļuvi (`node --test platform/tests/migrations.test.mjs`, 3/3, 2026-09-30); tas nav dzīvs Production tests.
+- [ ] Ar diviem atsevišķiem testa organizatoriem Production kandidātā pierādīt, ka pasākumi un galerijas ir savstarpēji izolēti.
 - [ ] Ar anonīmu klientu pārbaudīt, ka organizatora API, dati un faili nav pieejami arī ar tiešu URL; sākotnējais `302` pārbauda Access robežu, nevis iekšējās lietotnes autorizāciju.
 
 ## 6. Fona darbi, rezerves kopijas un uzraudzība
