@@ -4,26 +4,28 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 
 **Pēdējā pārskatīšana:** 2026-09-30. Šis saraksts neaizstāj pienākumu pārbaudīt katru dzīvo plūsmu; lokāli testi nav Production pierādījums.
 
+**Darba princips:** kamēr TET izskata 2026-09-25 pieteikumu, pabeigt visus tālākos darbus kandidātā aiz Cloudflare Access. `lumiq.cam` DNS/Worker maršrutu neaiztikt. Kad pārējais gatavs, gaidīt TET atbloķēšanu; domēna pārslēgšana ir pēdējais solis.
+
 ## A. Pabeigt tagad, kamēr TET izskata pieteikumu
 
 ### 1. E-pasta sūtīšana
 
 - [x] 2026-09-30 Supabase Production SMTP pārbaudīts pēc pārlādes: custom SMTP ieslēgts, `smtp.resend.com:465`, sūtītājs `Lumiq <noreply@lumiq.cam>`, lietotājvārds `resend`; saglabātā parole ir noslēpta un netika mainīta.
-- [ ] Saglabāt SMTP iestatījumus un nosūtīt kontrolētu Auth testa vēstuli uz savu testa pastkasti; pārbaudīt piegādi, saites un kļūdu žurnālus.
-- [ ] Pārbaudīt Auth e-pastus Gmail un vēl vienā pasta klientā: mobilais izkārtojums, LV/EN teksts, saites, derīguma termiņš un `text/plain`/HTML atbalsts.
+- [ ] Nosūtīt kontrolētu Auth testa vēstuli uz savu testa pastkasti; pārbaudīt piegādi, saites un kļūdu žurnālus. Pirms īstas vēstules nosūtīšanas apstiprināt konkrēto testa sūtījumu.
+- [ ] Pārbaudīt Auth e-pastus Gmail un vēl vienā pasta klientā: Lumiq dizainu, attēlojumu mobilajā izkārtojumā, LV/EN tekstu, saites un derīguma termiņu. Supabase Auth redaktorā ir HTML veidne, nevis atsevišķs `text/plain` lauks; Worker transakciju e-pastiem jāpārbauda abi varianti.
 - [x] Sagatavotas sešas Lumiq tēmas Supabase Auth HTML veidnes: reģistrācija, uzaicinājums, paroles atjaunošana, e-pasta maiņa un drošības paziņojumi.
 - [x] Worker transakciju vēstules veidnes atbalsta HTML un teksta variantu; lokālie e-pasta testi izturēti.
 - [x] 2026-09-30 atkārtoti palaisti `email-templates.test.mjs`, `auth-callback.test.mjs` un `operations.test.mjs`: 11/11 izturēti. Tie nepārbauda SMTP piegādi no Production.
 
 ### 2. Lumiq e-pasta adreses
 
-- [x] Resend verificējis gan `send.lumiq.cam`, gan saknes `lumiq.cam`; saknes konfigurācijai pielāgotais Return-Path ir `outbound`, kas nesaduroties ar esošo sūtīšanas apakšdomēnu.
-- [x] Production Supabase SMTP pēc pārlādes izmanto `Lumiq <noreply@lumiq.cam>` un lietotājvārdu `resend`; saglabātā parole nav mainīta.
-- [ ] Nosūtīt kontrolētu Auth vēstuli un pārbaudīt, ka tā pienāk. Pēc tam pārbaudīt saites un vēstules izskatu Gmail un vēl vienā pasta klientā.
-- [ ] Izvēlēties, kur saņemt `support@lumiq.cam` vēstules, un apstiprināt konkrēto galamērķa adresi.
-- [ ] Tikai pēc galamērķa izvēles konfigurēt ienākošo e-pastu un pārbaudīt saņemšanu. Pirms Cloudflare Email Routing aktivizēšanas izvērtēt DNS konfliktu ar pašreizējiem pieciem Namecheap MX un SPF ierakstu; tos neaizstāt bez apstiprināta pasta plāna.
-- [ ] Pēc `support@` saņemšanas pārbaudīt Reply-To. Neveidot nevajadzīgas `events@`, `info@` vai citas atsevišķas pastkastes; ja vajag papildu adresi, sākt ar aliasu uz atbalsta pastkasti.
-- [ ] Izveidot īstu `support@lumiq.cam` saņemšanu vai pāradresāciju tikai pēc galamērķa izvēles; saglabāt pašreizējos piecus Namecheap MX un SPF ierakstus, līdz pasta maršrutēšanas plāns ir apstiprināts.
+- [x] Automātiskai sūtīšanai izmanto `noreply@lumiq.cam`; Production Supabase SMTP izmanto `Lumiq <noreply@lumiq.cam>` un Resend. Atsevišķa `noreplay@` adrese nav vajadzīga — pareizā rakstība ir `noreply@`.
+- [x] Resend verificējis `send.lumiq.cam` un saknes `lumiq.cam`; saknes konfigurācijai Return-Path ir `outbound`, saglabājot esošo sūtīšanas apakšdomēnu.
+- [ ] Pārbaudīt un vajadzības gadījumā salabot Lumiq zīmola veidnes visiem Auth paziņojumiem un lietotnes transakciju e-pastiem; salīdzināt Supabase Production saturu ar repozitorija avotiem, novērst dublētu noklusējuma tekstu un pēc saglabāšanas pārlādēt/redzami pārbaudīt katru veidni.
+- [ ] Izvēlēties, kur saņemt `support@lumiq.cam` vēstules, un apstiprināt konkrēto galamērķa adresi. Šī ir cilvēka atbalsta adrese; sākumā pietiek ar vienu pastkasti vai aliasu, nevis vairākām atsevišķām pastkastēm.
+- [ ] Tikai pēc galamērķa izvēles izveidot `support@lumiq.cam` saņemšanu/pāradresāciju un pārbaudīt ienākošo vēstuli. Pirms Cloudflare Email Routing aktivizēšanas saskaņot esošo Namecheap MX/SPF migrāciju; esošos ierakstus neaizstāt bez apstiprināta pasta plāna.
+- [ ] Pēc `support@` saņemšanas pārbaudīt atbildes plūsmu un iestatīt to kā Reply-To, kur tas ir atbalstīts; pārbaudīt Worker `PLATFORM_EMAIL_REPLY_TO` un Supabase Auth Reply-To atsevišķi.
+- [ ] Vēlāk vajadzīgās adreses, piemēram, `privacy@` vai `billing@`, sākumā veidot kā aliasus uz apstiprināto atbalsta galamērķi; šobrīd tās nav Production palaišanas priekšnoteikums.
 
 ### 3. Production konta un piekļuves plūsma
 
@@ -62,11 +64,11 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 
 - Pieteikums nosūtīts **2026-09-25**; TET solītais termiņš ir līdz piecām darbdienām, neieskaitot nedēļas nogali, aptuveni līdz **2026-10-02**.
 - Ja līdz termiņam nav atbildes, **2026-10-05** nosūtīt atkārtotu pieprasījumu ar sākotnējā STOP ekrāna attēlu un skenējumu rezultātiem.
-- [ ] Saņemt TET atbildi un skaidru apstiprinājumu par `lumiq.cam` atbloķēšanu.
-- [ ] Pēc apstiprinājuma pārbaudīt `lumiq.cam` no Tet tīkla un vēl viena neatkarīga tīkla; pārliecināties, ka STOP pāradresācija vairs nenotiek.
+- [ ] Saņemt TET atbildi un skaidru apstiprinājumu par `lumiq.cam` atbloķēšanu. Ja līdz piecu darbdienu termiņam nav atbildes, sekot līdzi 2026-10-05.
+- [ ] Pēc apstiprinājuma pārbaudīt `lumiq.cam` no Tet tīkla un vēl viena neatkarīga tīkla; pārliecināties, ka STOP pāradresācija vairs nenotiek. Līdz šai pārbaudei domēna cutover nav atļauts.
 - Līdz šim brīdim `lumiq.cam` maršrutu nemainīt un STOP lapā neievadīt konta datus.
 
-## C. Pēdējais darbs: `lumiq.cam` pieslēgšana Production
+## C. Pēdējais darbs pēc TET atbloķēšanas: `lumiq.cam` pieslēgšana Production
 
 - [ ] Pārbaudīt kandidāta gatavību: veselība, īpašnieka vienīgā Access politika, SMTP/Auth saites, foto plūsma un atgriešanas plāns.
 - [ ] Supabase Production Auth atļautajos URL pievienot precīzos `https://lumiq.cam` callback/redirect maršrutus, nepievienojot plašus wildcard.
