@@ -45,7 +45,8 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 - [x] Jaunākā Production rezerves kopija atkārtoti pārbaudīta 2026-09-30: 21 tabula, migrācijas 001–046 un kontrolsummas sakrīt; netika veikta atjaunošana.
 - [x] Recovery mērķa atjaunošana un migrāciju ķēde pārbaudīta; aizpildīto Recovery projektu nepārrakstīt.
 - [x] 2026-09-30 pārbaudīti divi aktīvi Cloudflare Billing Budget Alert: automātiskais `$10` slieksnis un `$50` slieksnis; abiem e-pasta saņēmējs ir īpašnieka konta adrese. Testa vēstule netika sūtīta.
-- [ ] Pārbaudīt Production kļūdu žurnālus un Queue retry/DLQ uzvedību ar kontrolētu testa kļūmi.
+- [x] 2026-09-30 Production Worker Observability pēdējā stundā rādīja 4 veiksmīgus notikumus un 0 kļūdu; Worker Logs ir ieslēgti. Logu payloadi netika atvērti.
+- [ ] Ar kontrolētu testa kļūmi pārbaudīt Queue retry/DLQ dzīvajā vidē pēc DLQ patērētāja izvietošanas un apstiprinājuma.
 
 ## 7. TET atbildes sagaidīšana
 
