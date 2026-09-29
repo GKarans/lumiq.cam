@@ -55,6 +55,7 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 - [ ] Pilnu restore testu veikt tikai tukšā izolētā mērķī; esošo Recovery datubāzi nepārrakstīt.
 - [ ] Pārbaudīt aktuālos Production Worker kļūdu žurnālus un Queue/DLQ metriku, tostarp sintētisku kļūmes scenāriju bez reālu klientu datu ietekmes.
 - [ ] Pievienot Cloudflare `$10`/`$50` budžeta brīdinājumu saņēmēju pēc adreses apstiprināšanas; pašlaik saņēmēju lauki ir tukši.
+- [x] Pārbaudīt Cloudflare Production Worker Observability žurnālu “Last 1 hour” skatā 2026-09-30: 10 success, 0 errors; pēdējie redzamie notikumi ir `/api/config` un `/api/auth/session`. Tas nav pilnas lietotnes plūsmas pierādījums.
 - [ ] Pārskatīt izmaksas un resursu atkarības; resursus nedzēst bez pierādītas neatkarības un īpašnieka apstiprinājuma. `app-images` un `event-photo-media` neaiztikt — STOP.
 
 ## 7. TET atbildes sagaidīšana un atkārtots pieprasījums
