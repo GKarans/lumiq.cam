@@ -29,6 +29,18 @@ to that address has been received successfully. Worker transactional messages
 accept `PLATFORM_EMAIL_REPLY_TO` for this purpose; it is intentionally
 optional.
 
+Supabase's hosted Auth template editor exposes HTML template content; it does
+not provide a separate plain-text alternative field. The HTML templates include
+the action URL as readable link text, but that is not an independently authored
+`text/plain` MIME part. Supabase's current documentation describes hosted Auth
+templates as HTML Go templates: <https://supabase.com/docs/guides/auth/auth-email-templates>.
+Do not claim a plain-text fallback for Auth mail until the actual delivered MIME
+message has been inspected. Worker transactional notifications already send
+both `text` and `html` through Resend.
+
 After saving, send test messages to a Gmail account and a second mailbox.
 Check both languages, mobile width, link destinations, expired-link behavior,
-and the plain-text fallback before treating the Production templates as live.
+and the delivered MIME types before treating the Production templates as live.
+If a real text alternative is required for Supabase Auth, evaluate a supported
+Auth email hook/custom sender separately; do not replace the working SMTP path
+without integration tests and a verified rollback.
