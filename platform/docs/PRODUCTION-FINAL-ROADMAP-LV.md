@@ -35,6 +35,8 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 
 ### 4. Produkta pilnais foto cikls
 
+- 2026-09-30 kandidāta sākumlapa aiz Access joprojām rāda veco `/demo` saiti, un `/demo` atgriež `404`. `wrangler deployments list` rāda pēdējo izvietošanu 2026-09-29 19:19 UTC; repozitorija `13f6820` saites labojums tika commitots vēlāk, 23:29 pēc Latvijas laika. Kandidāts nav atjaunināts ar šo kodu.
+- [ ] Pēc atsevišķa apstiprinājuma izvietot pašreizējo kandidāta konfigurāciju, kas ietver galveno Queue un DLQ patērētāju; saglabāt `workers.dev` kandidāta hostname un Cloudflare Access, `lumiq.cam` maršrutu neaiztikt. Pēc izvietošanas atkārtoti pārbaudīt sākumlapas saites un DLQ darbību.
 - [ ] Kandidātā izveidot marķētu QA pasākumu un QR kodu.
 - [ ] Ar telefonu atvērt viesa saiti, ievadīt vārdu, uzņemt foto, augšupielādēt to un pārbaudīt galeriju/sīktēlus.
 - [ ] Pārbaudīt organizatora foto dzēšanu, R2 objekta dzēšanu un ZIP lejupielādi.
