@@ -44,7 +44,8 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 ## 5. Drošība un izolācija
 
 - [x] Bez cookies kandidāta `/`, `/login` un `/healthz` katrs atgrieza `302` uz Cloudflare Access login.
-- [ ] Atkārtoti pārbaudīt Access politiku un tās vienīgo atļauto e-pastu kandidātam un `lumiq.cam`; 2026-09-30 Cloudflare One tiešais lapas ceļš atgrieza “page not found”, tādēļ jaunā pārbaude neizdevās.
+- [x] Workers → Access pašreizējā skatā kandidāta hostname un `lumiq.cam` ir piesaistīti `Lumiq closed test - owner` Allow politikai; abiem Worker nav atsevišķas Worker-level politikas.
+- [ ] Atvērt šīs politikas definīciju un atkārtoti apstiprināt, ka vienīgais Include nosacījums ir īpašnieka e-pasts; Worker Access kopsavilkums nerāda pašas politikas noteikumus.
 - [ ] Ar diviem testa organizatoriem pierādīt, ka pasākumi un galerijas ir savstarpēji izolēti.
 - [ ] Ar anonīmu klientu pārbaudīt, ka organizatora API, dati un faili nav pieejami arī ar tiešu URL; sākotnējais `302` pārbauda Access robežu, nevis iekšējās lietotnes autorizāciju.
 
