@@ -26,7 +26,10 @@ function candidate() {
     r2_buckets: [{binding: "R2_PHOTOS", bucket_name: "lumiq-production-photos", jurisdiction: "eu"}],
     queues: {
       producers: [{binding: "LUMIQ_JOBS_QUEUE", queue: "lumiq-production-jobs"}],
-      consumers: [{queue: "lumiq-production-jobs", dead_letter_queue: "lumiq-production-jobs-dlq"}]
+      consumers: [
+        {queue: "lumiq-production-jobs", dead_letter_queue: "lumiq-production-jobs-dlq"},
+        {queue: "lumiq-production-jobs-dlq"}
+      ]
     }
   };
 }
@@ -37,6 +40,7 @@ test("production starter template stays locked and has no automatic cleanup sche
   const template = JSON.parse(await readFile(new URL("../../cloudflare/worker/wrangler.production.template.json", import.meta.url), "utf8"));
   assert.equal(template.vars.PLATFORM_RELEASE_APPROVED, "NOT_APPROVED");
   assert.equal(template.triggers?.crons, undefined);
+  assert.deepEqual(template.queues.consumers.map(consumer => consumer.queue), ["lumiq-production-jobs", "lumiq-production-jobs-dlq"]);
 });
 
 test("production preflight accepts isolated candidate with budget and queue recovery", () => {
@@ -61,7 +65,7 @@ test("production R2 binding must explicitly target the EU jurisdiction", () => {
   assert.throws(() => validateProductionConfig(wrong, testHyperdriveId), /EU R2 jurisdiction/);
 });
 
-test("production preflight rejects closed-test resources, retired names and missing budget or DLQ", () => {
+test("production preflight rejects closed-test resources, retired names and missing budget or DLQ consumer", () => {
   const sharedDb = candidate();
   sharedDb.hyperdrive[0].id = testHyperdriveId;
   assert.throws(() => validateProductionConfig(sharedDb, testHyperdriveId), /must not reuse/);
@@ -85,8 +89,16 @@ test("production preflight rejects closed-test resources, retired names and miss
   assert.throws(() => validateProductionConfig(noBudget, testHyperdriveId), /hard stop/);
 
   const noDlq = candidate();
-  noDlq.queues.consumers[0].dead_letter_queue = undefined;
-  assert.throws(() => validateProductionConfig(noDlq, testHyperdriveId), /DLQ/);
+  noDlq.queues.consumers = noDlq.queues.consumers.slice(0, 1);
+  assert.throws(() => validateProductionConfig(noDlq, testHyperdriveId), /DLQ consumer/);
+
+  const wrongDlq = candidate();
+  wrongDlq.queues.consumers[1].queue = "lumiq-production-unrelated";
+  assert.throws(() => validateProductionConfig(wrongDlq, testHyperdriveId), /matching consumer/);
+
+  const nestedDlq = candidate();
+  nestedDlq.queues.consumers[1].dead_letter_queue = "lumiq-production-nested-dlq";
+  assert.throws(() => validateProductionConfig(nestedDlq, testHyperdriveId), /nested DLQ/);
 });
 
 test("production preflight rejects unsafe public variables and disabled preview protection", () => {

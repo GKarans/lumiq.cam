@@ -10,6 +10,14 @@ dead-letter queue mark their eligible DB job failed and stop automatic
 redispatch; the owner can retry it from the event workspace. Without the Queue
 binding, cron continues to poll and process jobs itself.
 
+The Worker must consume both the main queue and its DLQ. The main consumer
+routes exhausted messages to the DLQ; the DLQ consumer calls `deadLetter()` to
+mark the durable DB job failed. DLQ processing retries up to ten times. If the
+database remains unavailable through those retries, Cloudflare eventually
+discards that queue message; the job row remains the source of truth and the
+cron dispatcher can publish it again after the database recovers. Monitor DLQ
+age and Worker errors so this recovery loop is visible rather than silent.
+
 ## Closed-test sequence
 
 Do not enable photo uploads or run load tests until the account-level R2 budget
@@ -53,6 +61,13 @@ separate cost approval.
          "max_retries": 10,
          "dead_letter_queue": "lumiq-closed-test-jobs-dlq",
          "max_concurrency": 1
+       },
+       {
+         "queue": "lumiq-closed-test-jobs-dlq",
+         "max_batch_size": 1,
+         "max_batch_timeout": 5,
+         "max_retries": 10,
+         "max_concurrency": 1
        }
      ]
    }
@@ -60,7 +75,9 @@ separate cost approval.
 
    Also add `LUMIQ_JOBS_DLQ_NAME: "lumiq-closed-test-jobs-dlq"` to that
    config's `vars`. The Worker uses the Queue batch's source name to distinguish
-   the normal consumer from the dead-letter consumer.
+   the normal consumer from the dead-letter consumer. Do not add a nested DLQ:
+   the durable jobs table and cron dispatcher are the fallback if the DB is
+   unavailable while a DLQ message is being processed.
 
 5. Run `npm run check`, `npm run build`, and a Wrangler dry run with the
    closed-test config. Review every binding before a closed-test deployment.

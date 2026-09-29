@@ -56,11 +56,13 @@ export function validateProductionConfig(candidate, closedTestHyperdriveId) {
 
   const producer = (candidate.queues?.producers || []).filter(item => item?.binding === "LUMIQ_JOBS_QUEUE");
   requireThat(producer.length === 1 && candidate.queues.producers.length === 1 && /^lumiq-production-[a-z0-9-]+$/.test(producer[0].queue || ""), "Production jobs Queue binding is missing or not isolated.");
-  const consumers = (candidate.queues?.consumers || []).filter(item => item?.queue === producer[0].queue);
-  requireThat(consumers.length === 1 && candidate.queues.consumers.length === 1 && /^lumiq-production-[a-z0-9-]+$/.test(consumers[0].dead_letter_queue || ""), "Production jobs consumer must have a separate production DLQ.");
-  requireThat(consumers[0].dead_letter_queue !== producer[0].queue && vars.LUMIQ_JOBS_DLQ_NAME === consumers[0].dead_letter_queue, "Production DLQ name must match the Worker configuration.");
+  const consumers = candidate.queues?.consumers || [];
+  const mainConsumer = consumers.find(item => item?.queue === producer[0].queue);
+  requireThat(consumers.length === 2 && mainConsumer && /^lumiq-production-[a-z0-9-]+$/.test(mainConsumer.dead_letter_queue || ""), "Production jobs require a main consumer and a separate production DLQ consumer.");
+  const dlqConsumer = consumers.find(item => item?.queue === mainConsumer.dead_letter_queue);
+  requireThat(mainConsumer.dead_letter_queue !== producer[0].queue && dlqConsumer && !dlqConsumer.dead_letter_queue && vars.LUMIQ_JOBS_DLQ_NAME === mainConsumer.dead_letter_queue, "Production DLQ must have one matching consumer and no unhandled nested DLQ.");
 
-  return {worker: candidate.name, origin: origin.origin, hyperdriveId: prodDb.id, bucket: prodR2.bucket_name, queue: producer[0].queue, dlq: consumers[0].dead_letter_queue};
+  return {worker: candidate.name, origin: origin.origin, hyperdriveId: prodDb.id, bucket: prodR2.bucket_name, queue: producer[0].queue, dlq: mainConsumer.dead_letter_queue};
 }
 
 export function validateRemoteHyperdriveProject(config, expectedId, expectedProjectRef, expectedRuntimeRole = "lumiq_runtime") {
