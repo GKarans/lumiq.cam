@@ -130,7 +130,7 @@ Ja Cloudflare prasa arī lokālās testēšanas izcelsmi, pievieno to tikai atse
 | `PLATFORM_R2_SECRET_ACCESS_KEY` | Atbilstošais noslēpums |
 | `PLATFORM_TRUSTED_PROXY_IPS` | Atstāj tukšu, ja nezini Render tiešo proxy IP; neuzmini un neuztici visiem proxy |
 | `PLATFORM_EMAIL_KEY` | (Pēc izvēles) Resend API atslēga lietotnes paziņojumiem |
-| `PLATFORM_EMAIL_FROM` | (Pēc izvēles) Verificēts sūtītājs, piem. `Lumiq <no-reply@lumiq.cam>` |
+| `PLATFORM_EMAIL_FROM` | (Pēc izvēles) Verificēts sūtītājs, piem. `Lumiq <noreply@send.lumiq.cam>` |
 | `PLATFORM_ALERT_WEBHOOK` | (Pēc izvēles) Operāciju brīdinājumu HTTPS webhook |
 
 Neizveido `PLATFORM_STRIPE_SECRET`, `PLATFORM_STRIPE_WEBHOOK_SECRET` vai `PLATFORM_STRIPE_PRICE_*`. Maksājumi ir apzināti izslēgti. `PLATFORM_MODE=staging` un `PLATFORM_RELEASE_APPROVED=staging` jau ir Blueprint failā; nemaini tos uz izdomātu production režīmu. Pēc mainīgo ievades Render veic deploy.

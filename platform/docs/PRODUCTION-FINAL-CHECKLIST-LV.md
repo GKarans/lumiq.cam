@@ -10,7 +10,7 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 - [x] Production backup no privātā R2 atkārtoti pārbaudīts 2026-09-30: 21 tabula, migrācijas `001–046`, 0 foto objektu, checksum derīgs.
 - [x] Production kandidāts darbojas atsevišķā `workers.dev` adresē. `lumiq.cam` maršruts nav mainīts.
 - [x] EU Production foto, backup un recovery bucketu atdalījums pārbaudīts. `app-images` un `event-photo-media` neaiztikt.
-- [x] Supabase Auth SMTP izmanto verificēto Resend `send.lumiq.cam` un `Lumiq` sūtītāja nosaukumu.
+- [x] Supabase Auth SMTP izmanto verificēto Resend saknes `lumiq.cam` domēnu ar `Lumiq <noreply@lumiq.cam>`; Worker sūtītājam paredzēts verificētais `send.lumiq.cam`.
 
 ## 1. E-pasta adreses un saņemšana
 

@@ -18,10 +18,13 @@ Templates**:
 | Password changed notification | `supabase-password-changed.html` | `Lumiq konta paroles drošības paziņojums / Lumiq password security notice` |
 | Email address changed notification | `supabase-email-changed.html` | `Lumiq konta e-pasts nomainīts / Lumiq email address changed` |
 
-The current confirmed Resend sending domain is `send.lumiq.cam`. Supabase Auth
-SMTP should keep using `Lumiq <noreply@send.lumiq.cam>` until the root-domain
-sender has been separately verified. Do not replace root-domain MX or SPF
-records as part of this step.
+Resend has verified both `send.lumiq.cam` and the root `lumiq.cam` domain. The
+Production Supabase Auth sender is `Lumiq <noreply@lumiq.cam>`; the prepared
+Cloudflare Worker release configuration expects
+`Lumiq <noreply@send.lumiq.cam>`, but this value is not yet present in the live
+Runtime variables. The root domain uses its separate `outbound` Return-Path.
+Existing root MX and SPF records must remain unchanged unless an approved
+receiving-mail migration requires a coordinated change.
 
 `support@lumiq.cam` is not yet a verified receiving mailbox. Do not set it as
 the `Reply-To` address until incoming mail has been configured and a message

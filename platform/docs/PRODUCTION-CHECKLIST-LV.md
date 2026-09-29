@@ -11,7 +11,7 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 - [ ] Apstiprināt pāradresācijas saņēmēja adresi.
 - [ ] Pirms Cloudflare Email Routing aktivizācijas atrisināt DNS konfliktu: publiskajā DNS šobrīd ir pieci `eforward*.registrar-servers.com` MX ieraksti un Namecheap SPF `include:spf.efwd.registrar-servers.com`. Cloudflare vednis piedāvā tos aizstāt ar saviem trim MX un SPF. Nekādas izmaiņas neveikt, kamēr nav izvēlēts, vai pārņemt ienākošā pasta maršrutēšanu un saglabāts vajadzīgais esošais pasts.
 - Namecheap konta `Redirect Email` panelis prasa pārslēgt nameserverus uz Namecheap noklusējumu. To nedarīt, jo `lumiq.cam` DNS pašlaik apkalpo Cloudflare; pārbaudīts 2026-09-30.
-- [ ] Ja sūtīšanai vajadzīgs tieši `@lumiq.cam`, pievienot saknes domēnu Resend un verificēt, apvienojot SPF, neizdzēšot esošo pasta konfigurāciju.
+- [ ] Nākamajā apstiprinātajā kandidāta izvietošanā pievienot Worker `PLATFORM_EMAIL_FROM=Lumiq <noreply@send.lumiq.cam>`; pašreizējā Production Runtime variables panelī tas nav iestatīts. Pēc tam kontrolēti pārbaudīt Worker transakciju e-pasta piegādi.
 
 ## 2. Lumiq e-pastu dizains
 
