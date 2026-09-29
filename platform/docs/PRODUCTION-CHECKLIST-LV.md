@@ -44,7 +44,7 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 - [ ] Pievienot un pārbaudīt Production DLQ patērētāju; pašlaik DLQ nav patērētāja, lai gan pēdējā pārbaudē backlog bija 0. Pirms izvietošanas vajadzīgs atsevišķs apstiprinājums.
 - [x] Jaunākā Production rezerves kopija atkārtoti pārbaudīta 2026-09-30: 21 tabula, migrācijas 001–046 un kontrolsummas sakrīt; netika veikta atjaunošana.
 - [x] Recovery mērķa atjaunošana un migrāciju ķēde pārbaudīta; aizpildīto Recovery projektu nepārrakstīt.
-- [ ] Apstiprināt Cloudflare izmaksu brīdinājumu saņēmējus un testa paziņojumu.
+- [x] 2026-09-30 pārbaudīti divi aktīvi Cloudflare Billing Budget Alert: automātiskais `$10` slieksnis un `$50` slieksnis; abiem e-pasta saņēmējs ir īpašnieka konta adrese. Testa vēstule netika sūtīta.
 - [ ] Pārbaudīt Production kļūdu žurnālus un Queue retry/DLQ uzvedību ar kontrolētu testa kļūmi.
 
 ## 7. TET atbildes sagaidīšana
