@@ -29,14 +29,15 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 
 ## 3. Production konta plūsma aiz Access
 
+- [x] Lokālajā izolētajā pārlūka testā izieta reģistrācija, e-pasta verifikācija, pieslēgšanās, paroles atjaunošanas saite un jauna parole; uzaicinājuma callback tests izturēja. Sintētiski dati, nevis Production.
 - [ ] Ar atsevišķu testa kontu pārbaudīt reģistrāciju vai uzaicinājumu, apstiprinājuma saiti, pieslēgšanos, paroles atjaunošanu un izrakstīšanos.
 - [ ] Pārbaudīt sesijas atkārtotu ielādi un kļūdainas/expired saites saprotamu apstrādi.
 - [ ] Skaidri marķēt testa kontu, un pēc pārbaudes dzēst testa lietotāju un saistītos datus.
 
 ## 4. Pasākuma un foto pilnais cikls
 
-- [ ] Izveidot testa pasākumu un QR kodu.
-- [ ] Pārbaudīt viesa vārdu, kameras foto uzņemšanu/augšupielādi, galeriju un sīktēlus mobilajā ierīcē.
+- [x] Lokālajā izolētajā browser journey izveidots/publicēts pasākums, pievienots viesa vārds, augšupielādēti 20 testa foto ar vienu tīkla kļūmes atkārtojumu, galerijā redzēti sīktēli un priekšskatījums; mobilais izkārtojums saglabājās.
+- [ ] Production kandidātā izveidot skaidri marķētu QA pasākumu un QR; pārbaudīt viesa vārdu, kameras foto uzņemšanu/augšupielādi, galeriju un sīktēlus mobilajā ierīcē. Lokālais tests nepieslēdz Production Supabase vai R2.
 - [ ] Pārbaudīt foto dzēšanu datubāzē un objekta izņemšanu no R2.
 - [ ] Pārbaudīt ZIP lejupielādi, kļūdu paziņojumus, lēnu savienojumu un atkārtotu mēģinājumu.
 - [ ] Pēc testa izdzēst sintētisko pasākumu un objektus un apstiprināt, ka dati vairs nav pieejami.
