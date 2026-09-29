@@ -273,17 +273,17 @@ deployed.
 ## Readiness and owner decision register
 
 **Launch-kit status: NOT READY FOR PRODUCTION.** The preparation artifacts are
-in place, but this is not a launch approval. In particular, the restored
-`lumiq_runtime` role still has `BYPASSRLS` and broad DML grants; the minimum-
-privilege requirement is not satisfied by the current database architecture.
-No role flags or RLS policies were changed during this drill. Replace or
-constrain this shared runtime access only through a separately reviewed
-identity/RLS/function design with PostgreSQL integration tests.
+in place, but this is not a launch approval. Production now uses the separately
+provisioned `lumiq_production_runtime` with `NOBYPASSRLS`; migrations 001-046,
+RLS coverage and its narrow grants/RPC allowlist were checked against Production
+on 2026-09-29. The former `lumiq_runtime` role was left unchanged. Remaining
+live user-flow, Access-policy, email-delivery, operations and owner/legal gates
+still prevent a launch decision.
 
 | Decision or gate | Status | Required before production |
 |---|---|---|
 | Restore evidence and candidate isolation | VERIFIED for the documented synthetic drill; candidate remains owner-only behind Access | Preserve the drill evidence and recheck bindings before any further candidate deploy |
-| Runtime DB least privilege / `BYPASSRLS` | OPEN: production `lumiq_runtime` is still LOGIN and `BYPASSRLS`; local migrations 014-045 implement the reviewed direction but are not live | After a verified production backup and isolated PostgreSQL security/restore drill, apply reviewed migrations 014-045, verify `NOBYPASSRLS`, no broad table/sequence grants, exact function EXECUTE allow-list and application workflows. Do not attach candidate until these checks pass |
+| Runtime DB least privilege / `BYPASSRLS` | VERIFIED for current Production runtime: `lumiq_production_runtime` is `LOGIN/NOINHERIT/NOBYPASSRLS`; Production migration chain 001-046 and least-privilege verifier passed 2026-09-29. The former `lumiq_runtime` remains unchanged. | Re-run the read-only verifier after future role, migration or Hyperdrive changes; test app workflows under the active runtime |
 | Company/operator identity, support contact, privacy notice and terms | WAITING: company/legal details are not approved | Complete after company registration and qualified legal review |
 | Data region, subprocessors, retention and deletion/backup interaction | WAITING: proposed, not approved | Owner/legal decision with customer-market and residency requirements |
 | Backup cadence, encrypted destination, retention, RPO/RTO and restore operator | PROPOSED, NOT APPROVED OR IMPLEMENTED | Approve policy, then configure, alert and measure a real restore |
@@ -300,9 +300,9 @@ real guest uploads, or automatic production cleanup.
 
 | Resource | Required isolation | Candidate naming/location |
 |---|---|---|
-| Supabase PostgreSQL + Auth | `Lumiq Production` (`baqebydtinysosueksgr`) is active in Frankfurt on Pro; app ledger 001-013 is present; fresh R2 backup verified 2026-09-29 | Production project is separate; forward migrations 014-046 and isolated Recovery restore remain gated |
-| Runtime DB role | Production `lumiq_runtime` is LOGIN and `BYPASSRLS=true`; anon/authenticated have zero direct SELECT on the 19 RLS-enabled tables | Local migration 045 changes runtime to `NOBYPASSRLS` and removes broad grants. Apply only after verified backup/restore; verify function allow-list and real application paths; no candidate attachment yet |
-| Cloudflare Hyperdrive | Live config `287181f11f734b63844bcda5eb7fe90c` uses `lumiq_runtime.baqebydtinysosueksgr`, Frankfurt session pooler, port 5432, database `postgres`, caching disabled | `lumiq-production`; confirm the runtime password is safely stored and pass candidate preflight |
+| Supabase PostgreSQL + Auth | `Lumiq Production` (`baqebydtinysosueksgr`) is active in Frankfurt on Pro; migrations 001-046 and a fresh R2 backup were verified 2026-09-29 | Keep migrations and backup verification current; remaining end-to-end application tests are separate gates |
+| Runtime DB role | Production uses `lumiq_production_runtime` with `LOGIN/NOINHERIT/NOBYPASSRLS`; verifier confirmed no admin attributes, 19 RLS tables, no anonymous/authenticated direct SELECT and the explicit RPC allowlist | Re-run verifier after changes; test real application workflows with the active role |
+| Cloudflare Hyperdrive | Live config `287181f11f734b63844bcda5eb7fe90c` uses `lumiq_production_runtime.baqebydtinysosueksgr`, Frankfurt session pooler, port 5432, database `postgres`, caching disabled | `lumiq-production`; preserve the DPAPI-managed runtime credential and pass candidate preflight |
 | R2 photos / backups | Separate private EU-jurisdiction buckets exist and are empty; no backup cadence/restore drill yet | `lumiq-production-photos`; `lumiq-production-backups` |
 | Queues | Production Queue and DLQ exist with zero producers/consumers; currently unbound | `lumiq-production-jobs` and `lumiq-production-jobs-dlq` |
 | Worker | Not yet deployed; when created, use distinct `workers.dev` origin and owner-only Access, no custom domain until cutover | `lumiq-production-candidate` |
@@ -344,11 +344,11 @@ the candidate origin and routes against code. At cutover:
 - Supabase Auth SMTP/email templates and app transactional email sender are
   separate configuration surfaces. Test both; keep production credentials out
   of browser config and source control.
-- Lumiq-branded LV/EN Supabase Auth templates are prepared in
-  `platform/email-templates/`. They are not live until saved and tested in the
-  Production Auth dashboard. Worker transactional notices render branded HTML
-  plus plain text; set `PLATFORM_EMAIL_REPLY_TO` only after the support inbox
-  receives an external test message.
+- Lumiq-branded Supabase Auth templates are saved in the Production Auth
+  dashboard. Worker transactional notices render branded HTML plus plain text.
+  Verify actual delivery and rendering in Gmail and a second mail client before
+  declaring email QA complete. Set `PLATFORM_EMAIL_REPLY_TO` only after the
+  support inbox receives an external test message.
 - In the production project's Supabase **Authentication → URL Configuration**,
   set the Site URL to `https://lumiq.cam`; add only the four exact redirect URLs
   in the matrix, with no wildcard. Before cutover, use only the candidate's
