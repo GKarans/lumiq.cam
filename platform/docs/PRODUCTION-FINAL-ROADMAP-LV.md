@@ -51,6 +51,7 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 - [x] Recovery atjaunošanas pārbaude un migrāciju ķēde izieta.
 - [x] Cloudflare `$10` un `$50` budžeta brīdinājumi ir aktīvi; saņēmējs pārbaudīts kā īpašnieka konta adrese.
 - [x] Production Worker Observability pēdējā pārbaudē rādīja veiksmīgus notikumus un 0 kļūdu; turpināt uzraudzību pēc izvietošanas.
+- [x] 2026-09-30 pilnais `npm test` izturēja 171/171 testu; `npm run build` validēja 60 publiskos failus. Būvējums neveica izvietošanu un neaizstāj Production integrācijas pārbaudi.
 - [ ] Pārskatīt resursu lietojumu un atkarības. Nekādu R2, Worker, Hyperdrive vai Supabase projektu nedzēst, kamēr nav pierādīts, ka tie nav vajadzīgi un nav atsevišķa īpašnieka apstiprinājuma.
 
 ## B. TET atbildes sagaidīšana
