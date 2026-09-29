@@ -17,7 +17,8 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 - [x] Resend saknes domēns `lumiq.cam` ir verificēts ar atsevišķu `outbound` Return-Path; esošie Namecheap MX/SPF ieraksti ir saglabāti.
 - [x] Supabase Production Auth SMTP sūtītājs ir `Lumiq <noreply@lumiq.cam>`; SMTP parole palika noslēpta un netika mainīta.
 - [ ] Izveidot reālu ienākošo `support@lumiq.cam` pastkasti vai pāradresāciju. Galamērķa adrese vēl jāapstiprina īpašniekam.
-- [ ] Pēc galamērķa apstiprināšanas konfigurēt ienākošo pastu, saglabājot esošos piecus Namecheap MX un SPF ierakstus, līdz ir pārbaudīts un apstiprināts pasta maršrutēšanas plāns.
+- [ ] Pirms ienākošā pasta aktivizēšanas saskaņot pilnu saknes domēna pasta maršrutēšanu: Cloudflare Email Routing vednis piedāvā Cloudflare MX un SPF ierakstus, kas konfliktē ar esošajiem pieciem Namecheap `eforward` MX un saknes SPF. Aktivizācija var pārtraukt pašreizējās Namecheap pāradresācijas; saglabāt esošo iestatījumu, līdz īpašnieks apstiprina migrāciju un galamērķus.
+- [ ] Pēc maršrutēšanas plāna apstiprināšanas konfigurēt ienākošo pastu un pārbaudīt `support@lumiq.cam` saņemšanu, neietekmējot vajadzīgos esošos adresātus.
 - [ ] Nosūtīt vēstuli uz `support@lumiq.cam` un pārbaudīt saņemšanu/atbildi; tikai tad iestatīt `support@` kā Reply-To.
 - [x] Sākumā paredzētas tikai `noreply@` un `support@`; `events@` un citas atsevišķas pastkastes nav vajadzīgas.
 
