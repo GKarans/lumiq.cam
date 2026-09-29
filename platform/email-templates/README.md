@@ -16,6 +16,7 @@ Templates**:
 | Reset password | `supabase-reset-password.html` | `Atjauno Lumiq paroli / Reset your Lumiq password` |
 | Change email address | `supabase-change-email.html` | `Apstiprini jauno Lumiq e-pastu / Confirm your new Lumiq email` |
 | Password changed notification | `supabase-password-changed.html` | `Lumiq konta paroles drošības paziņojums / Lumiq password security notice` |
+| Email address changed notification | `supabase-email-changed.html` | `Lumiq konta e-pasts nomainīts / Lumiq email address changed` |
 
 The current confirmed Resend sending domain is `send.lumiq.cam`. Supabase Auth
 SMTP should keep using `Lumiq <noreply@send.lumiq.cam>` until the root-domain

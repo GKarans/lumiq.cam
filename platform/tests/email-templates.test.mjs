@@ -10,7 +10,8 @@ const templates=[
  ['supabase-invite.html','{{ .ConfirmationURL }}'],
  ['supabase-reset-password.html','{{ .ConfirmationURL }}'],
  ['supabase-change-email.html','{{ .ConfirmationURL }}'],
- ['supabase-password-changed.html',null]
+ ['supabase-password-changed.html',null],
+ ['supabase-email-changed.html',null]
 ];
 
 test('Supabase Auth email templates are responsive, localized and use supported variables',async()=>{
@@ -25,4 +26,7 @@ test('Supabase Auth email templates are responsive, localized and use supported 
  }
  const changedEmail=await readFile(path.join(root,'supabase-change-email.html'),'utf8');
  assert.match(changedEmail,/{{ \.NewEmail }}/);
+ const emailChangedNotification=await readFile(path.join(root,'supabase-email-changed.html'),'utf8');
+ assert.match(emailChangedNotification,/{{ \.OldEmail }}/);
+ assert.match(emailChangedNotification,/{{ \.Email }}/);
 });
