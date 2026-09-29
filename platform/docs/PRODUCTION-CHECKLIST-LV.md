@@ -36,7 +36,7 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 ## 5. Drošība un izolācija
 
 - [x] Kandidāta anonīmie pieprasījumi novirzās uz Access; `lumiq.cam` maršruts joprojām paliek Closed Test.
-- [ ] Atkārtoti tieši apstiprināt Access politikas vienīgo atļauto e-pastu gan kandidātam, gan `lumiq.cam` pirms domēna pārslēgšanas.
+- [x] 2026-09-30 Cloudflare Zero Trust politikā `Lumiq closed test - owner` tieši pārbaudīts `Allow` un viens `Include` noteikums ar īpašnieka konta e-pastu. Lietotņu sarakstā šī politika piesaistīta gan kandidāta hostname, gan `lumiq.cam`; adrese nav ierakstīta repozitorijā.
 - [ ] Ar diviem atsevišķiem testa organizatoriem pierādīt pasākumu un galeriju savstarpēju izolāciju; apstiprināt, ka anonīmi lietotāji nevar atvērt organizatora sadaļas.
 
 ## 6. Fona darbi, rezerves kopijas un uzraudzība
