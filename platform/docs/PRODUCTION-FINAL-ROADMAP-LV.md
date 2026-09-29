@@ -8,7 +8,8 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 
 ### 1. E-pasta sūtīšana
 
-- [ ] Supabase Production SMTP iestatīt uz Resend: host `smtp.resend.com`, ports `465`, lietotājvārds `resend`, verificētais sūtītājs `Lumiq <noreply@send.lumiq.cam>` un Resend API atslēga. Paroli ievada īpašnieks Supabase panelī; to neierakstīt repozitorijā vai čatā.
+- 2026-09-30 Supabase Production SMTP pārbaudē: custom SMTP ir ieslēgts, host `smtp.resend.com`, ports `465`, sūtītāja nosaukums `Lumiq` un saglabāta noslēpta parole. Sūtītāja e-pasta un lietotājvārda lauki ir tukši; paroles vērtība netika skatīta vai mainīta.
+- [ ] Supabase Production SMTP papildināt ar lietotājvārdu `resend` un verificēto sūtītāju `Lumiq <noreply@send.lumiq.cam>`, tad saglabāt. Saglabātā parole ir noslēpta; to neaiztikt un neierakstīt repozitorijā vai čatā.
 - [ ] Saglabāt SMTP iestatījumus un nosūtīt kontrolētu Auth testa vēstuli uz savu testa pastkasti; pārbaudīt piegādi, saites un kļūdu žurnālus.
 - [ ] Pārbaudīt Auth e-pastus Gmail un vēl vienā pasta klientā: mobilais izkārtojums, LV/EN teksts, saites, derīguma termiņš un `text/plain`/HTML atbalsts.
 - [x] Sagatavotas sešas Lumiq tēmas Supabase Auth HTML veidnes: reģistrācija, uzaicinājums, paroles atjaunošana, e-pasta maiņa un drošības paziņojumi.
@@ -69,4 +70,3 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 ## Pabeigšanas kritērijs
 
 Production kandidāts ir lietojams īpašniekam aiz Access, e-pasti pienāk un foto pilnais cikls ir pārbaudīts. Tikai pēc TET atbloķēšanas un īpašnieka apstiprinājuma izpilda pēdējo `lumiq.cam` maršruta maiņu. `app-images` un `event-photo-media` netiek aiztikti.
-
