@@ -21,7 +21,7 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 
 - [x] Automātiskai sūtīšanai izmanto `noreply@lumiq.cam`; Production Supabase SMTP izmanto `Lumiq <noreply@lumiq.cam>` un Resend. Atsevišķa `noreplay@` adrese nav vajadzīga — pareizā rakstība ir `noreply@`.
 - [x] Resend verificējis `send.lumiq.cam` un saknes `lumiq.cam`; saknes konfigurācijai Return-Path ir `outbound`, saglabājot esošo sūtīšanas apakšdomēnu.
-- [ ] Pārbaudīt un vajadzības gadījumā salabot Lumiq zīmola veidnes visiem Auth paziņojumiem un lietotnes transakciju e-pastiem; salīdzināt Supabase Production saturu ar repozitorija avotiem, novērst dublētu noklusējuma tekstu un pēc saglabāšanas pārlādēt/redzami pārbaudīt katru veidni.
+- [x] 2026-09-30 salīdzinātas un pēc pārlādes pārbaudītas sešas vajadzīgās Supabase Production Auth veidnes: apstiprinājums, uzaicinājums, paroles atjaunošana, e-pasta maiņa, paroles maiņas un e-pasta maiņas paziņojums. Piecām no tām izņemts Supabase noklusētais HTML fragments, kas iepriekš bija pielīmēts pirms Lumiq dokumenta.
 - [ ] Izvēlēties, kur saņemt `support@lumiq.cam` vēstules, un apstiprināt konkrēto galamērķa adresi. Šī ir cilvēka atbalsta adrese; sākumā pietiek ar vienu pastkasti vai aliasu, nevis vairākām atsevišķām pastkastēm.
 - [ ] Tikai pēc galamērķa izvēles izveidot `support@lumiq.cam` saņemšanu/pāradresāciju un pārbaudīt ienākošo vēstuli. Pirms Cloudflare Email Routing aktivizēšanas saskaņot esošo Namecheap MX/SPF migrāciju; esošos ierakstus neaizstāt bez apstiprināta pasta plāna.
 - [ ] Pēc `support@` saņemšanas pārbaudīt atbildes plūsmu un iestatīt to kā Reply-To, kur tas ir atbalstīts; pārbaudīt Worker `PLATFORM_EMAIL_REPLY_TO` un Supabase Auth Reply-To atsevišķi.
