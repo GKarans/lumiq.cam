@@ -8,8 +8,7 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 
 ### 1. E-pasta sūtīšana
 
-- 2026-09-30 Supabase Production SMTP pārbaudē: custom SMTP ir ieslēgts, host `smtp.resend.com`, ports `465`, sūtītāja nosaukums `Lumiq` un saglabāta noslēpta parole. Sūtītāja e-pasta un lietotājvārda lauki pēc lapas pārlādes bija tukši, tātad vērtības nav saglabātas; paroles vērtība netika skatīta vai mainīta.
-- [ ] Supabase Production SMTP papildināt ar lietotājvārdu `resend` un verificēto sūtītāju `Lumiq <noreply@send.lumiq.cam>`, tad saglabāt. Saglabātā parole ir noslēpta; to neaiztikt un neierakstīt repozitorijā vai čatā.
+- [x] 2026-09-30 Supabase Production SMTP pārbaudīts pēc pārlādes: custom SMTP ieslēgts, `smtp.resend.com:465`, sūtītājs `Lumiq <noreply@send.lumiq.cam>`, lietotājvārds `resend`; saglabātā parole ir noslēpta un netika mainīta.
 - [ ] Saglabāt SMTP iestatījumus un nosūtīt kontrolētu Auth testa vēstuli uz savu testa pastkasti; pārbaudīt piegādi, saites un kļūdu žurnālus.
 - [ ] Pārbaudīt Auth e-pastus Gmail un vēl vienā pasta klientā: mobilais izkārtojums, LV/EN teksts, saites, derīguma termiņš un `text/plain`/HTML atbalsts.
 - [x] Sagatavotas sešas Lumiq tēmas Supabase Auth HTML veidnes: reģistrācija, uzaicinājums, paroles atjaunošana, e-pasta maiņa un drošības paziņojumi.
@@ -18,11 +17,12 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 
 ### 2. Lumiq e-pasta adreses
 
-- [ ] Saglabāt minimālo adrešu komplektu: `noreply@send.lumiq.cam` sūtīšanai un `support@lumiq.cam` klientu atbildēm. `noreply@lumiq.cam` nav aktīvs, kamēr saknes domēns nav atsevišķi verificēts Resend.
+- [x] Saglabāt verificēto `send.lumiq.cam` kā pašreizējo sistēmas sūtītāju `noreply@send.lumiq.cam`; Production Supabase SMTP to izmanto.
+- [ ] Pabeigt saknes `lumiq.cam` Resend verifikāciju, lai varētu pāriet uz `noreply@lumiq.cam`. Resend konfigurēts ar pielāgotu Return-Path `outbound`, lai tas nesadurtos ar `send.lumiq.cam`. Cloudflare publicē `resend._domainkey`, `outbound` un `routbound`; Cloudflare autoritatīvie nameserveri un publiskais resolveris ierakstus atgriež, bet Resend statuss vēl ir `Pending`.
 - [ ] Izvēlēties, kur saņemt `support@lumiq.cam` vēstules, un apstiprināt konkrēto galamērķa adresi.
 - [ ] Tikai pēc galamērķa izvēles konfigurēt ienākošo e-pastu un pārbaudīt saņemšanu. Pirms Cloudflare Email Routing aktivizēšanas izvērtēt DNS konfliktu ar pašreizējiem pieciem Namecheap MX un SPF ierakstu; tos neaizstāt bez apstiprināta pasta plāna.
 - [ ] Pēc `support@` saņemšanas pārbaudīt Reply-To. Neveidot nevajadzīgas `events@`, `info@` vai citas atsevišķas pastkastes; ja vajag papildu adresi, sākt ar aliasu uz atbalsta pastkasti.
-- [ ] Ja vēlāk vajadzīgs sūtīt tieši no `@lumiq.cam`, pievienot un verificēt saknes domēnu Resend, saglabājot esošo pasta DNS konfigurāciju un apvienojot SPF korekti.
+- [ ] Izveidot īstu `support@lumiq.cam` saņemšanu vai pāradresāciju tikai pēc galamērķa izvēles; saglabāt pašreizējos piecus Namecheap MX un SPF ierakstus, līdz pasta maršrutēšanas plāns ir apstiprināts.
 
 ### 3. Production konta un piekļuves plūsma
 
