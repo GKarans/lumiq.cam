@@ -14,7 +14,7 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 
 ## 1. E-pasta adreses un saņemšana
 
-- [x] Sistēmas vēstules pašlaik sūta no `noreply@send.lumiq.cam`; tas ir esošais verificētais variants.
+- [x] Sistēmas vēstules konfigurētas no `Lumiq <noreply@lumiq.cam>` pēc saknes Resend domēna verifikācijas; jāiziet reālas Auth vēstules piegādes pārbaude.
 - [ ] Ja vajadzīgs tieši `noreply@lumiq.cam`, pievienot saknes domēnu Resend ar atsevišķu Return-Path un verificēt to; pirms tam saglabāt esošos piecus Namecheap MX un Namecheap SPF ierakstu. DNS vēl nav mainīts.
 - [ ] Izveidot īstu `support@lumiq.cam` saņemšanu vai pāradresāciju un pārbaudīt ienākošo vēstuli. Galamērķa pastkaste jāapstiprina īpašniekam; jautājums ir uzdots.
 - [ ] Neveidot pagaidām `events@` vai citas pastkastes.

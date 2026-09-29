@@ -4,8 +4,9 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 
 ## 1. E-pasta adreses un saņemšana
 
-- [x] Production Supabase SMTP izmanto verificēto `Lumiq <noreply@send.lumiq.cam>` ar Resend lietotājvārdu `resend`; saglabātā SMTP parole paliek noslēpta.
-- [ ] Pabeigt Resend saknes `lumiq.cam` domēna verifikāciju un pēc tam pārbaudīt `noreply@lumiq.cam` sūtīšanu. Izmantots pielāgots Return-Path `outbound`, lai nesadurtos ar `send.lumiq.cam`; Resend vēl rāda `Pending`.
+- [x] Production Supabase SMTP pēc pārlādes izmanto verificēto `Lumiq <noreply@lumiq.cam>` ar Resend lietotājvārdu `resend`; saglabātā SMTP parole paliek noslēpta.
+- [x] Resend saknes `lumiq.cam` domēns verificēts ar pielāgoto Return-Path `outbound`, neskarot piecus Namecheap MX, Namecheap SPF un Worker DNS ierakstus.
+- [ ] Nosūtīt kontrolētu Auth testa vēstuli no `noreply@lumiq.cam` un pārbaudīt piegādi.
 - [ ] Izveidot `support@lumiq.cam` kā īstu ienākošo adresi vai pāradresāciju un pārbaudīt saņemšanu.
 - [ ] Apstiprināt pāradresācijas saņēmēja adresi.
 - [ ] Pirms Cloudflare Email Routing aktivizācijas atrisināt DNS konfliktu: publiskajā DNS šobrīd ir pieci `eforward*.registrar-servers.com` MX ieraksti un Namecheap SPF `include:spf.efwd.registrar-servers.com`. Cloudflare vednis piedāvā tos aizstāt ar saviem trim MX un SPF. Nekādas izmaiņas neveikt, kamēr nav izvēlēts, vai pārņemt ienākošā pasta maršrutēšanu un saglabāts vajadzīgais esošais pasts.
@@ -16,7 +17,7 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 
 - [x] Sagatavotas sešas responsīvas, LV/EN Supabase Auth HTML veidnes: reģistrācijas apstiprinājums, uzaicinājums, paroles atiestatīšana, e-pasta maiņa un abu izmaiņu drošības paziņojumi.
 - [x] Saglabāts `Lumiq` sūtītāja nosaukums; Worker paziņojumi atbalsta gan teksta, gan HTML saturu.
-- [x] Pēc pārlādes pārbaudīts Production SMTP sūtītājs `noreply@send.lumiq.cam`, lietotājvārds `resend`, host `smtp.resend.com:465`; saglabātā parole paliek noslēpta.
+- [x] Pēc pārlādes pārbaudīts Production SMTP sūtītājs `noreply@lumiq.cam`, lietotājvārds `resend`, host `smtp.resend.com:465`; saglabātā parole paliek noslēpta.
 - [ ] Nosūtīt kontrolētu Auth testa vēstuli un pārbaudīt reālu piegādi, saites un kļūdu žurnālus.
 - [ ] Pēc `support@` saņemšanas konfigurēt un notestēt Reply-To.
 - [ ] Saņemt vēstules Gmail un vēl vienā pasta klientā; pārbaudīt abas valodas, saites, derīguma termiņu un mobilo izkārtojumu. Auth veidņu redaktorā nav atsevišķa `text/plain` lauka; Worker vēstulēm teksta alternatīva jau ir.
