@@ -1,6 +1,43 @@
 # Launch gates
 
-## Current production provisioning state (2026-09-27)
+## Current production status (2026-09-29)
+
+The complete Production application is deployed as `lumiq-production-candidate`
+at `https://lumiq-production-candidate.gkarans-events.workers.dev`, version
+`fe2b82a5-aa33-4f21-8a23-3468af53efa0`. Its release gate is `production`; it
+uses only the Production Supabase project `baqebydtinysosueksgr`, Hyperdrive
+`287181f11f734b63844bcda5eb7fe90c`, private `lumiq-production-photos` R2,
+`lumiq-production-jobs` and its DLQ. Cloudflare Access blocks anonymous
+requests to the candidate, and the authenticated owner browser rendered the
+full Lumiq homepage. The `lumiq.cam` route has not been changed.
+
+Production runtime verification passed on 2026-09-29: migrations 001-046;
+19/19 public tables have RLS; `anon` and `authenticated` have no direct table
+SELECT; `lumiq_production_runtime` is `NOINHERIT`, `NOBYPASSRLS`, non-admin,
+and has no direct table, column or sequence access. The exact reviewed internal
+RPC allow-list passed.
+
+The current-tree `npm run check` passed on 2026-09-29: secret scan over 253
+files, `npm audit` with zero vulnerabilities, 166/166 Node tests, build of 60
+public files, responsive/browser journeys at 320-1440 px, invite callback,
+axe, keyboard, reduced-motion and 200% zoom checks. These are local automated
+checks plus the limited live checks above; they do not replace phone testing,
+live signup/photo/ZIP checks or backup restoration.
+
+**Domain blocker:** anonymous HEAD requests to `lumiq.cam`, `/app` and
+`/register` currently return HTTP 307 to the unrelated external host
+`stop.tiklavairogs.tet.lv/passthrough`. Do not use the domain or enter account
+credentials there. The Access application does protect the candidate hostname,
+but currently does not protect the `lumiq.cam` host. Create/verify an
+owner-only Access application covering the complete `lumiq.cam/*` hostname
+before changing the Worker route. Do not disable Access or open public access.
+
+Production backup/restore evidence, real signup and photo/ZIP/delete smoke
+tests, live maximum-size/load checks, alert ownership, phone testing and the
+domain Access/cutover/rollback remain open. Pre-launch checkout remains
+simulated; do not claim public-sales readiness.
+
+## Current production provisioning state (2026-09-27, historical snapshot)
 
 The following current-state evidence supersedes older inventory snapshots below;
 those entries remain as dated history. `lumiq.cam` stays on its closed-test
