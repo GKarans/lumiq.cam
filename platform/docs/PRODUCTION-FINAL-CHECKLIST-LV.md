@@ -57,6 +57,8 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 ## 6. Fona darbi, rezerves kopijas un uzraudzība
 
 - [x] Lokālie sintētiskie Queue/DLQ, retry, job un backup testi izturēja 2026-09-30: `platform.test.mjs`, `worker-router.test.mjs`, `migrations.test.mjs` un `reliability.test.mjs`/`production-backup.test.mjs` kopā 81 pārbaude bez kļūdām. Tie nepierāda dzīvas Cloudflare Queue kļūmes apstrādi.
+- [x] Cloudflare Queue read-only konfigurācija 2026-09-30: `lumiq-production-jobs` ir aktīva, kandidāts ir Producer un Consumer; batch `1`, max wait `5 s`, max retries `10`, retry delay `0 s`, max concurrency `1`, DLQ piesaistīts. DLQ ir mērķa rinda bez consumer.
+- [ ] Ar kontrolētu nekaitīgu testa darbu pārbaudīt dzīvu retry un nonākšanu DLQ; neizmantot reālu klienta darbu vai datus.
 - [x] Jaunākā Production backup read-back un checksum pārbaude izturēja 2026-09-30.
 - [ ] Pilnu restore testu veikt tikai tukšā izolētā mērķī; esošo Recovery datubāzi nepārrakstīt.
 - [ ] Pārbaudīt aktuālos Production Worker kļūdu žurnālus un Queue/DLQ metriku, tostarp sintētisku kļūmes scenāriju bez reālu klientu datu ietekmes.
