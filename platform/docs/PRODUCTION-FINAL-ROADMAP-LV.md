@@ -14,6 +14,7 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 - [ ] Pārbaudīt Auth e-pastus Gmail un vēl vienā pasta klientā: mobilais izkārtojums, LV/EN teksts, saites, derīguma termiņš un `text/plain`/HTML atbalsts.
 - [x] Sagatavotas sešas Lumiq tēmas Supabase Auth HTML veidnes: reģistrācija, uzaicinājums, paroles atjaunošana, e-pasta maiņa un drošības paziņojumi.
 - [x] Worker transakciju vēstules veidnes atbalsta HTML un teksta variantu; lokālie e-pasta testi izturēti.
+- [x] 2026-09-30 atkārtoti palaisti `email-templates.test.mjs`, `auth-callback.test.mjs` un `operations.test.mjs`: 11/11 izturēti. Tie nepārbauda SMTP piegādi no Production.
 
 ### 2. Lumiq e-pasta adreses
 
