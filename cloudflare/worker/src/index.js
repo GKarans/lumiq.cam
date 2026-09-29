@@ -24,7 +24,7 @@ export function assertMigrationsApplied(applied) {
   }
 }
 let migrationsVerified = false;
-async function getApp(env) {
+async function getApp(env, {authCallbackOnly = false} = {}) {
   for (const name of [...requiredEnvironment, "PLATFORM_EMAIL_KEY", "PLATFORM_EMAIL_FROM"]) {
     if (typeof env[name] === "string") process.env[name] = env[name];
   }
@@ -58,6 +58,7 @@ async function getApp(env) {
         }
       } : {}),
       uploadsViaApi: true,
+      authCallbackOnly,
       validateImage: validateWebp
     });
   } catch (error) {

@@ -1,7 +1,7 @@
 import {createCipheriv,createDecipheriv,createHash,randomBytes} from 'node:crypto';
 import {uuid,token,hash,email,text,requireThat,cookies,confirmedPassword} from './security.mjs';
 import {profileDetails} from './profile.mjs';
-export function supabaseAuthService(db,{origin,mail,fetcher=fetch,sessionRpc=db.sessionRpc||null}){
+export function supabaseAuthService(db,{origin,mail,fetcher=fetch,sessionRpc=db.sessionRpc||null,callbackOnly=false}){
  const url=process.env.PLATFORM_SUPABASE_URL,key=process.env.PLATFORM_SUPABASE_PUBLISHABLE_KEY;
  requireThat(url&&key&&!url.includes('ojcvnsbhphvijmzjfenl'),503,'Configure a new isolated Supabase Auth project.');
  const secret=Buffer.from(process.env.PLATFORM_SESSION_ENCRYPTION_KEY||'','hex');requireThat(secret.length===32,503,'Configure the server session-encryption secret.');
@@ -108,8 +108,14 @@ export function supabaseAuthService(db,{origin,mail,fetcher=fetch,sessionRpc=db.
   async logout(req){const c=await fresh(req);if(c){await request('logout',{},c.session.access_token).catch(()=>{});await sessionCall('delete_app_session',{p_hash:c.row.token_hash});}},
   async requestReset(input){await request(`recover?redirect_to=${encodeURIComponent(origin+'/auth/reset')}`,{email:email(input.email)});return{message:'If the account exists, a reset email is on its way.'};},
   async consume(input){
+   if(callbackOnly){
+    requireThat(input.purpose==='verify'&&input.type==='invite'&&typeof input.access_token==='string',400,'This invitation link is invalid. Request a new one.');
+    const user=await request('user',null,text(input.access_token,8192));
+    requireThat(user?.email_confirmed_at,403,'Verify your email before continuing.');
+    return{message:'Invitation confirmed. The production candidate remains locked.'};
+   }
    const resetPassword=input.purpose==='reset'?confirmedPassword(input):null;
-   if(input.access_token&&input.purpose==='verify'&&input.type==='signup'){requireThat(typeof input.refresh_token==='string',400,'This confirmation link is invalid. Request a new one.');const providerSession={access_token:text(input.access_token,8192),refresh_token:text(input.refresh_token,8192),expires_at:Math.floor(Date.now()/1000)+Math.min(86400,Math.max(60,Number(input.expires_in)||3600))};const user=await request('user',null,providerSession.access_token);const account=await sync(user,providerSession.access_token),sessionToken=token();await storeSession(account,sessionToken,providerSession);return{message:'Email confirmed. Your account is ready.',cookie:`lumiq_session=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=604800`};
+   if(input.access_token&&input.purpose==='verify'&&['signup','invite'].includes(input.type)){requireThat(typeof input.refresh_token==='string',400,'This confirmation link is invalid. Request a new one.');const providerSession={access_token:text(input.access_token,8192),refresh_token:text(input.refresh_token,8192),expires_at:Math.floor(Date.now()/1000)+Math.min(86400,Math.max(60,Number(input.expires_in)||3600))};const user=await request('user',null,providerSession.access_token);const account=await sync(user,providerSession.access_token),sessionToken=token();await storeSession(account,sessionToken,providerSession);return{message:'Email confirmed. Your account is ready.',cookie:`lumiq_session=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=604800`};
    }
    if(input.access_token&&input.purpose==='reset'&&input.type==='recovery'){
     const access=text(input.access_token,8192),user=await request('user',null,access),account=await sync(user,access);await request('user',{password:resetPassword},access,'PUT');await revokeOwnSessions(account);return{message:'Your password has been updated. Sign in to continue.'};

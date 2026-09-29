@@ -31,10 +31,12 @@ async function withApp(getApp, env, action) {
 export function createWorkerHandler(getApp) {
   return {
     async fetch(request, env) {
-      if (!isReleaseApproved(env.PLATFORM_MODE, env.PLATFORM_RELEASE_APPROVED)) {
+      const url = new URL(request.url);
+      const releaseApproved = isReleaseApproved(env.PLATFORM_MODE, env.PLATFORM_RELEASE_APPROVED);
+      const authCallbackOnly = env.PLATFORM_MODE === "production" && env.PLATFORM_RELEASE_APPROVED === "NOT_APPROVED";
+      if (!releaseApproved && !(authCallbackOnly && request.method === "POST" && url.pathname === "/api/auth/consume")) {
         return json({error: "Lumiq is not available."}, 503);
       }
-      const url = new URL(request.url);
       const service = env.PLATFORM_SERVICE_NAME || url.hostname;
 
       if (url.pathname === "/healthz") {
@@ -51,7 +53,7 @@ export function createWorkerHandler(getApp) {
 
       if (url.pathname.startsWith("/api/")) {
         try {
-          return await withApp(getApp, env, app => app.handle(request, {clientId: request.headers.get("cf-connecting-ip") || "unknown"}));
+          return await withApp(currentEnv => getApp(currentEnv, {authCallbackOnly}), env, app => app.handle(request, {clientId: request.headers.get("cf-connecting-ip") || "unknown"}));
         } catch (error) {
           logStartupFailure(error);
           return json({error: "Lumiq backend is temporarily unavailable."}, 503);

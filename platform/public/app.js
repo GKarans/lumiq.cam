@@ -7,10 +7,11 @@ import {enhanceSelectMenus} from './select-menu.js';
 let version=0;document.documentElement.lang=language();document.addEventListener('change',e=>{if(!e.target.matches('[data-language]'))return;if(document.querySelector('#upload-queue .queue-item')){e.target.value=language();toast(t('Finish your photo queue before changing language.'),true);return;}const form=document.querySelector('form');if(form&&!form.checkValidity()&&form.querySelector('input:not([type=hidden])')?.value.trim()){e.target.value=language();toast(t('Submit or clear the form before changing language.'),true);return;}setLanguage(e.target.value);render();});
 document.body.classList.toggle('dark',localStorage.getItem('lumiq-theme')==='dark');
 async function render(){const request=++version;disposeGuest();disposeWorkspace();const app=document.getElementById('app'),path=location.pathname;document.getElementById('dialog').close();document.getElementById('dialog').onkeydown=null;try{
- if(path==='/auth/verify'){
+ if(path==='/auth/verify'||path==='/'){
   const query=new URLSearchParams(location.search),fragment=new URLSearchParams(location.hash.slice(1)),value=key=>query.get(key)||fragment.get(key);
-  const accessToken=value('access_token');
-  if(accessToken){const confirmation={access_token:accessToken,refresh_token:value('refresh_token'),expires_in:value('expires_in'),type:value('type'),purpose:'verify'};history.replaceState({},'','/auth/verify');await api('/auth/consume',{method:'POST',body:confirmation});toast('Email confirmed. Your account is ready.');history.replaceState({},'','/app');return await render();}
+  const accessToken=value('access_token'),invite=path==='/'&&value('type')==='invite';
+  if(invite&&accessToken){history.replaceState({},'','/');const result=await api('/auth/consume',{method:'POST',body:{access_token:accessToken,type:'invite',purpose:'verify'}});app.innerHTML=`<main id="main" class="narrow"><h1>Invitation confirmed</h1><p>${esc(result.message)}</p></main>`;return;}
+  if(path==='/auth/verify'&&accessToken){const confirmation={access_token:accessToken,refresh_token:value('refresh_token'),expires_in:value('expires_in'),type:value('type'),purpose:'verify'};history.replaceState({},'','/auth/verify');await api('/auth/consume',{method:'POST',body:confirmation});toast('Email confirmed. Your account is ready.');history.replaceState({},'','/app');return await render();}
  }
  const [config,session]=await Promise.all([state.config?Promise.resolve(state.config):api('/config'),api('/auth/session')]);state.config=config;state.user=session.user;
  if(request!==version)return;

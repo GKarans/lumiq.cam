@@ -77,6 +77,25 @@ test('Worker release gate blocks assets, API and health unless mode and approval
  assert.equal(assetCalls,0);
 });
 
+test('release-locked production allows only the invite-consume POST through a callback-only app',async()=>{
+ const calls=[];
+ const handler=createWorkerHandler(async(_env,options)=>({
+  db:{close:async()=>calls.push('closed')},
+  handle:async request=>{calls.push(new URL(request.url).pathname);return Response.json({callbackOnly:options.authCallbackOnly});}
+ }));
+ const env={PLATFORM_MODE:'production',PLATFORM_RELEASE_APPROVED:'NOT_APPROVED'};
+ const accepted=await handler.fetch(new Request('https://candidate.example.workers.dev/api/auth/consume',{method:'POST'}),env);
+ assert.equal(accepted.status,200);
+ assert.deepEqual(await accepted.json(),{callbackOnly:true});
+ assert.deepEqual(calls,['/api/auth/consume','closed']);
+ for(const [path,method] of [['/api/config','GET'],['/api/auth/reset','POST'],['/api/auth/consume','GET'],['/healthz','GET']]){
+  const response=await handler.fetch(new Request(`https://candidate.example.workers.dev${path}`,{method}),env);
+  assert.equal(response.status,503,`${method} ${path} remains release-locked`);
+ }
+ const invalidMode=await handler.fetch(new Request('https://candidate.example.workers.dev/api/auth/consume',{method:'POST'}),{});
+ assert.equal(invalidMode.status,503,'missing release settings do not enable callback mode');
+});
+
 test('Worker release gate also blocks scheduled database and mail work',async()=>{
  let scheduled=0;
  const context={waitUntil:()=>{scheduled++;}};

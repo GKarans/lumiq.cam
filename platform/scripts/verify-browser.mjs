@@ -23,7 +23,7 @@ try{
  }
  if(!ready)throw new Error(`Test server failed to start: ${startup}`);
  await mkdir('platform/test-results',{recursive:true});
- for(const file of ['browser.cjs','journey.cjs','designer.cjs','billing-browser.cjs','refinement-browser.cjs','accessibility.cjs']){
+ for(const file of ['browser.cjs','journey.cjs','invite-callback-browser.cjs','designer.cjs','billing-browser.cjs','refinement-browser.cjs','accessibility.cjs']){
   const child=spawn(process.execPath,[`platform/tests/${file}`],{env,stdio:'inherit',windowsHide:true});
   const [code]=await once(child,'exit');result.checks.push({file,passed:code===0});
   if(code!==0)throw new Error(`${file} failed`);
