@@ -17,6 +17,8 @@ const templates=[
 test('Supabase Auth email templates are responsive, localized and use supported variables',async()=>{
  for(const [file,requiredVariable] of templates){
   const html=await readFile(path.join(root,file),'utf8');
+  assert.match(html.trimStart(),/^<!doctype html>/i,`${file} starts with a complete HTML document`);
+  assert.equal((html.match(/<!doctype html>/gi)||[]).length,1,`${file} contains one HTML document`);
   assert.match(html,/<meta name="viewport" content="width=device-width,initial-scale=1">/,file);
   assert.match(html,/Lumiq/,file);
   assert.match(html,/{{ if eq \.Data\.locale "lv" }}/,file);
