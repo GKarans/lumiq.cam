@@ -12,7 +12,8 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 
 - [x] 2026-09-30 Supabase Production SMTP pārbaudīts pēc pārlādes: custom SMTP ieslēgts, `smtp.resend.com:465`, sūtītājs `Lumiq <noreply@lumiq.cam>`, lietotājvārds `resend`; saglabātā parole ir noslēpta un netika mainīta.
 - [ ] Nosūtīt kontrolētu Auth testa vēstuli uz savu testa pastkasti; pārbaudīt piegādi, saites un kļūdu žurnālus. Pirms īstas vēstules nosūtīšanas apstiprināt konkrēto testa sūtījumu.
-- [ ] Pārbaudīt Auth e-pastus Gmail un vēl vienā pasta klientā: Lumiq dizainu, attēlojumu mobilajā izkārtojumā, LV/EN tekstu, saites un derīguma termiņu. Supabase Auth redaktorā ir HTML veidne, nevis atsevišķs `text/plain` lauks; Worker transakciju e-pastiem jāpārbauda abi varianti.
+- [ ] Ar apstiprinātu testa vēstuli pārbaudīt piegādāto MIME: Auth ziņojumiem pārliecināties, ka ir salasāma `text/plain` alternatīva; ja tās nav, izvērtēt Supabase Send Email Hook ar Resend un multipart `text`/`html`, vispirms izveidojot integrācijas testus un atgriešanās plānu. Worker transakciju vēstulēm pārbaudīt abus variantus.
+- [ ] Pārbaudīt Auth e-pastus Gmail un vēl vienā pasta klientā: Lumiq dizainu, attēlojumu mobilajā izkārtojumā, LV/EN tekstu, saites un derīguma termiņu.
 - [x] Sagatavotas sešas Lumiq tēmas Supabase Auth HTML veidnes: reģistrācija, uzaicinājums, paroles atjaunošana, e-pasta maiņa un drošības paziņojumi.
 - [x] Worker transakciju vēstules veidnes atbalsta HTML un teksta variantu; lokālie e-pasta testi izturēti.
 - [x] 2026-09-30 atkārtoti palaisti `email-templates.test.mjs`, `auth-callback.test.mjs` un `operations.test.mjs`: 11/11 izturēti. Tie nepārbauda SMTP piegādi no Production.
@@ -24,7 +25,7 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 - [x] 2026-09-30 salīdzinātas un pēc pārlādes pārbaudītas sešas vajadzīgās Supabase Production Auth veidnes: apstiprinājums, uzaicinājums, paroles atjaunošana, e-pasta maiņa, paroles maiņas un e-pasta maiņas paziņojums. Piecām no tām izņemts Supabase noklusētais HTML fragments, kas iepriekš bija pielīmēts pirms Lumiq dokumenta.
 - [ ] Izvēlēties, kur saņemt `support@lumiq.cam` vēstules, un apstiprināt konkrēto galamērķa adresi. Šī ir cilvēka atbalsta adrese; sākumā pietiek ar vienu pastkasti vai aliasu, nevis vairākām atsevišķām pastkastēm.
 - [ ] Tikai pēc galamērķa un pasta pakalpojuma izvēles izveidot `support@lumiq.cam` saņemšanu/pāradresāciju un pārbaudīt ienākošo vēstuli. Namecheap panelis prasa Namecheap nameserverus, bet domēna DNS ir Cloudflare; nameserverus nemainīt. Cloudflare Email Routing aktivizēšanai saskaņot esošo MX/SPF migrāciju un tās ietekmi uz esošajām pāradresācijām; ierakstus neaizstāt bez apstiprināta pasta plāna.
-- [ ] Pēc `support@` saņemšanas pārbaudīt atbildes plūsmu un iestatīt to kā Reply-To, kur tas ir atbalstīts; pārbaudīt Worker `PLATFORM_EMAIL_REPLY_TO` un Supabase Auth Reply-To atsevišķi.
+- [ ] Pēc `support@` saņemšanas pārbaudīt ienākošu vēstuli un atbildes plūsmu; iestatīt `support@lumiq.cam` kā Reply-To, kur tas ir atbalstīts, un pārbaudīt Worker `PLATFORM_EMAIL_REPLY_TO` un Supabase Auth Reply-To atsevišķi.
 - [ ] Vēlāk vajadzīgās adreses, piemēram, `privacy@` vai `billing@`, sākumā veidot kā aliasus uz apstiprināto atbalsta galamērķi; šobrīd tās nav Production palaišanas priekšnoteikums.
 
 ### 3. Production konta un piekļuves plūsma
