@@ -17,6 +17,10 @@ test('public guest-flow links never point at the local-only demo route', async (
   assert.match(marketing, /href="\/features">\$\{icon\('play'\)\} Explore the guest flow/);
   assert.match(marketing, /href="\/features">Guest experience/);
   assert.match(marketing, /href="\/register">Create an event/);
+  assert.match(marketing, /if\(route==='\/status'\)\{if\(!state\.config\?\.local\)/);
+  assert.match(marketing, /Live service status is not available yet/);
+  assert.match(marketing, /Local development environment\. This is not production uptime monitoring/);
+  assert.match(await readFile(path.join(root, 'i18n.js'), 'utf8'), /Live service status is not available yet/);
   assert.match(app, /else if\(path==='\/demo'\)\{const d=await api\('\/local\/demo'\)/);
   assert.match(latvian, /'Explore the guest flow':'Apskatīt viesa plūsmu'/);
   assert.match(latvian, /'Guest experience':'Viesa plūsma'/);
