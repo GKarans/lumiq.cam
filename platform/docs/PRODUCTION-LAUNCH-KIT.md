@@ -4,11 +4,12 @@
 
 The complete application is deployed to the private Production candidate at
 `https://lumiq-production-candidate.gkarans-events.workers.dev`, Worker version
-`fe2b82a5-aa33-4f21-8a23-3468af53efa0`. Its release gate is approved for
+`37314545-a149-416a-837b-ea5efbb8f6b0`. Its release gate is approved for
 Production use behind Cloudflare Access; anonymous requests to the candidate
 are redirected to the Access login. The candidate uses the independent
-Production Supabase, Hyperdrive, private photo bucket, Queue and DLQ. The
-owner-authenticated browser rendered the full application homepage.
+Production Supabase, Hyperdrive, private photo bucket in the explicit EU
+jurisdiction, Queue and DLQ. The owner-authenticated browser rendered the full
+registration form.
 
 The Production runtime and RLS verifier passed migrations 001-046, all 19
 public tables under RLS, no direct table SELECT for browser roles, and the
@@ -18,13 +19,20 @@ dependency audit, build, responsive/browser flows and accessibility checks.
 This does not yet prove a real user signup, photo lifecycle, ZIP export, phone
 compatibility, production backup restore or load limits.
 
-**Do not route `lumiq.cam` yet.** The current host returns HTTP 307 to the
-unrelated `stop.tiklavairogs.tet.lv/passthrough` host, and requests to its
-`/app` and `/register` paths do the same. The candidate host has Access, but
-the custom domain does not. First create and verify an owner-only Access
-application for all of `lumiq.cam/*`, then route the domain to the Production
-Worker without disabling Access. Keep the old dated provisioning evidence
-below as history, not as the current state.
+`lumiq.cam` is still routed to the Closed Test Worker. This PC's default DNS
+resolver sends the host to TET Tīkla Vairogs STOP (`81.198.92.113`); a
+diagnostic request pinned to Cloudflare's edge returns the existing owner-only
+Access HTTP 302. This is network DNS filtering, not a broken Lumiq route or
+missing Access application. Allowlist `lumiq.cam` in Mans Tet/Tīkla Vairogs or
+request a false-positive review. After Production signup/photo/ZIP smoke
+checks, move the domain route to Production while preserving its Access
+policy. Do not disable Access. Keep the dated provisioning evidence below as
+history, not as the current state.
+
+The three empty default-jurisdiction Production R2 duplicates were deleted
+after the Worker was rebound to the matching EU photo bucket. The remaining
+EU buckets are photos (0 objects), backups (18 objects) and recovery (0).
+`app-images` was explicitly left untouched.
 
 Live backups/restore, signup and full photo/gallery/ZIP/delete tests,
 max-size/load checks, alert ownership and physical-phone sign-off remain open.

@@ -23,7 +23,7 @@ function candidate() {
       LUMIQ_JOBS_DLQ_NAME: "lumiq-production-jobs-dlq"
     },
     hyperdrive: [{binding: "HYPERDRIVE", id: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}],
-    r2_buckets: [{binding: "R2_PHOTOS", bucket_name: "lumiq-production-photos"}],
+    r2_buckets: [{binding: "R2_PHOTOS", bucket_name: "lumiq-production-photos", jurisdiction: "eu"}],
     queues: {
       producers: [{binding: "LUMIQ_JOBS_QUEUE", queue: "lumiq-production-jobs"}],
       consumers: [{queue: "lumiq-production-jobs", dead_letter_queue: "lumiq-production-jobs-dlq"}]
@@ -50,6 +50,15 @@ test("production candidate preflight refuses an approved release state", () => {
   const approved = candidate();
   approved.vars.PLATFORM_RELEASE_APPROVED = "production";
   assert.throws(() => validateProductionConfig(approved, testHyperdriveId), /must stay release-locked/);
+});
+
+test("production R2 binding must explicitly target the EU jurisdiction", () => {
+  const missing = candidate();
+  delete missing.r2_buckets[0].jurisdiction;
+  assert.throws(() => validateProductionConfig(missing, testHyperdriveId), /EU R2 jurisdiction/);
+  const wrong = candidate();
+  wrong.r2_buckets[0].jurisdiction = "default";
+  assert.throws(() => validateProductionConfig(wrong, testHyperdriveId), /EU R2 jurisdiction/);
 });
 
 test("production preflight rejects closed-test resources, retired names and missing budget or DLQ", () => {

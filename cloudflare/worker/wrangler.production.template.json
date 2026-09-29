@@ -39,7 +39,8 @@
   "r2_buckets": [
     {
       "binding": "R2_PHOTOS",
-      "bucket_name": "lumiq-production-replace"
+      "bucket_name": "lumiq-production-replace",
+      "jurisdiction": "eu"
     }
   ],
   "queues": {

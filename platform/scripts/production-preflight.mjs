@@ -46,6 +46,7 @@ export function validateProductionConfig(candidate, closedTestHyperdriveId) {
   const prodR2 = oneBinding(candidate.r2_buckets, "R2_PHOTOS", "R2");
   requireThat(candidate.r2_buckets.length === 1, "Production config must not include additional R2 buckets.");
   requireThat(typeof prodR2.bucket_name === "string" && /^lumiq-production-[a-z0-9-]+$/.test(prodR2.bucket_name), "Production R2 bucket must use the lumiq-production-* namespace.");
+  requireThat(prodR2.jurisdiction === "eu", "Production photo storage must explicitly bind the EU R2 jurisdiction.");
   requireThat(!["lumiq-staging-photos", "lumiq-closed-test-photos", "app-images"].includes(prodR2.bucket_name), "Production must not reuse a staging, test or legacy bucket.");
 
   requireThat(vars.R2_BUDGET_ENABLED === "true", "Production requires the R2 usage hard stop.");

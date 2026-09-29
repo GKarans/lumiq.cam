@@ -4,12 +4,13 @@
 
 The complete Production application is deployed as `lumiq-production-candidate`
 at `https://lumiq-production-candidate.gkarans-events.workers.dev`, version
-`fe2b82a5-aa33-4f21-8a23-3468af53efa0`. Its release gate is `production`; it
+`37314545-a149-416a-837b-ea5efbb8f6b0`. Its release gate is `production`; it
 uses only the Production Supabase project `baqebydtinysosueksgr`, Hyperdrive
 `287181f11f734b63844bcda5eb7fe90c`, private `lumiq-production-photos` R2,
-`lumiq-production-jobs` and its DLQ. Cloudflare Access blocks anonymous
-requests to the candidate, and the authenticated owner browser rendered the
-full Lumiq homepage. The `lumiq.cam` route has not been changed.
+explicit `eu` R2 jurisdiction, `lumiq-production-jobs` and its DLQ.
+Cloudflare Access blocks anonymous requests to the candidate, and the
+authenticated owner browser rendered the full registration form. The
+`lumiq.cam` route has not been changed.
 
 Production runtime verification passed on 2026-09-29: migrations 001-046;
 19/19 public tables have RLS; `anon` and `authenticated` have no direct table
@@ -24,13 +25,19 @@ axe, keyboard, reduced-motion and 200% zoom checks. These are local automated
 checks plus the limited live checks above; they do not replace phone testing,
 live signup/photo/ZIP checks or backup restoration.
 
-**Domain blocker:** anonymous HEAD requests to `lumiq.cam`, `/app` and
-`/register` currently return HTTP 307 to the unrelated external host
-`stop.tiklavairogs.tet.lv/passthrough`. Do not use the domain or enter account
-credentials there. The Access application does protect the candidate hostname,
-but currently does not protect the `lumiq.cam` host. Create/verify an
-owner-only Access application covering the complete `lumiq.cam/*` hostname
-before changing the Worker route. Do not disable Access or open public access.
+**Domain note:** this PC's default DNS resolver returns TET Tīkla Vairogs STOP
+address `81.198.92.113` for `lumiq.cam`; public DNS returns Cloudflare edge
+addresses. A diagnostic request pinned to Cloudflare's edge returned Access
+HTTP 302 for `lumiq.cam`, confirming the existing owner-only Access app works.
+The redirect is TET network-level DNS filtering, not a Lumiq Worker redirect
+or a missing Access app. Add `lumiq.cam` to the TET Vairogs allowlist or ask
+Tet to review the false positive. Do not disable Access or open public access.
+The domain still routes to Closed Test; switch it only after Production
+signup/photo/ZIP checks pass.
+
+The empty default-jurisdiction duplicates of Production photos, backups and
+recovery were verified and deleted on 2026-09-29. The EU buckets remain:
+photos 0 objects, backup 18 objects, recovery 0. `app-images` was not touched.
 
 Production backup/restore evidence, real signup and photo/ZIP/delete smoke
 tests, live maximum-size/load checks, alert ownership, phone testing and the
