@@ -133,6 +133,7 @@ negarantē nepārtrauktu darbību bez papildu compute izmaksām.
 
 ## 2026-09-30 read-only pārbaude
 
+- Cloudflare Worker panelī 2026-09-30 `lumiq-production-candidate` pārbaudīts atkārtoti: pēdējās 24 h ir 74 izsaukumi un 0 kļūdu; Observability `Events` skatā pēdējā 1 h ir 14 veiksmīgi notikumi un 0 kļūdu. Skatā redzami kandidāta `/api/config`, `/api/auth/session` un `/api/local/demo` pieprasījumi. Žurnālus tikai nolasīju; kodu vai Worker iestatījumus nemainīju.
 - 2026-09-30 Queue/job sintētiskie testi atkārtoti izpildīti: `node --test platform/tests/platform.test.mjs platform/tests/allowances.test.mjs platform/tests/worker-router.test.mjs` — 40/40 izturēja. Pierādīts, ka Queue publicēšanas kļūme atjauno DB dispatch stāvokli, R2 darba kļūme liek job atpakaļ DB rindā ar atkārtošanas aizkavi, bet patērētāja/starta kļūme liek Cloudflare Queue ziņojumu retry; DLQ patērētājs reģistrē saņemto job kā failed. Cloudflare Queue ziņojums tiek ackots, ja DB job kļūme ir droši apstrādāta ar DB retry/fail statusu; tādēļ biznesa job kļūmes nenonāk Cloudflare DLQ automātiski. Dzīvu Production Queue/DLQ kļūmi neizraisīju; tai vajadzīgs atsevišķs sintētisks scenārijs pēc apstiprinātas izvietošanas.
 
 - Production kandidāta versija `37314545-a149-416a-837b-ea5efbb8f6b0` joprojām ir 100%. Bez sesijas Worker atbild ar HTTP 302; Cloudflare Worker panelī nav custom domain vai route. `PLATFORM_RELEASE_APPROVED` ir `production`, un Access politika ir owner-only. `lumiq.cam` maršruts nav mainīts.
