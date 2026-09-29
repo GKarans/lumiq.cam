@@ -9,7 +9,7 @@ import {createApp,isReleaseApproved} from '../server/app.mjs';
 import {storage} from '../server/storage.mjs';
 import {uuid,hash} from '../server/security.mjs';
 import {collectNotices,queueMessage} from '../server/notifications.mjs';
-import {mailDelivery} from '../server/mail.mjs';
+import {mailDelivery,renderLumiqEmail} from '../server/mail.mjs';
 import {replaceCover,replaceCoverSource} from '../server/covers.mjs';
 import {replaceQrBackground,replaceQrSource,saveQrLayout} from '../server/qr-posters.mjs';
 import {normalizeEvent} from '../server/events.mjs';
@@ -50,7 +50,7 @@ test('event JSONB values returned as strings are normalized before use',()=>{
 
 test('service notices deduplicate and delivery retries survive worker restarts',async()=>{
  const db=await openDatabase({memory:true}),owner={id:uuid(),email:'notices@example.test',name:'Notifications'};
- const previousKey=process.env.PLATFORM_EMAIL_KEY,previousFrom=process.env.PLATFORM_EMAIL_FROM;
+ const previousKey=process.env.PLATFORM_EMAIL_KEY,previousFrom=process.env.PLATFORM_EMAIL_FROM,previousReplyTo=process.env.PLATFORM_EMAIL_REPLY_TO;
  try{
   await db.query('insert into accounts(id,email,name) values($1,$2,$3)',[owner.id,owner.email,owner.name]);
   await db.query("insert into subscriptions(account_id,plan,status) values($1,'studio','active')",[owner.id]);
@@ -60,8 +60,8 @@ test('service notices deduplicate and delivery retries survive worker restarts',
   await collectNotices(db);await collectNotices(db);
   assert.equal((await db.query('select count(*)::int as n from deliveries')).rows[0].n,2);
   Object.assign(process.env,{PLATFORM_EMAIL_KEY:'fixture',PLATFORM_EMAIL_FROM:'testing@example.test'});
-  let fail=true;const keys=[];
-  const deliver=mailDelivery(db,{local:false,fetcher:async(url,options)=>{keys.push(options.headers['Idempotency-Key']);return new Response(null,{status:fail?503:200});}});
+  let fail=true;const keys=[],payloads=[];
+  const deliver=mailDelivery(db,{local:false,fetcher:async(url,options)=>{keys.push(options.headers['Idempotency-Key']);payloads.push(JSON.parse(options.body));return new Response(null,{status:fail?503:200});}});
   assert.equal((await deliver()).sent,0);
   const retry=(await db.query('select * from deliveries')).rows;
   assert.ok(retry.every(m=>m.status==='queued'&&m.attempts===1&&Date.parse(m.available_at)>Date.now()));
@@ -73,10 +73,29 @@ test('service notices deduplicate and delivery retries survive worker restarts',
   await queueMessage(db,owner,'Last attempt','Requires operator attention.','last');
   await db.query("update deliveries set attempts=4 where dedupe_key='last'");fail=true;
   await deliver();assert.equal((await db.query("select status from deliveries where dedupe_key='last'")).rows[0].status,'failed');
+  fail=false;process.env.PLATFORM_EMAIL_REPLY_TO='support@lumiq.cam';
+  await queueMessage(db,owner,'HTML <fixture>','<img src=x onerror=alert(1)>\n\nhttps://lumiq.cam/reset?token=x&next=ok','html');
+  assert.equal((await deliver()).sent,1);
+  const message=payloads.at(-1);
+  assert.equal(message.text,'<img src=x onerror=alert(1)>\n\nhttps://lumiq.cam/reset?token=x&next=ok');
+  assert.equal(message.reply_to,'support@lumiq.cam');
+  assert.match(message.html,/HTML &lt;fixture&gt;/);
+  assert.match(message.html,/&lt;img src=x onerror=alert\(1\)&gt;/);
+  assert.doesNotMatch(message.html,/<img src=x/);
+  assert.match(message.html,/href="https:\/\/lumiq\.cam\/reset\?token=x&amp;next=ok"/);
  }finally{
-  for(const [key,value]of [['PLATFORM_EMAIL_KEY',previousKey],['PLATFORM_EMAIL_FROM',previousFrom]]){if(value===undefined)delete process.env[key];else process.env[key]=value;}
+  for(const [key,value]of [['PLATFORM_EMAIL_KEY',previousKey],['PLATFORM_EMAIL_FROM',previousFrom],['PLATFORM_EMAIL_REPLY_TO',previousReplyTo]]){if(value===undefined)delete process.env[key];else process.env[key]=value;}
   await db.close();
  }
+});
+
+test('Lumiq email renderer includes responsive brand and escapes content',()=>{
+ const html=renderLumiqEmail('Parole <mainīta>','Droši turpini & apstiprini.');
+ assert.match(html,/name="viewport"/);
+ assert.match(html,/Lumiq/);
+ assert.match(html,/Parole &lt;mainīta&gt;/);
+ assert.match(html,/Droši turpini &amp; apstiprini\./);
+ assert.match(html,/lang="lv"/);
 });
 
 test('cover replacement preserves the attached file and cleans failed attachments',async()=>{

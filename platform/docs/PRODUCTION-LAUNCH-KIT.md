@@ -344,6 +344,11 @@ the candidate origin and routes against code. At cutover:
 - Supabase Auth SMTP/email templates and app transactional email sender are
   separate configuration surfaces. Test both; keep production credentials out
   of browser config and source control.
+- Lumiq-branded LV/EN Supabase Auth templates are prepared in
+  `platform/email-templates/`. They are not live until saved and tested in the
+  Production Auth dashboard. Worker transactional notices render branded HTML
+  plus plain text; set `PLATFORM_EMAIL_REPLY_TO` only after the support inbox
+  receives an external test message.
 - In the production project's Supabase **Authentication → URL Configuration**,
   set the Site URL to `https://lumiq.cam`; add only the four exact redirect URLs
   in the matrix, with no wildcard. Before cutover, use only the candidate's
