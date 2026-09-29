@@ -8,7 +8,7 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 
 ### 1. E-pasta sūtīšana
 
-- 2026-09-30 Supabase Production SMTP pārbaudē: custom SMTP ir ieslēgts, host `smtp.resend.com`, ports `465`, sūtītāja nosaukums `Lumiq` un saglabāta noslēpta parole. Sūtītāja e-pasta un lietotājvārda lauki ir tukši; paroles vērtība netika skatīta vai mainīta.
+- 2026-09-30 Supabase Production SMTP pārbaudē: custom SMTP ir ieslēgts, host `smtp.resend.com`, ports `465`, sūtītāja nosaukums `Lumiq` un saglabāta noslēpta parole. Sūtītāja e-pasta un lietotājvārda lauki pēc lapas pārlādes bija tukši, tātad vērtības nav saglabātas; paroles vērtība netika skatīta vai mainīta.
 - [ ] Supabase Production SMTP papildināt ar lietotājvārdu `resend` un verificēto sūtītāju `Lumiq <noreply@send.lumiq.cam>`, tad saglabāt. Saglabātā parole ir noslēpta; to neaiztikt un neierakstīt repozitorijā vai čatā.
 - [ ] Saglabāt SMTP iestatījumus un nosūtīt kontrolētu Auth testa vēstuli uz savu testa pastkasti; pārbaudīt piegādi, saites un kļūdu žurnālus.
 - [ ] Pārbaudīt Auth e-pastus Gmail un vēl vienā pasta klientā: mobilais izkārtojums, LV/EN teksts, saites, derīguma termiņš un `text/plain`/HTML atbalsts.
@@ -30,6 +30,7 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 - [ ] Pārbaudīt beigušos/kļūdainu Auth saiti un saprotamu kļūdas paziņojumu.
 - [ ] Pēc testa izdzēst testa kontu un tā datus vai dokumentēt, kāpēc tas jāpatur.
 - [x] Kandidāta anonīmie pamatpieprasījumi ir aizsargāti ar Cloudflare Access.
+- [x] 2026-09-30 tiešie pieprasījumi bez pārlūka sesijas uz kandidāta `/`, `/login` un `/healthz` atgrieza `302`; autorizētajā pārlūkā vietne atveras ar esošo Access sesiju.
 - [x] Access atļaujas politika pārbaudīta: `Allow` tikai īpašnieka e-pastam; `lumiq.cam` maršruts nav mainīts.
 
 ### 4. Produkta pilnais foto cikls
