@@ -143,3 +143,5 @@ negarantē nepārtrauktu darbību bez papildu compute izmaksām.
 - Publisku palaišanu neapstiprina tehniskais deploy; vajadzīgs īpašnieka atsevišķs lēmums.
 
 Papildu e-pasta verifikācija 2026-09-30: `node --test platform/tests/email-templates.test.mjs platform/tests/operations.test.mjs` izturēja 9/9. Tika pārbaudīta Supabase Auth HTML veidņu responsivitāte, lokalizācijas atzari un mainīgie, kā arī Worker vēstuļu `text`/`html`, satura escape, Reply-To un retry uzvedība. Tie ir lokāli sintētiski testi, nevis dzīvas Production vēstules piegāde. Supabase oficiālā dokumentācija uzskaita Auth veidnes kā HTML Go-template un nedokumentē atsevišķu plain-text satura lauku: https://supabase.com/docs/guides/auth/auth-email-templates.
+
+Papildu kandidāta Access pārbaude 2026-09-30: bez cookies nosūtīti HTTP GET uz kandidāta `/`, `/login` un `/healthz`; visi trīs atgrieza `302` uz Cloudflare Access login hostu. Atsevišķā jau autorizētā pārlūkā sākumlapa ielādējās, tādēļ šī pārlūka sesija nav anonīmās piekļuves pierādījums. Organizatoru savstarpējās datu izolācijas pārbaude un pilna autentificēta konta plūsma vēl nav veikta.
