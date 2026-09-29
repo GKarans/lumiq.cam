@@ -60,7 +60,7 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 - [x] Cloudflare Queue read-only konfigurācija 2026-09-30: `lumiq-production-jobs` ir aktīva, kandidāts ir Producer un Consumer; batch `1`, max wait `5 s`, max retries `10`, retry delay `0 s`, max concurrency `1`, DLQ piesaistīts. DLQ ir mērķa rinda bez consumer.
 - [ ] Ar kontrolētu nekaitīgu testa darbu pārbaudīt dzīvu retry un nonākšanu DLQ; neizmantot reālu klienta darbu vai datus.
 - [x] Jaunākā Production backup read-back un checksum pārbaude izturēja 2026-09-30.
-- [ ] Pilnu restore testu veikt tikai tukšā izolētā mērķī; esošo Recovery datubāzi nepārrakstīt.
+- [x] Pilns Production backup restore ir veikts jaunajā izolētajā Recovery projektā; backup datu inventārs sakrita un migrācijas `001–046` pārbaudītas 2026-09-29. Esošo Recovery datubāzi atkārtoti nepārrakstīt.
 - [ ] Pārbaudīt aktuālos Production Worker kļūdu žurnālus un Queue/DLQ metriku, tostarp sintētisku kļūmes scenāriju bez reālu klientu datu ietekmes.
 - [ ] Pievienot Cloudflare `$10`/`$50` budžeta brīdinājumu saņēmēju pēc adreses apstiprināšanas; pašlaik saņēmēju lauki ir tukši.
 - [x] Pārbaudīt Cloudflare Production Worker Observability žurnālu “Last 1 hour” skatā 2026-09-30: 10 success, 0 errors; pēdējie redzamie notikumi ir `/api/config` un `/api/auth/session`. Tas nav pilnas lietotnes plūsmas pierādījums.
