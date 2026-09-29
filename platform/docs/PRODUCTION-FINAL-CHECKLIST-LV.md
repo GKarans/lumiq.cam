@@ -7,7 +7,7 @@ Mērķis: pabeigt un pārbaudīt privāti lietojamu Lumiq produktu uz Production
 ## 1. Pamati jau pārbaudīti
 
 - [x] Production Supabase Pro, DB migrācijas `001–046`, drošā `lumiq_production_runtime` loma un Hyperdrive piesaiste.
-- [x] Production rezerves kopija pārbaudīta no R2; atjaunošanas projekts un migrāciju ķēde pārbaudīti.
+- [x] Production rezerves kopija pārbaudīta no R2; 2026-09-30 atkārtots attālinātais read-back un checksum (21 tabula, migrācijas 001–046); atjaunošanas projekts un migrāciju ķēde pārbaudīti.
 - [x] Kandidāta Worker ir izvietots atsevišķā `workers.dev` adresē; kandidātam un `lumiq.cam` ir owner-only Cloudflare Access politika.
 - [x] Cloudflare EU foto, backup un recovery R2 resursi ir atdalīti. `app-images` un ar to saistīto `event-photo-media` neaiztikt.
 - [x] Supabase Auth SMTP caur Resend un sešas Auth veidnes ir konfigurētas; `send.lumiq.cam` ir verificēts.
