@@ -53,25 +53,11 @@ export function createR2Storage(bucket, options = {}) {
     if (classA > budget.limits.classAOpsPerMonth || classB > budget.limits.classBOpsPerMonth || bytes > budget.limits.lifetimeWriteBytes) {
       throw new Fault(413, "This storage operation exceeds the configured safety limit.");
     }
-    const result = await budget.db.query(`
-      insert into r2_usage_guard(singleton, month_start, class_a_ops, class_b_ops, lifetime_write_bytes)
-      values (true, date_trunc('month', now() at time zone 'UTC')::date, $1, $2, $3)
-      on conflict (singleton) do update set
-        month_start = excluded.month_start,
-        class_a_ops = case when r2_usage_guard.month_start = excluded.month_start
-          then r2_usage_guard.class_a_ops + excluded.class_a_ops else excluded.class_a_ops end,
-        class_b_ops = case when r2_usage_guard.month_start = excluded.month_start
-          then r2_usage_guard.class_b_ops + excluded.class_b_ops else excluded.class_b_ops end,
-        lifetime_write_bytes = r2_usage_guard.lifetime_write_bytes + excluded.lifetime_write_bytes
-      where
-        (case when r2_usage_guard.month_start = excluded.month_start
-          then r2_usage_guard.class_a_ops + excluded.class_a_ops else excluded.class_a_ops end) <= $4
-        and (case when r2_usage_guard.month_start = excluded.month_start
-          then r2_usage_guard.class_b_ops + excluded.class_b_ops else excluded.class_b_ops end) <= $5
-        and r2_usage_guard.lifetime_write_bytes + excluded.lifetime_write_bytes <= $6
-      returning singleton
-    `, [classA, classB, bytes, budget.limits.classAOpsPerMonth, budget.limits.classBOpsPerMonth, budget.limits.lifetimeWriteBytes]);
-    if (!result.rows.length) {
+    const result = await budget.db.query(
+      "select public.reserve_r2_budget($1,$2,$3,$4,$5,$6) as reserved",
+      [classA, classB, bytes, budget.limits.classAOpsPerMonth, budget.limits.classBOpsPerMonth, budget.limits.lifetimeWriteBytes]
+    );
+    if (result.rows[0]?.reserved !== true) {
       throw new Fault(429, "The configured photo-storage safety allowance has been reached. New storage operations are paused.");
     }
   }

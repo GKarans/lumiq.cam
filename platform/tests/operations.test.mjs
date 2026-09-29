@@ -10,8 +10,8 @@ import {storage} from '../server/storage.mjs';
 import {uuid,hash} from '../server/security.mjs';
 import {collectNotices,queueMessage} from '../server/notifications.mjs';
 import {mailDelivery} from '../server/mail.mjs';
-import {replaceCover} from '../server/covers.mjs';
-import {replaceQrBackground,saveQrLayout} from '../server/qr-posters.mjs';
+import {replaceCover,replaceCoverSource} from '../server/covers.mjs';
+import {replaceQrBackground,replaceQrSource,saveQrLayout} from '../server/qr-posters.mjs';
 import {normalizeEvent} from '../server/events.mjs';
 import {validateWebp} from '../../cloudflare/worker/src/webp-validation.js';
 
@@ -97,9 +97,15 @@ test('cover replacement preserves the attached file and cleans failed attachment
   assert.deepEqual(qrLayout,{template:'vintage',font:'roboto',titleSize:76,textX:.5,textY:.15,qrX:.5,qrY:.62,qrScale:1});
   const data=(await sharp({create:{width:16,height:16,channels:3,background:'#16835e'}}).webp().toBuffer()).toString('base64');
   await replaceQrBackground(db,files,app.events,user,e.id,data,validateWebp);const qrBackground=(await app.events.own(user,e.id)).appearance.qr_background_key;
-  assert.match(qrBackground,/^cover-[0-9a-f]{6}\/cover\/cover-fixture-[0-9a-f]{6}-qr-design-.*\.webp$/);
+  assert.match(qrBackground,/^cover-[0-9a-f]{6}\/events\/cover-fixture-[0-9a-f]{6}\/qr_background-[0-9a-f]{32}\.webp$/);
   await replaceCover(db,files,app.events,user,e.id,data,validateWebp);const first=(await app.events.own(user,e.id)).appearance.cover_key;
-  assert.match(first,/^cover-[0-9a-f]{6}\/cover\/cover-fixture-[0-9a-f]{6}-guest-cover-.*\.webp$/);
+  assert.match(first,/^cover-[0-9a-f]{6}\/events\/cover-fixture-[0-9a-f]{6}\/cover-[0-9a-f]{32}\.webp$/);
+  await replaceCover(db,files,app.events,user,e.id,data,validateWebp,'camera');
+  const cameraCover=(await app.events.own(user,e.id)).appearance.camera_cover_key;
+  assert.match(cameraCover,/^cover-[0-9a-f]{6}\/events\/cover-fixture-[0-9a-f]{6}\/camera_cover-[0-9a-f]{32}\.webp$/);
+  await replaceCoverSource(db,files,app.events,user,e.id,data,validateWebp);
+  const coverSource=(await app.events.own(user,e.id)).appearance.cover_base_key;
+  assert.match(coverSource,/^cover-[0-9a-f]{6}\/events\/cover-fixture-[0-9a-f]{6}\/cover_source-[0-9a-f]{32}\.webp$/);
   const updated=await app.events.save(user,{name:'Cover fixture',title:'Saved design',time_zone:'UTC',start,end},e.id);
   assert.equal(updated.appearance.title,'Saved design');
   assert.equal(updated.appearance.cover,`/api/covers/${e.id}`);
@@ -107,12 +113,18 @@ test('cover replacement preserves the attached file and cleans failed attachment
   assert.deepEqual(updated.appearance.qr_layout,qrLayout);
   assert.equal(updated.appearance.font,'roboto');
   assert.equal(updated.appearance.qr_background_key,qrBackground);
+  await replaceQrSource(db,files,app.events,user,e.id,data,validateWebp);
+  const qrSourceEvent=await app.events.own(user,e.id);
+  assert.match(qrSourceEvent.appearance.qr_base_key,/^cover-[0-9a-f]{6}\/events\/cover-fixture-[0-9a-f]{6}\/qr_source-[0-9a-f]{32}\.webp$/);
+  assert.equal(qrSourceEvent.appearance.qr_layout.template,'custom');
   await replaceCover(db,files,app.events,user,e.id,data,validateWebp);const second=(await app.events.own(user,e.id)).appearance.cover_key;
   assert.notEqual(first,second);await app.jobs.tick();await assert.rejects(files.get(first));assert.ok(await files.size(second));
+  const abandoned=await app.events.reserveDesignAsset(user,e.id,'cover');await files.put(abandoned.key,Buffer.from('orphan'));
   await app.events.action(user,e.id,{action:'archive'});
+  await assert.rejects(app.events.attachDesignAsset(user,e.id,'cover',abandoned.key,abandoned.reservationId),/no longer be redesigned/);
   await assert.rejects(replaceCover(db,files,app.events,user,e.id,data,validateWebp),/no longer be redesigned/);
   const cleanup=(await db.query("select * from jobs where status='queued' and type='object-cleanup'")).rows;
-  assert.equal(cleanup.length,1);const detached=cleanup[0].payload.keys[0];assert.ok(await files.size(detached));
+  assert.equal(cleanup.length,1);const detached=cleanup[0].payload.keys[0];assert.equal(detached,abandoned.key);assert.ok(await files.size(detached));
   await db.query('update jobs set available_at=now() where id=$1',[cleanup[0].id]);await app.jobs.tick();await assert.rejects(files.get(detached));assert.ok(await files.size(second));
  }finally{await db.close();await rm(root,{recursive:true,force:true});}
 });

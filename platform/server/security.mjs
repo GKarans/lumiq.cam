@@ -14,10 +14,9 @@ export async function passwordMatches(password,stored){if(!stored||typeof passwo
 export function cookies(header=''){return Object.fromEntries((header||'').split(';').filter(x=>x.includes('=')).map(x=>{const i=x.indexOf('=');return[x.slice(0,i).trim(),x.slice(i+1)]}));}
 export function csrf(req,origins){if(['GET','HEAD','OPTIONS'].includes(req.method))return;const allowed=origins instanceof Set?origins:new Set([origins]);requireThat(allowed.has(req.headers.get('origin')),403,'This request is not allowed.');}
 export function rateLimiter(limit=120,window=60000){const buckets=new Map();return key=>{const now=Date.now();for(const[k,v]of buckets)if(v.until<now)buckets.delete(k);const b=buckets.get(key)||{count:0,until:now+window};buckets.set(key,b);requireThat(++b.count<=limit,429,'Too many attempts. Please wait a minute.');};}
-export function databaseLimiter(db,limit,scope,now=()=>Date.now()){
+export function databaseLimiter(db,limit,scope,now=()=>Date.now(),consume=null){
  return async key=>{
-  const window=Math.floor(now()/60000);
-  const r=await db.query("insert into request_limits(key_hash,window_id,requests,expires_at) values($1,$2,1,now()+interval '2 minutes') on conflict(key_hash) do update set requests=case when request_limits.window_id=excluded.window_id then request_limits.requests+1 else 1 end,window_id=excluded.window_id,expires_at=excluded.expires_at returning requests",[hash(`${scope}:${key}`),window]);
-  requireThat(r.rows[0].requests<=limit,429,'Too many attempts. Please wait a minute.');
+  const window=Math.floor(now()/60000),keyHash=hash(`${scope}:${key}`),requests=consume?await consume(keyHash,window,limit):(await db.query("insert into request_limits(key_hash,window_id,requests,expires_at) values($1,$2,1,now()+interval '2 minutes') on conflict(key_hash) do update set requests=case when request_limits.window_id=excluded.window_id then request_limits.requests+1 else 1 end,window_id=excluded.window_id,expires_at=excluded.expires_at returning requests",[keyHash,window])).rows[0].requests;
+  requireThat(requests<=limit,429,'Too many attempts. Please wait a minute.');
  };
 }

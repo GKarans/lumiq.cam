@@ -22,15 +22,15 @@ export async function openDatabase(options={}) {
   const {default:postgres}=await import('postgres');
   const sql=postgres(connection,{ssl:options.ssl??'require',max:options.maxConnections??5,fetch_types:options.fetchTypes??true});
   query=async(text,args=[])=>({rows:await sql.unsafe(text,encodeUuidArrayParameters(text,args))});
-  transaction=fn=>sql.begin(tx=>fn({exec:text=>tx.unsafe(text).simple(),query:async(text,args=[])=>({rows:await tx.unsafe(text,encodeUuidArrayParameters(text,args))})}));
+  transaction=fn=>sql.begin(tx=>fn({exec:text=>tx.unsafe(text).simple(),query:async(text,args=[])=>({rows:await tx.unsafe(text,encodeUuidArrayParameters(text,args))}),queuePlatformMessage:(...args)=>queuePlatformMessage(async(text,values=[])=>({rows:await tx.unsafe(text,encodeUuidArrayParameters(text,values))}),...args)}));
   close=()=>sql.end();
  }else{
   const {PGlite}=await import('@electric-sql/pglite');
   const directory=options.memory?'memory://':path.join(ROOT,'.local','database');
   if(!options.memory)await mkdir(directory,{recursive:true});
-  const db=new PGlite(directory);query=(...args)=>db.query(...args);transaction=fn=>db.transaction(fn);close=()=>db.close();
+  const db=new PGlite(directory);query=(...args)=>db.query(...args);transaction=fn=>db.transaction(tx=>fn({query:tx.query.bind(tx),exec:tx.exec.bind(tx),queuePlatformMessage:(...args)=>queuePlatformMessage(tx.query.bind(tx),...args)}));close=()=>db.close();
  }
- const db={query,transaction,close};
+ const db={query,transaction,close,queuePlatformMessage:(...args)=>queuePlatformMessage(query,...args)};
  const entries=[];
  if(!options.skipMigrations)for(const {version,file} of PLATFORM_MIGRATIONS)entries.push({version,sql:await readFile(path.join(ROOT,'server',file),'utf8')});
  // A single schema execution is valid in PostgreSQL and PGlite extended mode through transaction.
@@ -41,4 +41,7 @@ export async function openDatabase(options={}) {
   if(entries.some(e=>!applied.includes(e.version)))throw new Error('Platform migrations are pending. Run npm run migrate before starting.');
  }
  return db;
+}
+function queuePlatformMessage(query,account,subject,body,dedupe=null){
+ return query('select public.queue_platform_message($1::uuid,$2::text,$3::text,$4::text,$5::text) as queued',[account.id||null,account.email,subject,body,dedupe]).then(result=>result.rows[0].queued);
 }

@@ -2,6 +2,7 @@ import {readFile,lstat,realpath} from 'node:fs/promises';
 import {createReadStream} from 'node:fs';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
+import {PLATFORM_MIGRATIONS} from '../server/migration-manifest.mjs';
 
 const root=path.resolve(process.argv[2]||'');
 if(!process.argv[2])throw new Error('Usage: node platform/scripts/verify-backup.mjs <backup-directory>');
@@ -26,8 +27,17 @@ const verifyFile=async({file,size,sha256},label)=>{
 };
 
 const database=manifest.database;
-if(manifest.format_version!==3||database?.scope!=='lumiq-public-plus-auth-users-identities'||!Array.isArray(database.tables)||!Array.isArray(manifest.objects)){
- throw new Error('Backup manifest is incomplete or outdated. Create a new version 3 backup.');
+ if(![3,4].includes(manifest.format_version)||database?.scope!=='lumiq-public-plus-auth-users-identities'||!Array.isArray(database.tables)||!Array.isArray(manifest.objects)){
+ throw new Error('Backup manifest is incomplete or outdated. Create a new version 4 backup.');
+ }
+if(manifest.format_version===4){
+ if(database.public_dump!=='data-only'||!Array.isArray(database.migrations)||database.migrations.length!==PLATFORM_MIGRATIONS.length)throw new Error('Version 4 backup is missing its data-only marker or migration chain.');
+ for(let index=0;index<PLATFORM_MIGRATIONS.length;index++){
+  const entry=PLATFORM_MIGRATIONS[index],applied=database.migrations[index];
+  const source=(await readFile(new URL(`../server/${entry.file}`,import.meta.url),'utf8')).replaceAll('\r\n','\n');
+  const checksum=createHash('sha256').update(source).digest('hex');
+  if(applied?.version!==entry.version||applied?.checksum!==checksum)throw new Error(`Backup migration chain differs at ${entry.version}.`);
+ }
 }
 const tableNames=new Set();
 for(const table of database.tables){

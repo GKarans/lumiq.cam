@@ -62,7 +62,7 @@ approval. In addition:
    testing. Give the candidate a distinct Worker name, `workers.dev` hostname,
    no custom domain, and an Access allowlist limited to the owner/testers.
    Before deployment, run `npx wrangler hyperdrive list` and pass the current
-   closed-test Hyperdrive ID to `npm run production:preflight -- <production-config.jsonc> --closed-test-hyperdrive-id=<id>`.
+   closed-test Hyperdrive ID to `npm run production:preflight -- <production-config.jsonc> --closed-test-hyperdrive-id=<id>`. The checked runtime role defaults to `lumiq_runtime`; pass `--runtime-role=lumiq_production_runtime` only if that separate no-bypass role has been provisioned and explicitly selected.
    The preflight checks static binding names and declared Auth/database project
    reference consistency, then queries Cloudflare's read-only Hyperdrive config
    and compares its remote Supabase origin to the declared project reference.

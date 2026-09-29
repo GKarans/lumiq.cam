@@ -1,0 +1,47 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "lumiq-restore-drill-candidate",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-22",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "nodejs_compat_populate_process_env"
+  ],
+  "workers_dev": true,
+  "preview_urls": false,
+  "vars": {
+    "PLATFORM_MODE": "staging",
+    "PLATFORM_RELEASE_APPROVED": "NOT_APPROVED",
+    "PLATFORM_SERVICE_NAME": "lumiq-restore-drill-candidate",
+    "PLATFORM_ORIGIN": "https://lumiq-restore-drill-candidate.gkarans-events.workers.dev",
+    "PLATFORM_SUPABASE_URL": "https://sprzlvywzpeyuzbsyplz.supabase.co",
+    "PLATFORM_SUPABASE_PROJECT_REF": "sprzlvywzpeyuzbsyplz",
+    "PLATFORM_SUPABASE_PUBLISHABLE_KEY": "REPLACE_WITH_RESTORE_DRILL_PUBLISHABLE_KEY",
+    "R2_BUDGET_ENABLED": "true",
+    "R2_MAX_CLASS_A_OPS_MONTH": "1000",
+    "R2_MAX_CLASS_B_OPS_MONTH": "10000",
+    "R2_MAX_LIFETIME_WRITE_BYTES": "134217728",
+    "R2_MAX_STREAM_WRITE_BYTES": "16777216"
+  },
+  "assets": {
+    "directory": "../../platform/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/healthz", "/api/*"]
+  },
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "00000000000000000000000000000000"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2_PHOTOS",
+      "bucket_name": "lumiq-restore-drill-20260925"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

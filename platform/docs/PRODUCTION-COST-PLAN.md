@@ -1,12 +1,30 @@
 # Production cost plan
 
-Updated: 2026-09-25. Owner's current decision: free closed test only. No paid
-plan is approved. The earlier EUR 60/month ceiling is not authorization to
-spend. The owner wants paid production resources connected only after the
-`lumiq.cam` transition and company registration. A pre-company domain handoff,
-if performed, must remain a closed pilot behind Access on isolated test data;
-it is not production. This document update creates or changes no cloud
-resources.
+## Current owner decision — 2026-09-29
+
+- Cloudflare Workers Paid at USD 5/month is approved for the isolated
+  production candidate. The `lumiq.cam` domain and closed-test Worker remain
+  separate; this approval is not permission to route production traffic or
+  open public access.
+- Supabase Pro is active for the organization, Spend Cap is enabled, and
+  Restore Drill remains active. Billing showed USD 25 current and USD 34
+  projected for Sep 29-Oct 29. Pro includes USD 10 monthly compute credits,
+  but compute and explicit add-ons such as PITR are not covered by Spend Cap.
+  Supabase currently bills Nano at the Micro rate in paid orgs (about USD
+  10/month); the credit covers one project. An always-on Recovery project is
+  therefore estimated to add about USD 10/month, taking the current projection
+  to roughly USD 44 and a full-month total to about USD 45 before other usage.
+  Review actual compute line items before creating it;
+  no PITR, replica, log drain or larger compute add-on is approved.
+- R2 overages, backups, email, payment processing, taxes and other account-wide
+  usage are not included in the USD 5 approval. Cost alerts are not a hard cap;
+  production limits still need measured, owner-approved values.
+- The older decision history below records the state as of 2026-09-25. Where it
+  conflicts with this dated update, this update is authoritative.
+
+The following 2026-09-25 decision is historical and was superseded on
+2026-09-29 by the current owner decision above. It is retained as decision
+history only and does not override the current production-infrastructure goal.
 
 ## Current deployment facts
 
@@ -83,13 +101,19 @@ production launch.
 
 ### Current decision and next step
 
-- [x] Owner declined the USD 25/month Supabase Pro option for now.
-- [x] Owner decision: defer paid production resources until after `lumiq.cam`
-      has been transitioned and the company is registered. The domain has now
-      been transitioned only to a closed pilot behind Access, not production.
-      This does not authorize spending or public production use of test resources.
-- [x] Current scope is a free closed test only; no public launch, paying
-      customers, or real guest-photo collection.
+The decisions below are historical and were superseded on 2026-09-29 when the
+owner upgraded the Supabase organization to Pro and approved continuing without
+pausing Restore Drill. The organization currently has Spend Cap enabled. This
+keeps quota overages restricted, but does not cap compute, PITR, or other
+explicitly provisioned add-ons. Billing showed `$25` current and `$34` projected
+for Sep 29-Oct 29; inspect the compute line items before adding an always-on
+Recovery project. Do not enable paid add-ons until their costs and benefit are
+reviewed with the owner.
+
+- [x] Historical: owner deferred paid production resources while Lumiq was a
+      closed test. This is no longer the current plan.
+- [x] Current scope remains closed and behind Access; this upgrade does not
+      authorize public launch or collection of real guest photos.
 - [x] Owner created a separate Supabase Free project for closed testing. The
       old staging resources have since been deleted; do not recreate them or
       copy their data.
@@ -124,12 +148,13 @@ production launch.
 
 ## Required cost gates
 
-- [ ] Before paid production, owner approves the exact recurring Supabase plan
-      after seeing the current organization-level estimate and confirms whether
-      EUR 60 includes any other account-wide subscriptions or usage.
-- [ ] Keep the Worker on Free only if target-environment organizer, guest,
-      upload, gallery, QR and export journeys pass under its CPU/query limits;
-      otherwise stop and present the USD 5/month Worker Paid alternative.
+- [ ] Before creating Recovery, owner confirms the estimated additional USD
+      10/month compute cost (roughly USD 44 projected for the current cycle,
+      about USD 45 for a full month before other usage). Supabase Pro and
+      Workers Paid are already approved.
+- [ ] Keep Spend Cap enabled. Before any add-on not covered by it (compute
+      upgrades, PITR, IPv4, log drains), state the recurring cost and obtain
+      explicit owner approval.
 - [ ] Measure current Cloudflare account R2 consumption. Set a production
       aggregate byte/object and operation budget below the available free
       allocation; fail new uploads closed before the cap.

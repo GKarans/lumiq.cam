@@ -4,6 +4,8 @@ platform/.local/
 platform/dist/
 platform/test-results/
 cloudflare/worker/wrangler.closed-test.jsonc
+cloudflare/worker/wrangler.restore-drill.local.jsonc
+cloudflare/worker/wrangler.production.preflight.local.jsonc
 .env
 .env.*
 !.env.example

@@ -28,6 +28,12 @@ test('full isolated customer, photo and export flow',async t=>{
   const coverChange=await call(`/events/${e.id}`,{name:e.name,description:e.description,start,end,time_zone:'UTC',cover:'/assets/party.webp'},'PATCH');
   assert.equal(coverChange.data.appearance.cover,'/assets/party.webp');
   e=coverChange.data;
+  const appearanceOnly=await call(`/events/${e.id}`,{name:e.name,description:e.description,title:'Integration design'},'PATCH');
+  assert.equal(appearanceOnly.r.status,200);
+  assert.equal(appearanceOnly.data.starts_at,e.starts_at);
+  assert.equal(appearanceOnly.data.ends_at,e.ends_at);
+  assert.equal((await call(`/events/${e.id}`,{name:e.name,description:e.description,start},'PATCH')).r.status,400);
+  e=appearanceOnly.data;
   const preview=(await call(`/events/${e.id}/preview`,{})).data,previewUrl=new URL(preview.url),secret=previewUrl.searchParams.get('preview');
   assert.equal(preview.expires_in,900);
   const page=await call(`/guest/${e.slug}?preview=${encodeURIComponent(secret)}`);
@@ -112,7 +118,17 @@ test('full isolated customer, photo and export flow',async t=>{
   await db.query("update jobs set status='ready' where type='test-dispatch'");
  });
  await t.test('verified payment simulation and deduplication',async()=>{const o=(await call('/billing/checkout',{plan:'gathering'})).data;assert.equal((await call('/billing')).data.subscription.plan,'trial');assert.equal((await call('/billing/simulate',{order:o.order,outcome:'success'})).r.status,200);assert.equal((await call('/billing/simulate',{order:o.order,outcome:'success'})).data.duplicate,true);assert.equal((await call('/billing')).data.subscription.plan,'gathering');await call('/billing/cancel',{});assert.equal((await call('/billing')).data.subscription.cancel_at_end,true);});
- await t.test('CSRF and wrong-account access denied',async()=>{await call('/auth/register',{name:'Other',email:'other@example.test',password:'Test-password-123!'});const mail=(await call('/local/inbox')).data.find(m=>m.recipient==='other@example.test');await call('/auth/consume',{token:new URL(mail.body).searchParams.get('token')});const login=await call('/auth/login',{email:'other@example.test',password:'Test-password-123!'});assert.equal((await call(`/events/${e.id}`,null,'GET',{Cookie:login.r.headers.get('set-cookie').split(';')[0]})).r.status,404);assert.equal((await app.handle(new Request(origin+`/api/events/${e.id}/action`,{method:'POST',headers:{Origin:'https://attacker.invalid',Cookie:cookie},body:JSON.stringify({action:'delete',confirm:e.name})}))).status,403);});
+ await t.test('CSRF and wrong-account access denied',async()=>{
+  await call('/auth/register',{name:'Other',email:'other@example.test',password:'Test-password-123!'});
+  const mail=(await call('/local/inbox')).data.find(m=>m.recipient==='other@example.test');
+  await call('/auth/consume',{token:new URL(mail.body).searchParams.get('token')});
+  const login=await call('/auth/login',{email:'other@example.test',password:'Test-password-123!'}),outsiderCookie=login.r.headers.get('set-cookie').split(';')[0];
+  assert.equal((await call(`/events/${e.id}`,null,'GET',{Cookie:outsiderCookie})).r.status,404);
+  assert.equal((await app.handle(new Request(`${origin}/api/photos/${mid}/thumb`,{headers:{Origin:origin,Cookie:outsiderCookie}}))).status,403,'another organizer cannot read a photo by guessing its ID');
+  const exportJob=(await db.query("select id from jobs where event_id=$1 and type='export' and status='ready' limit 1",[e.id])).rows[0];assert(exportJob,'fixture export should be ready');
+  assert.equal((await app.handle(new Request(`${origin}/api/jobs/${exportJob.id}/download/0`,{headers:{Origin:origin,Cookie:outsiderCookie}}))).status,404,'another organizer cannot download an export by guessing its job ID');
+  assert.equal((await app.handle(new Request(origin+`/api/events/${e.id}/action`,{method:'POST',headers:{Origin:'https://attacker.invalid',Cookie:cookie},body:JSON.stringify({action:'delete',confirm:e.name})}))).status,403);
+ });
  await t.test('metadata deletion followed by object cleanup before event end',async()=>{await db.query("update events set ends_at=now()+interval '1 hour' where id=$1",[e.id]);assert.equal((await call(`/events/${e.id}/photos`,{ids:[mid]},'DELETE')).r.status,200);assert.equal((await call(`/events/${e.id}/photos`)).data.total,0);await app.jobs.tick();const m=(await db.query('select * from media where id=$1',[mid])).rows[0];await assert.rejects(app.files.get(m.object_key));});
  }finally{await db.close();await rm(root,{recursive:true,force:true});}
 });

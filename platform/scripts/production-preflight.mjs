@@ -28,7 +28,7 @@ export function validateProductionConfig(candidate, closedTestHyperdriveId) {
   }
 
   const vars = candidate.vars || {};
-  requireThat(vars.PLATFORM_MODE === "production" && vars.PLATFORM_RELEASE_APPROVED === "production", "Production mode and approval must both be explicit.");
+  requireThat(vars.PLATFORM_MODE === "production" && vars.PLATFORM_RELEASE_APPROVED === "NOT_APPROVED", "Production candidate must stay release-locked as NOT_APPROVED.");
   let origin;
   try { origin = new URL(vars.PLATFORM_ORIGIN); } catch { throw new Error("Production candidate origin is invalid."); }
   requireThat(origin.protocol === "https:" && origin.hostname.startsWith(`${candidate.name}.`) && origin.hostname.endsWith(".workers.dev") && origin.origin === vars.PLATFORM_ORIGIN, "Candidate origin must be its own bare HTTPS workers.dev origin.");
@@ -62,8 +62,10 @@ export function validateProductionConfig(candidate, closedTestHyperdriveId) {
   return {worker: candidate.name, origin: origin.origin, hyperdriveId: prodDb.id, bucket: prodR2.bucket_name, queue: producer[0].queue, dlq: consumers[0].dead_letter_queue};
 }
 
-export function validateRemoteHyperdriveProject(config, expectedId, expectedProjectRef) {
+export function validateRemoteHyperdriveProject(config, expectedId, expectedProjectRef, expectedRuntimeRole = "lumiq_runtime") {
   requireThat(config && config.id === expectedId, "Remote Hyperdrive ID does not match the candidate binding.");
+  requireThat(config.caching?.disabled === true, "Production Hyperdrive caching must be explicitly disabled.");
+  requireThat(["lumiq_runtime", "lumiq_production_runtime"].includes(expectedRuntimeRole), "Production runtime role is not an allowed dedicated identity.");
   const host = config.origin?.host?.toLowerCase();
   const username = config.origin?.user?.toLowerCase();
   requireThat(typeof host === "string" && typeof username === "string", "Remote Hyperdrive origin metadata is incomplete.");
@@ -75,7 +77,12 @@ export function validateRemoteHyperdriveProject(config, expectedId, expectedProj
     projectRef = /^db\.([a-z0-9]+)\.supabase\.co$/i.exec(host)?.[1]?.toLowerCase();
   }
   requireThat(projectRef === expectedProjectRef.toLowerCase(), "Remote Hyperdrive origin does not match the candidate Supabase project reference.");
-  return {id: config.id, host, projectRef};
+  if (host.endsWith(".pooler.supabase.com")) {
+    requireThat(username === `${expectedRuntimeRole}.${expectedProjectRef.toLowerCase()}`, `Production Hyperdrive must use the selected dedicated ${expectedRuntimeRole} role, not postgres/admin.`);
+  } else {
+    requireThat(username === expectedRuntimeRole, `Production Hyperdrive must use the selected dedicated ${expectedRuntimeRole} role, not postgres/admin.`);
+  }
+  return {id: config.id, host, projectRef, runtimeRole: expectedRuntimeRole};
 }
 
 function getRemoteHyperdriveConfig(id) {
@@ -108,16 +115,19 @@ async function readConfig(file) {
 async function main() {
   const [candidatePath, ...args] = process.argv.slice(2);
   const testIdArg = args.find(value => value.startsWith("--closed-test-hyperdrive-id="));
-  requireThat(candidatePath && testIdArg, "Usage: npm run production:preflight -- <production-wrangler-config.jsonc> --closed-test-hyperdrive-id=<id>");
+  const runtimeRoleArg = args.find(value => value.startsWith("--runtime-role="));
+  requireThat(candidatePath && testIdArg, "Usage: npm run production:preflight -- <production-wrangler-config.jsonc> --closed-test-hyperdrive-id=<id> [--runtime-role=lumiq_runtime|lumiq_production_runtime]");
   const candidateFile = path.resolve(candidatePath);
   const candidate = await readConfig(candidateFile);
+  const runtimeRole = runtimeRoleArg?.split("=", 2)[1] || "lumiq_runtime";
   const result = validateProductionConfig(candidate, testIdArg.split("=", 2)[1]);
   const remoteDatabase = validateRemoteHyperdriveProject(
     getRemoteHyperdriveConfig(result.hyperdriveId),
     result.hyperdriveId,
-    candidate.vars.PLATFORM_SUPABASE_PROJECT_REF
+    candidate.vars.PLATFORM_SUPABASE_PROJECT_REF,
+    runtimeRole
   );
-  console.log(`Production candidate passed static isolation and remote DB identity checks: worker=${result.worker}, origin=${result.origin}, Hyperdrive=${remoteDatabase.id}, DB project=${remoteDatabase.projectRef}, R2=${result.bucket}, Queue=${result.queue}, DLQ=${result.dlq}.`);
+  console.log(`Production candidate passed static isolation and remote DB identity checks: worker=${result.worker}, origin=${result.origin}, Hyperdrive=${remoteDatabase.id}, DB project=${remoteDatabase.projectRef}, runtime=${remoteDatabase.runtimeRole}, R2=${result.bucket}, Queue=${result.queue}, DLQ=${result.dlq}.`);
   console.log("No deployment or resource changes were performed. Verify Cloudflare Access, R2/Queue existence and Wrangler dry-run bindings separately.");
 }
 

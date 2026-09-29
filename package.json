@@ -20,6 +20,7 @@
     "security": "node platform/scripts/security-scan.mjs && npm audit --audit-level=high",
     "backup": "node platform/scripts/backup-cloud.mjs",
     "backup:verify": "node platform/scripts/verify-backup.mjs",
+    "backup:production": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File platform/scripts/backup-production.ps1",
     "restore:drill": "node platform/scripts/restore-drill.mjs",
     "cost": "node platform/scripts/cost-model.mjs",
     "cloudflare:dev": "node platform/scripts/block-deploy.mjs --dev",
@@ -32,6 +33,7 @@
     "@aws-sdk/lib-storage": "^3.1131.0",
     "@aws-sdk/s3-request-presigner": "3.1131.0",
     "@electric-sql/pglite": "0.5.8",
+    "fabric": "7.4.0",
     "fflate": "0.8.3",
     "libphonenumber-js": "1.13.13",
     "lucide": "0.468.0",
@@ -43,7 +45,11 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
     "acorn": "8.18.0",
+    "esbuild": "0.28.1",
     "playwright": "1.63.0",
     "wrangler": "4.136.3"
+  },
+  "overrides": {
+    "undici": "7.29.1"
   }
 }

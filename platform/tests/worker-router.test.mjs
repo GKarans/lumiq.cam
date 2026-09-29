@@ -106,6 +106,37 @@ test('scheduled Worker processes one database-polled job per invocation',async()
  assert.equal(closed.length,1);
 });
 
+test('retention drill schedule is isolated, event-targeted, and never delivers email',async()=>{
+ const calls=[],closed=[],runScheduled=createScheduledHandler(async()=>({
+  jobs:{retention:async options=>{calls.push(['retention',options]);return{expired:true,jobId:'d4f6c64d-9065-4c42-9a48-cbac690b106d'};},tick:async options=>calls.push(['tick',options])},
+  db:{query:async(...args)=>{calls.push(['query',...args]);return{rows:[{status:'ready',result:{removed:1}}]};},close:async()=>closed.push(true)},
+  deliverMail:async()=>calls.push(['mail'])
+ }));
+ let scheduled;const eventId='cc8d61dd-9b02-4c68-a4a3-0069f098bf6a';
+ await runScheduled({}, {PLATFORM_MODE:'staging',PLATFORM_RELEASE_APPROVED:'staging',PLATFORM_SERVICE_NAME:'lumiq-restore-drill-candidate',PLATFORM_SUPABASE_PROJECT_REF:'sprzlvywzpeyuzbsyplz',PLATFORM_R2_BUCKET:'lumiq-restore-drill-20260925',PLATFORM_RETENTION_DRILL_EVENT_ID:eventId,HYPERDRIVE:{connectionString:'unused-test-connection'}}, {waitUntil:promise=>{scheduled=promise;}});
+ await scheduled;
+ assert.deepEqual(calls.slice(0,2),[['retention',{eventId}],['tick',{concurrency:1,maxJobs:1,jobIds:['d4f6c64d-9065-4c42-9a48-cbac690b106d']}]]);
+ assert(!calls.some(([type])=>type==='mail'));assert.equal(closed.length,1);
+ let opened=false;const guarded=createScheduledHandler(async()=>{opened=true;throw new Error('Guard should reject the wrong bucket before opening a database.');});
+ await guarded({}, {PLATFORM_MODE:'staging',PLATFORM_RELEASE_APPROVED:'staging',PLATFORM_SERVICE_NAME:'lumiq-restore-drill-candidate',PLATFORM_SUPABASE_PROJECT_REF:'sprzlvywzpeyuzbsyplz',PLATFORM_R2_BUCKET:'lumiq-closed-test-photos',PLATFORM_RETENTION_DRILL_EVENT_ID:eventId,HYPERDRIVE:{connectionString:'unused-test-connection'}}, {waitUntil:()=>{}});
+ assert.equal(opened,false);
+});
+
+test('event-end drill prepares and processes only the targeted archive without mail delivery',async()=>{
+ const calls=[],closed=[],eventId='cc8d61dd-9b02-4c68-a4a3-0069f098bf6a',jobId='d4f6c64d-9065-4c42-9a48-cbac690b106d';let scheduled;
+ const runScheduled=createScheduledHandler(async()=>({
+  jobs:{retention:async options=>{calls.push(['retention',options]);return{prepared:true,jobId};},tick:async options=>calls.push(['tick',options])},
+  db:{query:async(...args)=>{calls.push(['query',...args]);return{rows:args[0].startsWith('select id from jobs')?[{id:'12b718a0-7119-460c-846c-4b08d239ce64'}]:[{status:'ready',result:{parts:[{key:'exports/synthetic/part-1.zip'}]}}]};},close:async()=>closed.push(true)},
+  deliverMail:async()=>calls.push(['mail'])
+ }));
+ await runScheduled({}, {PLATFORM_MODE:'staging',PLATFORM_RELEASE_APPROVED:'staging',PLATFORM_SERVICE_NAME:'lumiq-restore-drill-candidate',PLATFORM_SUPABASE_PROJECT_REF:'sprzlvywzpeyuzbsyplz',PLATFORM_R2_BUCKET:'lumiq-restore-drill-20260925',PLATFORM_RETENTION_DRILL_EVENT_ID:eventId,PLATFORM_RETENTION_DRILL_PHASE:'event-end',HYPERDRIVE:{connectionString:'unused-test-connection'}}, {waitUntil:promise=>{scheduled=promise;}});
+ await scheduled;
+ assert.deepEqual(calls.slice(0,2),[['retention',{eventId,phase:'event-end'}],['tick',{concurrency:1,maxJobs:1,jobIds:[jobId]}]]);
+ assert.deepEqual(calls[2][1],"select id from jobs where event_id=$1 and type='export-part' and payload->>'parent_id'=$2 and status='queued' order by (payload->>'part_index')::int limit 10");
+ assert.deepEqual(calls[3],['tick',{concurrency:1,maxJobs:1,jobIds:['12b718a0-7119-460c-846c-4b08d239ce64']}]);
+ assert(!calls.some(([type])=>type==='mail'));assert.equal(closed.length,1);
+});
+
 test('queue consumer runs only valid targeted jobs, closes DB and retries startup failures',async()=>{
  const calls=[],deadLetters=[],makeMessage=body=>({body,acked:false,retried:null,ack(){this.acked=true;},retry(options){this.retried=options;}});
  const id='d4f6c64d-9065-4c42-9a48-cbac690b106d',valid=makeMessage({jobId:id}),invalid=makeMessage({jobId:'not-a-uuid'}),closed=[];

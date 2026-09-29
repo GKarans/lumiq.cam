@@ -49,15 +49,21 @@ try {
     await tx.unsafe('grant connect on database postgres to lumiq_runtime');
     await tx.unsafe('grant usage on schema public to lumiq_runtime');
     await tx.unsafe('grant select, insert, update, delete on all tables in schema public to lumiq_runtime');
+    await tx.unsafe('revoke insert, update, delete on table public.accounts from lumiq_runtime');
+    await tx.unsafe('grant insert (id,email,name,password_hash,profile,preferences,verified) on table public.accounts to lumiq_runtime');
+    await tx.unsafe('grant update (email,name,password_hash,profile,preferences,verified,storage_prefix,design_defaults) on table public.accounts to lumiq_runtime');
     await tx.unsafe('alter default privileges for role postgres in schema public grant select, insert, update, delete on tables to lumiq_runtime');
   });
 
   const [role] = await sql`
     select rolcanlogin, rolinherit, rolbypassrls, rolcreatedb, rolcreaterole, rolsuper,
-      has_table_privilege('lumiq_runtime', 'public.accounts', 'select') as can_read_accounts
+      has_table_privilege('lumiq_runtime', 'public.accounts', 'select') as can_read_accounts,
+      has_table_privilege('lumiq_runtime', 'public.accounts', 'delete') as can_delete_accounts,
+      has_column_privilege('lumiq_runtime', 'public.accounts', 'role', 'insert') as can_insert_account_role,
+      has_column_privilege('lumiq_runtime', 'public.accounts', 'role', 'update') as can_update_account_role
     from pg_roles where rolname = 'lumiq_runtime'
   `;
-  if (!role?.rolcanlogin || role.rolinherit || !role.rolbypassrls || role.rolcreatedb || role.rolcreaterole || role.rolsuper || !role.can_read_accounts) {
+  if (!role?.rolcanlogin || role.rolinherit || !role.rolbypassrls || role.rolcreatedb || role.rolcreaterole || role.rolsuper || !role.can_read_accounts || role.can_delete_accounts || role.can_insert_account_role || role.can_update_account_role) {
     throw new Error('Runtime DB role verification failed. Do not attach it to a Worker.');
   }
   console.log(`Closed-test DB role ready: lumiq_runtime.${projectRef}; login-only, table-scoped, BYPASSRLS, not owner/superuser.`);

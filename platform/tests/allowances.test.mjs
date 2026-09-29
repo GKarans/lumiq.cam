@@ -1,13 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {mkdtemp,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import path from 'node:path';
 import {openDatabase} from '../server/db.mjs';
 import {createApp} from '../server/app.mjs';
+import {storage} from '../server/storage.mjs';
 import {billingService} from '../server/billing.mjs';
 import {PLANS,eventState} from '../shared/plans.js';
 import {uuid} from '../server/security.mjs';
 
 test('publication allowance and Single Event purchases',async t=>{
- const db=await openDatabase({memory:true}),app=await createApp({db});
+ const root=await mkdtemp(path.join(tmpdir(),'lumiq-allowances-')),db=await openDatabase({memory:true}),app=await createApp({db,files:storage({root})});
  const account=async(plan='trial')=>{const u={id:uuid(),name:'Allowance test',email:`${uuid()}@example.test`};await db.query('insert into accounts(id,name,email) values($1,$2,$3)',[u.id,u.name,u.email]);await db.query("insert into subscriptions(account_id,plan,status) values($1,$2,$3)",[u.id,plan,plan==='trial'?'trialing':'active']);return u;};
  const draft=(u)=>app.events.save(u,{name:'Future gathering',start:new Date(Date.now()+86400000).toISOString().slice(0,16),end:new Date(Date.now()+2*86400000).toISOString().slice(0,16),time_zone:'UTC'});
  const publish=(u,e,funding='plan')=>app.events.action(u,e.id,{action:'publish',funding});
@@ -45,12 +49,49 @@ test('publication allowance and Single Event purchases',async t=>{
    await app.jobs.retention();assert.equal((await db.query("select count(*)::int as n from jobs where event_id=$1 and type='export' and payload->>'automatic'='true'",[e.id])).rows[0].n,1,'The maintenance cycle must not rebuild or replace the immutable archive.');
    const archivedZip=autos[0].result.parts[0].key;assert(await app.files.size(archivedZip));
    await db.query("update jobs set available_at=now() where type='media-cleanup' and event_id=$1",[e.id]);await app.jobs.tick();assert(await app.files.size(archivedZip),'Deleting gallery photos must not remove them from the already generated ZIP.');
-   await db.query("update events set retention_at=now()-interval '1 second' where id=$1",[e.id]);await app.jobs.retention();await app.jobs.tick();
+   await db.query("update events set retention_at=now()-interval '1 second' where id=$1",[e.id]);const expiry=await app.jobs.retention({eventId:e.id});assert(expiry.expired&&expiry.jobId);await app.jobs.tick({jobIds:[expiry.jobId]});
    assert.equal((await db.query('select count(*)::int as n from media where event_id=$1',[e.id])).rows[0].n,0);
    assert.equal((await db.query('select count(*)::int as n from guests where event_id=$1',[e.id])).rows[0].n,0);
    await assert.rejects(app.files.size(archivedZip),{code:'ENOENT'},'Retention expiry removes the ZIP as well as gallery media.');
-   const archived=(await db.query('select name,description,appearance,status,starts_at,ends_at,retention_at from events where id=$1',[e.id])).rows[0];
-   assert.equal(archived.name,'Synthetic party');assert.equal(archived.description,'');assert.deepEqual(archived.appearance,{});assert.equal(archived.status,'archived');assert(archived.starts_at&&archived.ends_at&&archived.retention_at);
+   const archived=(await db.query('select id,name,slug,description,appearance,storage_prefix,entitlement,status,starts_at,ends_at,time_zone,retention_at,share_enabled,share_expires,share_used,share_limit from events where id=$1',[e.id])).rows[0];
+   assert.equal(archived.name,'Synthetic party');assert.equal(archived.slug,`expired-${e.id}`);assert.equal(archived.description,'');assert.deepEqual(archived.appearance,{});assert.equal(archived.storage_prefix,`expired/events/${e.id}`);assert.deepEqual(archived.entitlement,{retentionDays:30});assert.equal(archived.status,'archived');assert(archived.starts_at&&archived.ends_at&&archived.time_zone&&archived.retention_at);assert.equal(archived.share_enabled,false);assert.equal(archived.share_expires,null);assert.equal(archived.share_used,0);assert.equal(archived.share_limit,0);
+  });
+  await t.test('retention cleanup retries idempotently and never removes another organizer assets',async()=>{
+   const owner=await account('studio'),other=await account('studio'),photo=Buffer.from('synthetic-cleanup-photo');
+   const makeEnded=async(user,name)=>{
+    const event=await draft(user);await publish(user,event);const guestId=uuid(),mediaId=uuid();
+    await db.query('insert into guests(id,event_id,name,token_hash,storage_prefix) values($1,$2,$3,$4,$5)',[guestId,event.id,'Test guest',`cleanup-${guestId}`,`cleanup/${event.id}/guest`]);
+    const prefix=`cleanup/${event.id}`,keys={photo:`${prefix}/guest/photo.webp`,thumb:`${prefix}/guest/thumb/photo.webp`,cover:`${prefix}/cover.webp`,qr:`${prefix}/qr.webp`};
+    for(const key of Object.values(keys))await app.files.put(key,photo);
+    await db.query("insert into media(id,event_id,guest_id,object_key,thumbnail_key,name,bytes,thumbnail_bytes,status) values($1,$2,$3,$4,$5,'photo.webp',$6,$6,'uploaded')",[mediaId,event.id,guestId,keys.photo,keys.thumb,photo.length]);
+    await db.query("update events set name=$2,starts_at=now()-interval '2 hours',ends_at=now()-interval '1 hour',retention_at=now()+interval '1 day',appearance=jsonb_build_object('cover_key',$3::text,'qr_background_key',$4::text) where id=$1",[event.id,name,keys.cover,keys.qr]);
+    return{eventId:event.id,mediaId,keys};
+   };
+   const target=await makeEnded(owner,'Expiring synthetic event'),preserved=await makeEnded(other,'Unexpired synthetic event');
+   const targeted=await app.jobs.retention({eventId:target.eventId,phase:'event-end'});assert(targeted.prepared&&targeted.jobId);
+   await app.jobs.tick({concurrency:1,maxJobs:1,jobIds:[targeted.jobId]});
+   const targetParts=(await db.query("select id from jobs where event_id=$1 and type='export-part' and payload->>'parent_id'=$2 and status='queued'",[target.eventId,targeted.jobId])).rows;assert(targetParts.length);
+   await app.jobs.tick({concurrency:1,maxJobs:targetParts.length,jobIds:targetParts.map(part=>part.id)});
+   assert.equal((await db.query("select count(*)::int as n from jobs where event_id=$1 and type='export' and payload->>'automatic'='true'",[preserved.eventId])).rows[0].n,0,'The scoped event-end preparation must not touch another organizer event.');
+   await app.jobs.retention();await app.jobs.tick();
+   const getAutoZip=async(eventId)=>{const job=(await db.query("select result from jobs where event_id=$1 and type='export' and status='ready' and payload->>'automatic'='true'",[eventId])).rows[0];assert(job?.result?.parts?.length);return job.result.parts[0].key;};
+   const targetZip=await getAutoZip(target.eventId),preservedZip=await getAutoZip(preserved.eventId);
+   await db.query('update events set retention_at=now()-interval \'1 second\' where id=$1',[target.eventId]);
+    const expiry=await app.jobs.retention({eventId:target.eventId});assert(expiry.expired&&expiry.jobId);
+   let cleanup=(await db.query("select id,status from jobs where event_id=$1 and type='retention-cleanup'",[target.eventId])).rows;assert.equal(cleanup.length,1);assert.equal(cleanup[0].status,'queued');
+   const remove=app.files.remove;let failed=false;app.files.remove=async key=>{if(key===target.keys.photo&&!failed){failed=true;throw new Error('synthetic R2 outage');}return remove(key);};
+   try{await app.jobs.tick();}finally{app.files.remove=remove;}
+   cleanup=(await db.query('select id,status from jobs where id=$1',[cleanup[0].id])).rows[0];assert.equal(cleanup.status,'queued');
+    const retry=await app.jobs.retention({eventId:target.eventId});assert.equal(retry.jobId,cleanup.id,'A repeated scoped expiry must reuse its existing cleanup job.');
+    await db.query('update jobs set available_at=now() where id=$1',[cleanup.id]);await app.jobs.tick({jobIds:[cleanup.id]});
+   for(const key of Object.values(target.keys))await assert.rejects(app.files.get(key),{code:'ENOENT'});
+   await assert.rejects(app.files.get(targetZip),{code:'ENOENT'});
+   assert.equal((await db.query('select count(*)::int as n from media where event_id=$1',[target.eventId])).rows[0].n,0);
+   const archived=(await db.query('select id,name,slug,description,appearance,storage_prefix,entitlement,status,starts_at,ends_at,time_zone,retention_at,share_enabled,share_expires,share_used,share_limit from events where id=$1',[target.eventId])).rows[0];
+   assert.equal(archived.name,'Expiring synthetic event');assert.equal(archived.slug,`expired-${target.eventId}`);assert.equal(archived.description,'');assert.deepEqual(archived.appearance,{});assert.equal(archived.storage_prefix,`expired/events/${target.eventId}`);assert.deepEqual(archived.entitlement,{retentionDays:30});assert.equal(archived.status,'archived');assert(archived.starts_at&&archived.ends_at&&archived.time_zone&&archived.retention_at);assert.equal(archived.share_enabled,false);assert.equal(archived.share_expires,null);assert.equal(archived.share_used,0);assert.equal(archived.share_limit,0);
+   await app.jobs.retention();await app.jobs.tick();assert.equal((await db.query("select count(*)::int as n from jobs where event_id=$1 and type='retention-cleanup'",[target.eventId])).rows[0].n,1,'Repeated expiry runs must remain idempotent after success.');
+   assert.equal((await db.query('select count(*)::int as n from media where id=$1 and event_id=$2',[preserved.mediaId,preserved.eventId])).rows[0].n,1);
+   for(const key of [...Object.values(preserved.keys),preservedZip])assert(await app.files.size(key),`Other organizer asset must survive cleanup: ${key}`);
   });
   await t.test('expired subscriptions preserve owner access and post-event sharing until retention ends',async()=>{
    for(const plan of ['gathering','studio']){
@@ -142,7 +183,7 @@ test('publication allowance and Single Event purchases',async t=>{
    const change=await app.billing.checkout(u,{plan:'studio'});await app.billing.simulate(u,change.order,'success');
    const after=await app.events.subscription(u);assert.equal(String(before.period_start),String(after.period_start));assert.equal((await app.events.allowance(u)).used,1);assert.equal((await app.events.allowance(u)).remaining,11);
   });
- }finally{await db.close();}
+ }finally{await db.close();await rm(root,{recursive:true,force:true});}
 });
 
 test('Stripe Single Event checkout uses payment mode and a verified paid event grants only a pass',async()=>{

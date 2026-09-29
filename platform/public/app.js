@@ -1,7 +1,7 @@
 import {language,setLanguage,localizeDom,t} from './i18n.js';
 import {state,api,esc,icon,toast,go,icons,toggleTheme,wireForm,field} from './ui.js';
 import {nav,footer,marketingPage,contactPage,wireContact,authPage,wireAuth} from './marketing.js';
-import {disposeWorkspace,dashboard,wireDashboard,detail,wireDetail,billingPage,wireBilling,checkout,wireCheckout,accountPage,wireAccount,supportPage,adminPage,wireAdmin} from './workspace.js';
+import {disposeWorkspace,dashboard,wireDashboard,detail,wireDetail,billingPage,wireBilling,checkout,wireCheckout,accountPage,wireAccount,supportPage,adminPage,wireAdmin} from './workspace.js?v=event-cover-20260926-1';
 import {guestPage,wireGuest,disposeGuest} from './guest.js';
 import {enhanceSelectMenus} from './select-menu.js';
 let version=0;document.documentElement.lang=language();document.addEventListener('change',e=>{if(!e.target.matches('[data-language]'))return;if(document.querySelector('#upload-queue .queue-item')){e.target.value=language();toast(t('Finish your photo queue before changing language.'),true);return;}const form=document.querySelector('form');if(form&&!form.checkValidity()&&form.querySelector('input:not([type=hidden])')?.value.trim()){e.target.value=language();toast(t('Submit or clear the form before changing language.'),true);return;}setLanguage(e.target.value);render();});

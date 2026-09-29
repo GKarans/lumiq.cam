@@ -2,10 +2,10 @@ import {loadSharp} from './image-runtime.mjs';
 import QRCode from 'qrcode';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
-import {uuid,requireThat,Fault} from './security.mjs';
+import {requireThat,Fault} from './security.mjs';
 import {ROOT} from './db.mjs';
 import {FONT_IDS,FONT_FAMILIES,normalizeFont} from '../shared/fonts.js';
-import {eventFolder} from '../shared/storage-keys.js';
+import {normalizeCanvasScene} from '../shared/canvas-scene.js';
 
 export const QR_TEMPLATES=['garden','vintage','celebration','modern','custom'];
 export const QR_FONTS=FONT_IDS;
@@ -24,7 +24,8 @@ export function normalizeQrLayout(input={}){
   textY:number(input.textY,.10,.38,DEFAULT_QR_LAYOUT.textY),
   qrX:number(input.qrX,.18,.82,DEFAULT_QR_LAYOUT.qrX),
   qrY:number(input.qrY,.34,.76,DEFAULT_QR_LAYOUT.qrY),
-  qrScale:number(input.qrScale,.72,1.18,DEFAULT_QR_LAYOUT.qrScale)
+  qrScale:number(input.qrScale,.72,1.18,DEFAULT_QR_LAYOUT.qrScale),
+  ...(normalizeCanvasScene(input.scene)?{scene:normalizeCanvasScene(input.scene)}:{})
  };
 }
 
@@ -62,6 +63,7 @@ export async function renderQrPoster({event,target,format='qr',layout:input={},c
 
 export async function saveQrLayout(db,events,user,eventId,input){
  const layout=normalizeQrLayout(input);
+ if(events.saveQrLayout)return events.saveQrLayout(user,eventId,layout);
  return db.transaction(async tx=>{
   await tx.query('select id from accounts where id=$1 for update',[user.id]);
   const event=await events.own(user,eventId,tx);
@@ -72,22 +74,19 @@ export async function saveQrLayout(db,events,user,eventId,input){
  });
 }
 
+export async function replaceQrSource(db,files,events,user,eventId,data,validateImage){
+ requireThat(typeof data==='string'&&data.length<12*1024**2,413,'Choose a smaller QR background.');
+ await events.own(user,eventId);let image;
+ try{const source=Buffer.from(data,'base64');if(validateImage){await validateImage(source);image=source;}else{const sharp=await loadSharp();image=await sharp(source,{limitInputPixels:40e6,failOn:'warning'}).rotate().resize({width:3200,height:3200,fit:'inside',withoutEnlargement:true}).webp({quality:90}).toBuffer();}}
+ catch{throw new Fault(415,'This QR background could not be opened. Use JPEG, PNG or WebP.');}
+ const reservation=await events.reserveDesignAsset(user,eventId,'qr_source');await files.put(reservation.key,image);return events.attachDesignAsset(user,eventId,'qr_source',reservation.key,reservation.reservationId);
+}
+
 export async function replaceQrBackground(db,files,events,user,eventId,data,validateImage){
  requireThat(typeof data==='string'&&data.length<12*1024**2,413,'Choose a smaller QR background.');
- const initial=await events.own(user,eventId);
+ await events.own(user,eventId);
  let image;
  try{const source=Buffer.from(data,'base64');if(validateImage){await validateImage(source);image=source;}else{const sharp=await loadSharp();image=await sharp(source,{limitInputPixels:40e6,failOn:'warning'}).rotate().resize({width:3200,height:3200,fit:'inside',withoutEnlargement:true}).webp({quality:90}).toBuffer();}}
  catch{throw new Fault(415,'This QR background could not be opened. Use JPEG, PNG or WebP.');}
- const organizerPrefix=await events.organizerPrefix(user),key=`${organizerPrefix}/cover/${eventFolder(initial.name,eventId)}-qr-design-${uuid()}.webp`,cleanupId=uuid();
- await db.query("insert into jobs(id,owner_id,event_id,type,payload,available_at) values($1,$2,$3,'object-cleanup',$4,now()+interval '10 minutes')",[cleanupId,user.id,eventId,{keys:[key]}]);
- await files.put(key,image);
- await db.transaction(async tx=>{
-  await tx.query('select id from accounts where id=$1 for update',[user.id]);
-  const event=await events.own(user,eventId,tx);
-  requireThat(['draft','published'].includes(event.status)&&Date.parse(event.retention_at)>Date.now(),409,'This event can no longer be redesigned.');
-  await tx.query('update events set appearance=$1::jsonb where id=$2',[{...event.appearance,qr_background_key:key},event.id]);
-  await tx.query('delete from jobs where id=$1',[cleanupId]);
-  if(event.appearance.qr_background_key)await tx.query("insert into jobs(id,owner_id,event_id,type,payload) values($1,$2,$3,'object-cleanup',$4)",[uuid(),user.id,eventId,{keys:[event.appearance.qr_background_key]}]);
- });
- return {ok:true};
+ const reservation=await events.reserveDesignAsset(user,eventId,'qr_background');await files.put(reservation.key,image);return events.attachDesignAsset(user,eventId,'qr_background',reservation.key,reservation.reservationId);
 }

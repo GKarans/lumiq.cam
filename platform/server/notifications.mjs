@@ -2,6 +2,7 @@ import {uuid} from './security.mjs';
 import {localized} from './locale.mjs';
 
 export function queueMessage(db,account,subject,body,dedupe=null){
+ if(db.queuePlatformMessage)return db.queuePlatformMessage(account,subject,body,dedupe);
  return db.query('insert into deliveries(id,account_id,recipient,subject,body,dedupe_key) values($1,$2,$3,$4,$5,$6) on conflict(dedupe_key) do nothing',[uuid(),account.id||null,account.email,subject,body,dedupe]);
 }
 

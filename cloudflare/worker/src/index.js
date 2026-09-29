@@ -72,9 +72,31 @@ export function createScheduledHandler(getApp) {
   return async (_controller, env, context) => {
     if (!isReleaseApproved(env.PLATFORM_MODE, env.PLATFORM_RELEASE_APPROVED)) return;
     if (!env.HYPERDRIVE?.connectionString) return;
+    const drillEventId = env.PLATFORM_RETENTION_DRILL_EVENT_ID;
+    if (drillEventId && (env.PLATFORM_MODE !== "staging" || env.PLATFORM_SERVICE_NAME !== "lumiq-restore-drill-candidate" || env.PLATFORM_SUPABASE_PROJECT_REF !== "sprzlvywzpeyuzbsyplz" || env.PLATFORM_R2_BUCKET !== "lumiq-restore-drill-20260925" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(drillEventId))) return;
+    const drillPhase = env.PLATFORM_RETENTION_DRILL_PHASE || "expiry";
+    if (drillEventId && !["expiry", "event-end"].includes(drillPhase)) return;
     context.waitUntil((async () => {
       const app = await getApp(env);
       try {
+        if (drillEventId) {
+          if (drillPhase === "event-end") {
+            const result = await app.jobs.retention({eventId: drillEventId, phase: "event-end"});
+            if (result.jobId) {
+              await app.jobs.tick({concurrency: 1, maxJobs: 1, jobIds: [result.jobId]});
+              const parts = (await app.db.query("select id from jobs where event_id=$1 and type='export-part' and payload->>'parent_id'=$2 and status='queued' order by (payload->>'part_index')::int limit 10", [drillEventId, result.jobId])).rows;
+              if (parts.length) await app.jobs.tick({concurrency: 1, maxJobs: parts.length, jobIds: parts.map(part => part.id)});
+            }
+            const job = result.jobId ? (await app.db.query("select status,result from jobs where id=$1 and event_id=$2 and type='export' and payload->>'automatic'='true'", [result.jobId, drillEventId])).rows[0] : null;
+            console.log(JSON.stringify({component: "retention-drill", phase: drillPhase, eventId: drillEventId, prepared: result.prepared, jobStatus: job?.status || null, parts: job?.result?.parts?.length ?? null}));
+            return;
+          }
+          const result = await app.jobs.retention({eventId: drillEventId});
+          if (result.jobId) await app.jobs.tick({concurrency: 1, maxJobs: 1, jobIds: [result.jobId]});
+          const job = result.jobId ? (await app.db.query("select status,result from jobs where id=$1 and event_id=$2 and type='retention-cleanup'", [result.jobId, drillEventId])).rows[0] : null;
+          console.log(JSON.stringify({component: "retention-drill", eventId: drillEventId, expired: result.expired, jobStatus: job?.status || null, removedMedia: job?.result?.removed ?? null}));
+          return;
+        }
         await app.jobs.retention();
         if (env.LUMIQ_JOBS_QUEUE) await app.jobs.dispatch(env.LUMIQ_JOBS_QUEUE);
         else await app.jobs.tick({concurrency: 1, maxJobs: 1});

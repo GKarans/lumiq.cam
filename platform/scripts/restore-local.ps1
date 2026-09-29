@@ -48,7 +48,9 @@ $environmentNames = @(
   'PLATFORM_R2_ACCESS_KEY_ID',
   'PLATFORM_R2_SECRET_ACCESS_KEY',
   'PLATFORM_RESTORE_TARGET_REF',
-  'PLATFORM_RESTORE_DRILL'
+  'PLATFORM_RESTORE_DRILL',
+  'PLATFORM_RESTORE_ALLOW_PARTIAL',
+  'PLATFORM_RUNTIME_PASSWORD'
 )
 
 function Set-MaskedProcessValue {
@@ -77,6 +79,11 @@ try {
   $env:PLATFORM_R2_ENDPOINT = $r2Endpoint
   Set-MaskedProcessValue 'PLATFORM_R2_ACCESS_KEY_ID' 'Target-bucket Object Read & Write access key ID'
   Set-MaskedProcessValue 'PLATFORM_R2_SECRET_ACCESS_KEY' 'Target-bucket Object Read & Write secret key'
+  Set-MaskedProcessValue 'PLATFORM_RUNTIME_PASSWORD' 'New lumiq_restore_runtime password (32+ URL-safe characters)'
+  $partialConfirmation = Read-Host "If retrying this partial drill restore, type ONLY 'RESET PARTIAL $expectedProjectRef'; otherwise press Enter"
+  if ($partialConfirmation -ceq "RESET PARTIAL $expectedProjectRef") {
+    $env:PLATFORM_RESTORE_ALLOW_PARTIAL = '1'
+  }
 
   Write-Host "Restoring only to Supabase project '$expectedProjectRef' and R2 bucket '$targetBucket'."
   & npm.cmd run restore:drill -- $resolvedBackup

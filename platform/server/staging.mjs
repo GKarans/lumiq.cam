@@ -15,7 +15,7 @@ const server=workerOnly?null:http.createServer(async(req,res)=>{
  try{
   if(req.url==='/healthz'){try{await app.db.query('select 1 as ready');res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify({status:'ok',mode:'staging',database:'ready'}));}catch{res.writeHead(503,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify({status:'unavailable',database:'failed'}));}return;}
   if(req.url.startsWith('/api/billing/webhook')&&Number(req.headers['content-length'])>100000)throw Object.assign(new Error(),{status:413});
-  const chunks=[];let size=0,limit=req.url?.endsWith('/convert')?31*1024**2:7*1024**2;
+ const chunks=[];let size=0,limit=req.url?.endsWith('/convert')?31*1024**2:/\/(?:cover|cover-source|qr-background|qr-source)$/.test(req.url||'')?16*1024**2:7*1024**2;
   for await(const chunk of req){size+=chunk.length;if(size>limit)throw Object.assign(new Error(),{status:413});chunks.push(chunk);}
   const request=new Request(origin+req.url,{method:req.method,headers:req.headers,...(!['GET','HEAD'].includes(req.method)?{body:Buffer.concat(chunks)}:{})});
   const result=await app.handle(request,{clientId:clientAddress(req,(process.env.PLATFORM_TRUSTED_PROXY_IPS||'').split(',').filter(Boolean))});

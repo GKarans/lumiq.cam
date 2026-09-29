@@ -12,7 +12,7 @@ export function verifyStripe(body,header,secret,now=Date.now()) {
  return JSON.parse(body);
 }
 
-export function billingService(db,{local,origin,fetcher=fetch}) {
+export function billingService(db,{local,origin,fetcher=fetch,auth={},systemRpc=false}) {
  const stripe=async(route,values,requestId)=>{
   const key=process.env.PLATFORM_STRIPE_SECRET;
   requireThat(key?.startsWith('sk_test_'),503,'Payments are not configured for testing yet.');
@@ -22,9 +22,8 @@ export function billingService(db,{local,origin,fetcher=fetch}) {
   });
   requireThat(r.ok,502,'The payment provider is temporarily unavailable.');return r.json();
  };
- const canonical=async(tx,owner,id)=>{
+ const canonical=async(owner,id)=>{
   requireThat(/^sub_[\w]+$/.test(id),400,'Invalid subscription reference.');
-  // Fetch under the account lock so delayed deliveries cannot restore stale rights.
   const current=await stripe(`subscriptions/${id}`);
   requireThat(current.metadata?.account_id===owner,400,'Subscription account mismatch.');
   const item=current.items?.data?.[0];
@@ -33,15 +32,33 @@ export function billingService(db,{local,origin,fetcher=fetch}) {
   const end=item.current_period_end||current.current_period_end,start=item.current_period_start||current.current_period_start;
   requireThat(Number.isFinite(start)&&Number.isFinite(end)&&start<end,502,'The billing period is unavailable.');
   const status=({active:'active',trialing:'trialing',past_due:'overdue',unpaid:'overdue',canceled:'ended',incomplete_expired:'ended'}[current.status]||'incomplete');
-  await tx.query('update subscriptions set plan=$1,status=$2,period_end=$3,period_start=$8,cancel_at_end=$4,provider_id=$5,provider_customer=$6,updated_at=now() where account_id=$7',[
-   plan.id,status,new Date(end*1000).toISOString(),current.cancel_at_period_end===true,id,typeof current.customer==='string'?current.customer:current.customer.id,owner,new Date(start*1000).toISOString()
-  ]);
-  return current;
+  return{provider_id:id,plan:plan.id,status,period_start:new Date(start*1000).toISOString(),period_end:new Date(end*1000).toISOString(),cancel_at_end:current.cancel_at_period_end===true,provider_customer:typeof current.customer==='string'?current.customer:current.customer?.id||null};
  };
  const types=new Set(['checkout.session.completed','checkout.session.async_payment_succeeded','checkout.session.async_payment_failed','customer.subscription.created','customer.subscription.updated','customer.subscription.deleted','invoice.paid','invoice.payment_failed']);
  const apply=async event=>{
   requireThat(typeof event.id==='string'&&Number.isInteger(event.created),400,'Invalid payment event.');
   if(!types.has(event.type))return{ignored:true};
+  if(systemRpc){
+   const object=event.data?.object||{},checkout=event.type.startsWith('checkout.'),failed=event.type==='checkout.session.async_payment_failed';
+   const providerId=event.type.startsWith('customer.subscription.')?object.id:object.subscription||object.parent?.subscription_details?.subscription;
+   let owner=object.metadata?.account_id||object.parent?.subscription_details?.metadata?.account_id||null;
+   if(!owner&&providerId){const mapped=await db.query('select public.resolve_billing_owner($1) as owner',[providerId]);owner=mapped.rows[0]?.owner||null;}
+   if(checkout)requireThat(owner&&object.metadata?.order_id,400,'Payment account metadata is missing.');
+   let subscription=null;
+   if(providerId&&!failed&&(checkout?(object.payment_status==='paid'&&object.mode==='subscription'):true)){
+    requireThat(owner,400,'Payment account metadata is missing.');
+    subscription=await canonical(owner,providerId);
+    requireThat(subscription,400,'Subscription could not be verified.');
+   }
+   const payload={id:event.id,created:event.created,type:event.type,owner_id:owner,order_id:object.metadata?.order_id||null,
+    checkout_id:checkout?object.id:null,subscription_id:providerId||null,payment_status:object.payment_status||null,
+    amount_total:object.amount_total??null,currency:object.currency||null,mode:object.mode||null,
+    ...(subscription?{plan:subscription.plan,subscription_status:subscription.status,period_start:subscription.period_start,
+      period_end:subscription.period_end,cancel_at_end:subscription.cancel_at_end,customer_id:subscription.provider_customer,
+      provider_updated_at:event.created}:{})};
+   const result=await db.query('select public.apply_provider_payment_event($1::jsonb) as result',[payload]);
+   return result.rows[0]?.result||{ok:false};
+  }
   return db.transaction(async tx=>{
    const prior=await tx.query('insert into payment_events(id,created) values($1,$2) on conflict do nothing returning id',[event.id,event.created]);
    if(!prior.rows.length)return{duplicate:true};
@@ -74,7 +91,10 @@ export function billingService(db,{local,origin,fetcher=fetch}) {
    }
    if(!local){
     requireThat(!sub.provider_id||sub.provider_id===providerId||['ended','incomplete'].includes(sub.status),409,'Resolve the existing subscription before activating another.');
-    await canonical(tx,owner,providerId);
+    const snapshot=await canonical(owner,providerId);
+    await tx.query('update subscriptions set plan=$1,status=$2,period_start=$3,period_end=$4,cancel_at_end=$5,provider_id=$6,provider_customer=$7,updated_at=now() where account_id=$8',[
+     snapshot.plan,snapshot.status,snapshot.period_start,snapshot.period_end,snapshot.cancel_at_end,snapshot.provider_id,snapshot.provider_customer,owner
+    ]);
    }else if(!checkout){
     requireThat(sub.provider_id===providerId,400,'Subscription does not match this account.');
     if(Number(sub.provider_updated_at)>event.created)return{stale:true};
@@ -86,18 +106,18 @@ export function billingService(db,{local,origin,fetcher=fetch}) {
  };
  return{
   apply,
-  async reconcile(owner){requireThat(!local,409,'Local payments do not need reconciliation.');return db.transaction(async tx=>{const sub=(await tx.query('select * from subscriptions where account_id=$1 for update',[owner])).rows[0];requireThat(sub?.provider_id,404,'Subscription not found.');await canonical(tx,owner,sub.provider_id);return{ok:true};});},
+  async reconcile(owner){requireThat(!local,409,'Local payments do not need reconciliation.');if(systemRpc){const current=await db.query('select public.get_billing_subscription_id($1::uuid) as provider_id',[owner]);const providerId=current.rows[0]?.provider_id;requireThat(providerId,404,'Subscription not found.');const snapshot=await canonical(owner,providerId);const result=await db.query('select public.reconcile_provider_subscription_state($1::uuid,$2::jsonb) as saved',[owner,snapshot]);requireThat(result.rows[0]?.saved===true,409,'Subscription could not be reconciled.');return{ok:true};}return db.transaction(async tx=>{const sub=(await tx.query('select * from subscriptions where account_id=$1 for update',[owner])).rows[0];requireThat(sub?.provider_id,404,'Subscription not found.');const snapshot=await canonical(owner,sub.provider_id);await tx.query('update subscriptions set plan=$1,status=$2,period_start=$3,period_end=$4,cancel_at_end=$5,provider_id=$6,provider_customer=$7,updated_at=now() where account_id=$8',[snapshot.plan,snapshot.status,snapshot.period_start,snapshot.period_end,snapshot.cancel_at_end,snapshot.provider_id,snapshot.provider_customer,owner]);return{ok:true};});},
   async checkout(user,input){
    const plan=PLANS[input.plan];requireThat(plan&&plan.price>0,400,'Choose a paid plan.');
    if(!local)requireThat(process.env.PLATFORM_STRIPE_SECRET?.startsWith('sk_test_')&&process.env[`PLATFORM_STRIPE_PRICE_${plan.id.toUpperCase()}`],503,'Paid plans are not available yet.');
-   const current=(await db.query('select * from subscriptions where account_id=$1',[user.id])).rows[0];
-   requireThat(plan.billing==='one_time'||local||!current.provider_id||['ended','incomplete'].includes(current.status),409,'Manage your existing subscription in the billing portal.');
-   const id=uuid();await db.query('insert into orders(id,owner_id,plan,amount) values($1,$2,$3,$4)',[id,user.id,plan.id,plan.price]);
+   const id=uuid();let current,order;
+   if(auth.createOwnOrder){order=await auth.createOwnOrder(user,id,plan.id);requireThat(order?.id===id&&order.plan===plan.id&&Number(order.amount)===plan.price,403,'The order could not be created for this account.');current=order;}
+   else{current=(await db.query('select * from subscriptions where account_id=$1',[user.id])).rows[0];requireThat(plan.billing==='one_time'||local||!current.provider_id||['ended','incomplete'].includes(current.status),409,'Manage your existing subscription in the billing portal.');await db.query('insert into orders(id,owner_id,plan,amount) values($1,$2,$3,$4)',[id,user.id,plan.id,plan.price]);}
    if(local)return{url:`/checkout/${id}`,order:id,sandbox:true};
    const price=process.env[`PLATFORM_STRIPE_PRICE_${plan.id.toUpperCase()}`];requireThat(price,503,'This plan is not configured yet.');
    const oneTime=plan.billing==='one_time';
    const session=await stripe('checkout/sessions',{mode:oneTime?'payment':'subscription','line_items[0][price]':price,'line_items[0][quantity]':'1',success_url:`${origin}/app/billing?checkout=returned`,cancel_url:`${origin}/app/billing`,'metadata[account_id]':user.id,'metadata[order_id]':id,'billing_address_collection':'required','tax_id_collection[enabled]':'true','automatic_tax[enabled]':'true',...(oneTime?{}:{'subscription_data[metadata][account_id]':user.id}),client_reference_id:id,...(current.provider_customer?{customer:current.provider_customer}:{customer_email:user.email})},id);
-   await db.query('update orders set provider_id=$1 where id=$2',[session.id,id]);
+   if(auth.setOwnOrderProvider)requireThat(await auth.setOwnOrderProvider(user,id,session.id)===true,409,'Checkout session could not be attached to the order.');else await db.query('update orders set provider_id=$1 where id=$2',[session.id,id]);
    return{url:session.url};
   },
   async simulate(user,id,outcome){
@@ -107,12 +127,12 @@ export function billingService(db,{local,origin,fetcher=fetch}) {
    return apply({id:`local-${id}`,created:Math.floor(Date.now()/1000),type:'checkout.session.completed',data:{object:{id:`local-${id}`,subscription:`local-sub-${id}`,payment_status:'paid',mode:PLANS[order.plan].billing==='one_time'?'payment':'subscription',amount_total:order.amount,currency:'eur',metadata:{account_id:user.id,order_id:id}}}});
   },
   async cancel(user){
-   const sub=(await db.query('select * from subscriptions where account_id=$1',[user.id])).rows[0];
+   const sub=auth.getOwnSubscriptionPaymentDetails?await auth.getOwnSubscriptionPaymentDetails(user):(await db.query('select * from subscriptions where account_id=$1',[user.id])).rows[0];
    if(!local){requireThat(sub?.provider_id,409,'No subscription yet.');await stripe(`subscriptions/${encodeURIComponent(sub.provider_id)}`,{cancel_at_period_end:'true'},`cancel-${sub.provider_id}-${sub.period_end}`);}
-   await db.query('update subscriptions set cancel_at_end=true where account_id=$1',[user.id]);return{ok:true};
+   if(auth.cancelOwnSubscription)requireThat(await auth.cancelOwnSubscription(user),409,'Subscription could not be canceled.');else await db.query('update subscriptions set cancel_at_end=true where account_id=$1',[user.id]);return{ok:true};
   },
   async portal(user){
-   const sub=(await db.query('select * from subscriptions where account_id=$1',[user.id])).rows[0];
+   const sub=auth.getOwnSubscriptionPaymentDetails?await auth.getOwnSubscriptionPaymentDetails(user):(await db.query('select * from subscriptions where account_id=$1',[user.id])).rows[0];
    if(local)return{url:'/app/billing?portal=local',sandbox:true};
    requireThat(sub?.provider_customer,409,'No billing account yet.');
    return{url:(await stripe('billing_portal/sessions',{customer:sub.provider_customer,return_url:`${origin}/app/billing`})).url};

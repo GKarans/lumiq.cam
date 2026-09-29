@@ -3,12 +3,7 @@ import {requireThat} from './security.mjs';
 export function mailDelivery(db,{local=true,fetcher=fetch}){
  return async function deliver(){
   if(local)return {local:true};
-  const messages=await db.transaction(async tx=>{
-   await tx.query("update deliveries set status=case when attempts>=5 then 'failed' else 'queued' end where status='processing' and lease_until<now()");
-   const rows=(await tx.query("select * from deliveries where status='queued' and attempts<5 and available_at<=now() order by created_at for update skip locked limit 10")).rows;
-   for(const m of rows)await tx.query("update deliveries set status='processing',lease_until=now()+interval '5 minutes',attempts=attempts+1 where id=$1",[m.id]);
-   return rows;
-  });
+  const messages=(await db.query('select public.claim_platform_deliveries(10) as messages')).rows[0]?.messages||[];
   let sent=0;
   for(const m of messages){
    try{
@@ -18,9 +13,9 @@ export function mailDelivery(db,{local=true,fetcher=fetch}){
      body:JSON.stringify({from:process.env.PLATFORM_EMAIL_FROM,to:[m.recipient],subject:m.subject,text:m.body}),signal:AbortSignal.timeout(15000)
     });
     requireThat(r.ok,502,'Email delivery failed.');
-    await db.query("update deliveries set status='sent',lease_until=null where id=$1",[m.id]);sent++;
+    await db.query('select public.settle_platform_delivery($1::uuid,true) as settled',[m.id]);sent++;
    }catch{
-    await db.query("update deliveries set status=case when attempts>=5 then 'failed' else 'queued' end,lease_until=null,available_at=now()+(power(2,attempts)*interval '1 minute') where id=$1",[m.id]);
+    await db.query('select public.settle_platform_delivery($1::uuid,false) as settled',[m.id]);
    }
   }
   return {sent};

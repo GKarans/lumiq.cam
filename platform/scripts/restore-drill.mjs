@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import postgres from 'postgres';
 import { S3Client, PutObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
-import { assertEmptyAuthUsers, assertEmptyPublicSchema, libpqConnectionForCli, validateRestoreTarget, waitForChildExit } from './restore-safety.mjs';
+import { assertEmptyAuthUsers, ensureProductionCompatibilityRole, inspectPublicRestoreState, libpqConnectionForCli, provisionRestoredRuntimeRole, validateRestoreTarget, waitForChildExit } from './restore-safety.mjs';
 import {assertObjectInventory,assertTableInventory} from './restore-verification.mjs';
 
 if (process.env.PLATFORM_RESTORE_DRILL !== 'EMPTY-ISOLATED-TARGET') {
@@ -18,10 +18,10 @@ if (!backupDirectory) throw new Error('Usage: node platform/scripts/restore-dril
 const database = process.env.PLATFORM_DATABASE_URL;
 const bucket = process.env.PLATFORM_R2_BUCKET;
 const endpoint = process.env.PLATFORM_R2_ENDPOINT;
-if (!database || !bucket || !endpoint || !process.env.PLATFORM_R2_ACCESS_KEY_ID || !process.env.PLATFORM_R2_SECRET_ACCESS_KEY) throw new Error('Load the empty restore target credentials.');
+if (!database || !bucket || !endpoint || !process.env.PLATFORM_R2_ACCESS_KEY_ID || !process.env.PLATFORM_R2_SECRET_ACCESS_KEY || !process.env.PLATFORM_RUNTIME_PASSWORD) throw new Error('Load the isolated restore target credentials and runtime-role password.');
 const targetProjectRef=validateRestoreTarget(database, process.env.PLATFORM_RESTORE_TARGET_REF);
 const cliConnection=libpqConnectionForCli(database),cliEnvironment={...process.env,PGPASSWORD:cliConnection.password};
-delete cliEnvironment.PLATFORM_DATABASE_URL;
+for(const name of ['PLATFORM_DATABASE_URL','PLATFORM_R2_ACCESS_KEY_ID','PLATFORM_R2_SECRET_ACCESS_KEY','PLATFORM_RUNTIME_PASSWORD','PLATFORM_RESTORE_TARGET_REF','PLATFORM_RESTORE_DRILL','PLATFORM_RESTORE_ALLOW_PARTIAL'])delete cliEnvironment[name];
 
 const root = path.resolve(backupDirectory);
 const scripts = path.dirname(fileURLToPath(import.meta.url));
@@ -33,6 +33,7 @@ if (await waitForChildExit(verification) !== 0) {
   throw new Error('Backup integrity verification failed; restore was not started.');
 }
 const manifest = JSON.parse(await readFile(path.join(root, 'manifest.json'), 'utf8'));
+const migrationFirstRestore=manifest.format_version===4;
 if (targetProjectRef === manifest.database.source_project_ref) throw new Error('Restore target must be a different Supabase project from the source.');
 if (bucket === manifest.bucket) throw new Error('Restore target R2 bucket must be different from the source bucket.');
 
@@ -48,29 +49,46 @@ const existing = await s3.send(new ListObjectsV2Command({ Bucket: bucket, MaxKey
 if (existing.KeyCount) throw new Error('Restore target bucket is not empty.');
 
 const sql = postgres(database, { ssl: 'require', max: 1 });
+let partialRestore = false;
 try {
-  await assertEmptyPublicSchema(sql);
+  if(migrationFirstRestore){
+    const applied=(await sql`select version from public.platform_migrations order by version`).map(row=>row.version);
+    const expected=manifest.database.migrations.map(entry=>entry.version);
+    if(JSON.stringify(applied)!==JSON.stringify(expected))throw new Error('Version 4 restore target migration ledger does not match the verified backup chain.');
+    const [tables]=await sql`select count(*)::integer as count from information_schema.tables where table_schema='public' and table_name not in ('spatial_ref_sys','geometry_columns','geography_columns')`;
+    if(tables.count!==manifest.database.tables.filter(table=>table.schema==='public').length)throw new Error('Version 4 restore target schema does not match the applied migration chain.');
+  }else{
+    partialRestore = await inspectPublicRestoreState(sql, manifest.database.tables, { allowPartial: process.env.PLATFORM_RESTORE_ALLOW_PARTIAL === '1' });
+  }
   await assertEmptyAuthUsers(sql);
+  await ensureProductionCompatibilityRole(sql);
 } finally {
   await sql.end();
 }
+if (partialRestore) console.log('Confirmed retry: cleaning only objects listed in this verified Lumiq backup.');
 
-const pgRestore = spawn('pg_restore', [
+const restoreArgs = [
   '--exit-on-error',
   '--no-owner',
+  '--no-privileges',
+  ...(migrationFirstRestore ? ['--data-only'] : []),
+  '--single-transaction',
+  ...(partialRestore ? ['--clean', '--if-exists'] : []),
   '--dbname',
   cliConnection.connectionString,
   path.join(root, 'database.dump')
-], { stdio: 'inherit', windowsHide: true, env:cliEnvironment });
+];
+const pgRestore = spawn('pg_restore', restoreArgs, { stdio: 'inherit', windowsHide: true, env:cliEnvironment });
 if (await waitForChildExit(pgRestore) !== 0) {
-  throw new Error('Database restore failed. Install PostgreSQL client tools and retry.');
+  throw new Error('Database restore failed. The public-schema restore used one transaction; investigate the cause before retrying.');
 }
 
 const authRestore = spawn('pg_restore', [
   '--data-only',
   '--exit-on-error',
   '--no-owner',
-  '--no-acl',
+  '--no-privileges',
+  '--single-transaction',
   '--dbname',
   cliConnection.connectionString,
   path.join(root, manifest.database.auth_file)
@@ -81,7 +99,10 @@ if (await waitForChildExit(authRestore) !== 0) {
 
 const restoredDb=postgres(database,{ssl:'require',max:1});
 let restoredTables;
-try{restoredTables=await assertTableInventory(restoredDb,manifest.database.tables);}finally{await restoredDb.end();}
+try{
+ await provisionRestoredRuntimeRole(restoredDb,process.env.PLATFORM_RUNTIME_PASSWORD);
+ restoredTables=await assertTableInventory(restoredDb,manifest.database.tables);
+}finally{await restoredDb.end();}
 
 for (const object of manifest.objects) {
   await s3.send(new PutObjectCommand({
