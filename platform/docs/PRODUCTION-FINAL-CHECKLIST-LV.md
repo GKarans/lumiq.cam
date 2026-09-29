@@ -1,61 +1,74 @@
 # Lumiq Production pabeigšanas saraksts
 
-Mērķis: pabeigt un pārbaudīt privāti lietojamu Lumiq produktu uz Production kandidāta, neatverot publisku piekļuvi un nemainot `lumiq.cam` maršrutu, kamēr TET nav atrisinājis bloķējumu.
+Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nemainot `lumiq.cam` maršrutu līdz TET bloķējuma atrisināšanai un neatverot publisku piekļuvi. Šis saraksts seko īpašnieka astoņu posmu secībai. Atzīme apliecina tikai norādīto pierādījumu, nevis plašāku dzīvas Production plūsmas darbspēju.
 
-**Pēdējais pārbaudītais stāvoklis:** 2026-09-29. Pārbaudītos faktus un pierādījumus skatīt [Production progresā](./PRODUCTION-PROGRESS-LV.md). Šis saraksts ir izpildes secība, nevis apgalvojums, ka vēl nepārbaudītās darbības jau ir izdevušās.
+**Pēdējā darba pārbaude:** 2026-09-30. Papildu izpildes pierādījumi ir [Production progresa dokumentā](./PRODUCTION-PROGRESS-LV.md).
 
-## 1. Pamati jau pārbaudīti
+## Pārbaudītie infrastruktūras pamati
 
-- [x] Production Supabase Pro, DB migrācijas `001–046`, drošā `lumiq_production_runtime` loma un Hyperdrive piesaiste.
-- [x] Production rezerves kopija pārbaudīta no R2; 2026-09-30 atkārtots attālinātais read-back un checksum (21 tabula, migrācijas 001–046); atjaunošanas projekts un migrāciju ķēde pārbaudīti.
-- [x] Kandidāta Worker ir izvietots atsevišķā `workers.dev` adresē; kandidātam un `lumiq.cam` ir owner-only Cloudflare Access politika.
-- [x] Cloudflare EU foto, backup un recovery R2 resursi ir atdalīti. `app-images` un ar to saistīto `event-photo-media` neaiztikt.
-- [x] Supabase Auth SMTP caur Resend un sešas Auth veidnes ir konfigurētas; `send.lumiq.cam` ir verificēts.
-- [x] Lokālie testi, būve, drošības pārbaudes un sintētiskie pārlūka scenāriji ir izturējuši. Tie neaizstāj dzīvo Production plūsmas pārbaudi.
+- [x] Production Supabase Pro, drošā runtime loma un Hyperdrive ir piesaistīti; migrācijas `001–046` auditētas.
+- [x] Production backup no privātā R2 atkārtoti pārbaudīts 2026-09-30: 21 tabula, migrācijas `001–046`, 0 foto objektu, checksum derīgs.
+- [x] Production kandidāts darbojas atsevišķā `workers.dev` adresē. `lumiq.cam` maršruts nav mainīts.
+- [x] EU Production foto, backup un recovery bucketu atdalījums pārbaudīts. `app-images` un `event-photo-media` neaiztikt.
+- [x] Supabase Auth SMTP izmanto verificēto Resend `send.lumiq.cam` un `Lumiq` sūtītāja nosaukumu.
 
-## 2. Pabeigt kandidāta e-pastus
+## 1. E-pasta adreses un saņemšana
 
-- [ ] Izveidot un verificēt atsevišķu Production QA saņēmēja adresi; izmantot to reģistrācijas, uzaicinājuma, apstiprinājuma, paroles atiestatīšanas un e-pasta maiņas pārbaudēm.
-- [ ] Pārbaudīt reālu piegādi vismaz Gmail un vēl vienā pasta klientā, saites un mobilos veidņu izkārtojumus. Noslēpumus un klikšķināmus autentifikācijas tokenus neiekļaut testu atskaitēs.
-- [ ] Izveidot `support@lumiq.cam` saņemšanu/pāradresāciju uz īpašnieka izvēlētu pastkasti; pirms konfigurēšanas jāzina saņēmēja adrese.
-- [ ] Pārbaudīt `noreply@lumiq.cam` kā sūtītāja adresi. Līdz Resend saknes domēna verifikācijai palikt pie strādājošā `noreply@send.lumiq.cam`.
-- [ ] Resend saknes domēnam izmantot atsevišķu Return-Path, piemēram, `outbound`, un tikai tad sagatavot/verificēt nepieciešamos DNS ierakstus. Pirms DNS izmaiņām saglabāt esošos piecus Namecheap MX un Namecheap SPF ierakstu; automātisku DNS konfigurāciju neizmantot.
-- [ ] Sagatavot Lumiq vizuālajā stilā sakārtotas vēstuļu veidnes: konta apstiprināšana, uzaicinājums, paroles atiestatīšana, paroles maiņas paziņojums, e-pasta adreses maiņas paziņojums un produkta atbalsta vēstule. Pārskatīt latviešu/angļu tekstu, kontrastu, logo, pogas un vienkārša teksta alternatīvu.
-- [ ] Pārbaudīt, ka kļūdaina vai nedeliverējama adrese nerada sensitīvu datu noplūdi un lietotājam tiek parādīts saprotams statuss.
+- [x] Sistēmas vēstules pašlaik sūta no `noreply@send.lumiq.cam`; tas ir esošais verificētais variants.
+- [ ] Ja vajadzīgs tieši `noreply@lumiq.cam`, pievienot saknes domēnu Resend ar atsevišķu Return-Path un verificēt to; pirms tam saglabāt esošos piecus Namecheap MX un Namecheap SPF ierakstu. DNS vēl nav mainīts.
+- [ ] Izveidot īstu `support@lumiq.cam` saņemšanu vai pāradresāciju un pārbaudīt ienākošo vēstuli. Galamērķa pastkaste jāapstiprina īpašniekam; jautājums ir uzdots.
+- [ ] Neveidot pagaidām `events@` vai citas pastkastes.
 
-**Piezīme:** Resend saknes `lumiq.cam` ieraksts pašlaik ir `Not Started`; tā DNS nav mainīts. Noklusētais Return-Path konfliktē ar esošo `send.lumiq.cam` konfigurāciju. Saņēmēja pastkastei vēl nav apstiprināts pāradresācijas galamērķis. Šīs darbības nav jāsāk ar esošo ierakstu dzēšanu, kamēr nav īpašnieka apstiprinājuma.
+## 2. Lumiq e-pastu dizains un pārbaude
 
-## 3. Pabeigt privātu Production lietotnes pārbaudi
+- [x] Sagatavotas un Production Supabase Auth saglabātas sešas Lumiq HTML veidnes: apstiprināšana, uzaicinājums, paroles atjaunošana, e-pasta maiņa un konta drošības paziņojumi.
+- [x] Worker transakciju vēstulēm Resend payload satur gan `text`, gan `html`; `node --test platform/tests/email-templates.test.mjs platform/tests/operations.test.mjs` izturēja 9/9.
+- [ ] Supabase Auth panelī ir HTML lauks, nevis atsevišķa teksta MIME lauka. Pārbaudīt reāli saņemtās Auth vēstules MIME un izlemt, vai vajadzīgs atbalstīts Auth email hook, lai garantētu teksta alternatīvu.
+- [ ] Pārbaudīt reālas vēstules Gmail un vēl vienā pasta klientā: LV/EN, saites, mobilais izkārtojums un MIME tipi.
+- [ ] `support@lumiq.cam` iestatīt kā atbildes adresi tikai pēc ienākošās saņemšanas verificēšanas. Worker `PLATFORM_EMAIL_REPLY_TO` ir izvēles iestatījums; Supabase Auth Reply-To iespēja jāpārbauda atsevišķi.
 
-- [ ] Atkārtoti pārbaudīt Cloudflare Access stāvokli un owner-only politiku abiem hostiem: kandidātam un `lumiq.cam`. Anonīmam pieprasījumam jāsaņem Access pieteikšanās, nevis lietotnes saturs.
-- [ ] Kandidātā aiz Access iziet īpašnieka reģistrāciju, pieteikšanos, atteikšanos un sesijas atjaunošanu.
-- [ ] Ar sintētiskiem testa datiem iziet pilnu foto plūsmu: izveidot pasākumu, QR/saiti, atvērt viesa lapu, uzņemt/augšupielādēt foto, pārbaudīt galeriju, dzēšanu un atjaunošanas uzvedību.
-- [ ] Pārbaudīt foto tipu/izmēra ierobežojumus, kļūdas, mobilā ekrāna lietojamību, lēna savienojuma uzvedību un piekļuves izolāciju starp organizatoriem/pasākumiem.
-- [ ] Pārbaudīt visu foto ZIP eksportu, lielas galerijas plūsmu, Queue retry/DLQ uzvedību un kļūmju novērojamību ar sintētiskiem datiem.
-- [ ] Pārbaudīt backup brīdinājumus un atjaunošanas instrukcijas, nenodzēšot vai nepārrakstot esošo Recovery datubāzi.
-- [ ] Izvietot kandidātā tikai pēc release gate izpildes; pēc izvietošanas atkārtot smoke testus. `lumiq.cam` maršrutu šajā posmā neaiztikt.
+## 3. Production konta plūsma aiz Access
 
-## 4. Izmaksas, konti un resursu inventārs
+- [ ] Ar atsevišķu testa kontu pārbaudīt reģistrāciju vai uzaicinājumu, apstiprinājuma saiti, pieslēgšanos, paroles atjaunošanu un izrakstīšanos.
+- [ ] Pārbaudīt sesijas atkārtotu ielādi un kļūdainas/expired saites saprotamu apstrādi.
+- [ ] Skaidri marķēt testa kontu, un pēc pārbaudes dzēst testa lietotāju un saistītos datus.
 
-- [ ] Iestatīt un pārbaudīt Cloudflare `$10` un `$50` budžeta brīdinājumu saņēmējus, kad īpašnieks apstiprina adresi; pašlaik lauki ir tukši.
-- [ ] Pārskatīt mēneša Supabase/Cloudflare/Resend izmaksas, kvotas un Recovery Micro termiņu; neieslēgt papildu maksas funkcijas bez vajadzības.
-- [ ] Salīdzināt katru R2 bucket, Hyperdrive, Worker un Supabase projektu ar dzīvu bindingu, datiem un dokumentētu atjaunošanas vajadzību.
-- [ ] Tikai pēc atkarību audita un atsevišķa īpašnieka apstiprinājuma arhivēt vai dzēst liekos resursus. Production, Recovery un vajadzīgo Restore Drill neatvienot pirms pierādījumu saglabāšanas.
-- [ ] `app-images` un `event-photo-media` neaiztikt — STOP.
+## 4. Pasākuma un foto pilnais cikls
 
-## 5. Dokumentācija un palaišanas vārti
+- [ ] Izveidot testa pasākumu un QR kodu.
+- [ ] Pārbaudīt viesa vārdu, kameras foto uzņemšanu/augšupielādi, galeriju un sīktēlus mobilajā ierīcē.
+- [ ] Pārbaudīt foto dzēšanu datubāzē un objekta izņemšanu no R2.
+- [ ] Pārbaudīt ZIP lejupielādi, kļūdu paziņojumus, lēnu savienojumu un atkārtotu mēģinājumu.
+- [ ] Pēc testa izdzēst sintētisko pasākumu un objektus un apstiprināt, ka dati vairs nav pieejami.
 
-- [ ] Atjaunināt lietotāja rokasgrāmatu, incidentu/rollback instrukciju, backup/restore pierādījumus un testa rezultātus.
-- [ ] Atzīmēt, kas ir lokāli pārbaudīts, kas ir pārbaudīts Cloudflare/Supabase panelī un kas ir iziets īstā lietotāja pārlūkā.
-- [ ] Atstāt publisku reģistrāciju, maksājumus un publisku piekļuvi izslēgtu, kamēr nav pabeigti juridiskie, cenu un īpašnieka palaišanas lēmumi.
+## 5. Drošība un izolācija
 
-## 6. Pēdējais ārējais šķērslis: TET un `lumiq.cam`
+- [x] Bez cookies kandidāta `/`, `/login` un `/healthz` katrs atgrieza `302` uz Cloudflare Access login.
+- [ ] Atkārtoti pārbaudīt Access politiku un tās vienīgo atļauto e-pastu kandidātam un `lumiq.cam`; 2026-09-30 Cloudflare One tiešais lapas ceļš atgrieza “page not found”, tādēļ jaunā pārbaude neizdevās.
+- [ ] Ar diviem testa organizatoriem pierādīt, ka pasākumi un galerijas ir savstarpēji izolēti.
+- [ ] Ar anonīmu klientu pārbaudīt, ka organizatora API, dati un faili nav pieejami arī ar tiešu URL; sākotnējais `302` pārbauda Access robežu, nevis iekšējās lietotnes autorizāciju.
 
-- [ ] Sagaidīt TET atbildi uz 2026-09-25 nosūtīto pieprasījumu (solītais termiņš: piecas darba dienas, neieskaitot nedēļas nogali; aptuveni līdz 2026-10-02).
-- [ ] Ja atbildes nav pēc solītā termiņa, sazināties ar TET atkārtoti un pieprasīt `lumiq.cam` pārskatīšanu/atbloķēšanu. Saglabāt sarakstes un tīkla pārbaudes pierādījumus.
-- [ ] Pēc TET apstiprinājuma no klienta tīkla pārbaudīt DNS un HTTPS sasniedzamību; pārliecināties, ka nav `stop.tiklavairogs.tet.lv` novirzīšanas.
-- [ ] Pirms cutover vēlreiz pārbaudīt kandidāta veselību, Access owner-only politiku, autentifikācijas callback URL, DNS pašreizējo konfigurāciju un tūlītēju rollback ceļu.
-- [ ] Tikai pēc visiem iepriekšējiem vārtiem un īpašnieka apstiprinājuma pārslēgt `lumiq.cam` uz Production Worker, saglabājot Access/PIN aizsardzību.
-- [ ] Pēc pārslēgšanas testēt gan īpašnieka piekļuvi, gan anonīmu bloķēšanu; kļūmes gadījumā nekavējoties atjaunot iepriekšējo maršrutu.
+## 6. Fona darbi, rezerves kopijas un uzraudzība
 
-**Līdz pēdējā posma izpildei:** `lumiq.cam` paliek Closed Test maršrutā, Production kandidāts paliek atsevišķā hostā aiz Access, un neviena publiska piekļuve netiek atvērta.
+- [x] Lokālie sintētiskie Queue/DLQ, retry, job un backup testi izturēja 2026-09-30: `platform.test.mjs`, `worker-router.test.mjs`, `migrations.test.mjs` un `reliability.test.mjs`/`production-backup.test.mjs` kopā 81 pārbaude bez kļūdām. Tie nepierāda dzīvas Cloudflare Queue kļūmes apstrādi.
+- [x] Jaunākā Production backup read-back un checksum pārbaude izturēja 2026-09-30.
+- [ ] Pilnu restore testu veikt tikai tukšā izolētā mērķī; esošo Recovery datubāzi nepārrakstīt.
+- [ ] Pārbaudīt aktuālos Production Worker kļūdu žurnālus un Queue/DLQ metriku, tostarp sintētisku kļūmes scenāriju bez reālu klientu datu ietekmes.
+- [ ] Pievienot Cloudflare `$10`/`$50` budžeta brīdinājumu saņēmēju pēc adreses apstiprināšanas; pašlaik saņēmēju lauki ir tukši.
+- [ ] Pārskatīt izmaksas un resursu atkarības; resursus nedzēst bez pierādītas neatkarības un īpašnieka apstiprinājuma. `app-images` un `event-photo-media` neaiztikt — STOP.
+
+## 7. TET atbildes sagaidīšana un atkārtots pieprasījums
+
+- [ ] Sagaidīt atbildi uz 2026-09-25 nosūtīto TET pieprasījumu. Piecu darba dienu termiņš, neieskaitot nedēļas nogali, beidzas aptuveni 2026-10-02.
+- [ ] Ja atbildes nav līdz termiņam, 2026-10-05 sazināties ar TET atkārtoti, pievienojot sākotnējā STOP ekrāna attēlu un skenēšanas rezultātus.
+- [ ] Līdz TET apstiprinājumam `lumiq.cam` maršrutu nemainīt.
+
+## 8. Pēdējais solis pēc TET bloķējuma noņemšanas
+
+- [ ] No parastā klienta tīkla pārliecināties, ka `lumiq.cam` DNS/HTTPS vairs nenovirza uz `stop.tiklavairogs.tet.lv` un sasniedz Cloudflare Access.
+- [ ] Pievienot precīzos `lumiq.cam` callback/redirect URL Supabase Auth atļautajam sarakstam.
+- [ ] Pirms cutover pārbaudīt kandidāta veselību, vienīgā īpašnieka Access politiku un tūlītēju DNS/Worker rollback procedūru.
+- [ ] Pēc īpašnieka apstiprinājuma pārslēgt `lumiq.cam` Worker maršrutu no Closed Test uz Production, saglabājot Access/PIN.
+- [ ] Tūlīt pārbaudīt īpašnieka pieteikšanos, Auth e-pasta saites, foto plūsmu un anonīmu bloķēšanu; kļūmes gadījumā atjaunot iepriekšējo maršrutu.
+
+**Līdz 8. posma izpildei:** `lumiq.cam` paliek Closed Test maršrutā; kandidāts paliek atsevišķā adresē aiz Access; publiska piekļuve netiek atvērta.
