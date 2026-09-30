@@ -1,18 +1,18 @@
 # Lumiq Production palaišanas kontrolsaraksts
 
-Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu tikai pēc norādītā pierādījuma. `lumiq.cam` maršrutu nepārslēgt, kamēr TET nav noņēmis bloķējumu. Cloudflare Access paliek ieslēgts tikai īpašnieka e-pastam. `app-images` un `event-photo-media` neaiztikt.
+Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu tikai pēc norādītā pierādījuma. Jaunākā kandidāta versija ir `9f44ffa6-32df-4e31-bc22-6be125d189c8` ar 100% trafika; deploy pārbaudīja owner-only Access, Production DB/R2 un Queue/DLQ piesaisti. `lumiq.cam` maršrutu nepārslēgt, kamēr TET nav noņēmis bloķējumu. `app-images` un `event-photo-media` neaiztikt. Plašākais un jaunākais statuss ir [Production pabeigšanas roadmap](PRODUCTION-FINAL-ROADMAP-LV.md).
 
 ## 1. E-pasta adreses un saņemšana
 
 - [x] Production Supabase SMTP pēc pārlādes izmanto verificēto `Lumiq <noreply@lumiq.cam>` ar Resend lietotājvārdu `resend`; saglabātā SMTP parole paliek noslēpta.
-- [x] Resend saknes `lumiq.cam` domēns verificēts ar pielāgoto Return-Path `outbound`, neskarot piecus Namecheap MX, Namecheap SPF un Worker DNS ierakstus.
-- [x] 2026-09-30 publiskā DNS pārbaude: pieci Namecheap MX un Namecheap SPF joprojām publicēti, Resend DKIM atrodams, `_dmarc.lumiq.cam` nav publicēts; pārbaude bija tikai lasāma un DNS netika mainīts.
+- [x] Resend saknes `lumiq.cam` domēns verificēts ar pielāgoto Return-Path `outbound`; Resend DKIM saglabāts gan saknes, gan `send.lumiq.cam` domēnam.
+- [x] 2026-09-30 publiskajā DNS apstiprināti Cloudflare Email Routing MX un SPF, Resend DKIM un `_dmarc.lumiq.cam` monitoringa ieraksts `p=none`. Sākotnējie Namecheap MX/SPF ieraksti ir aizstāti, lai aktivizētu Cloudflare maršrutēšanu; `support@` saņemšana pārbaudīta ar testa vēstuli.
 - [ ] Nosūtīt kontrolētu Auth testa vēstuli no `noreply@lumiq.cam` un pārbaudīt piegādi.
 - [x] `support@lumiq.cam` pāradresācija uz `guntars.karans@gmail.com` pārbaudīta ar ārēju testa vēstuli; īpašnieka Gmail ekrānuzņēmumā tā redzama zem `Lumiq` iezīmes (2026-09-30).
 - [x] Pāradresācijas saņēmējs apstiprināts: `guntars.karans@gmail.com`.
-- [ ] Pirms Cloudflare Email Routing aktivizācijas atrisināt DNS konfliktu: publiskajā DNS šobrīd ir pieci `eforward*.registrar-servers.com` MX ieraksti un Namecheap SPF `include:spf.efwd.registrar-servers.com`. Cloudflare vednis piedāvā tos aizstāt ar saviem trim MX un SPF. Nekādas izmaiņas neveikt, kamēr nav izvēlēts, vai pārņemt ienākošā pasta maršrutēšanu un saglabāts vajadzīgais esošais pasts.
+- [x] 2026-09-30 Cloudflare Email Routing DNS konflikts atrisināts: Cloudflare MX/SPF publicēti, saņemšanas testa vēstule uz `support@lumiq.cam` pienāca Gmail. Sākotnējie Namecheap MX/SPF ieraksti bija jāaizstāj; nameserveri palika Cloudflare.
 - Namecheap konta `Redirect Email` panelis prasa pārslēgt nameserverus uz Namecheap noklusējumu. To nedarīt, jo `lumiq.cam` DNS pašlaik apkalpo Cloudflare; pārbaudīts 2026-09-30.
-- [ ] Nākamajā apstiprinātajā kandidāta izvietošanā pievienot Worker `PLATFORM_EMAIL_FROM=Lumiq <noreply@lumiq.cam>`; pašreizējā Production Runtime variables panelī tas nav iestatīts. Pēc tam kontrolēti pārbaudīt Worker transakciju e-pasta piegādi.
+- [x] Kandidāta izvietošanas konfigurācija nosaka `PLATFORM_EMAIL_FROM=Lumiq <noreply@lumiq.cam>` un `PLATFORM_EMAIL_REPLY_TO=support@lumiq.cam`; 2026-09-30 deploy skripts to pārbaudīja kandidātā. Worker transakciju vēstules faktiskā piegāde un saņemtā `Reply-To` galvene vēl nav pārbaudīta.
 
 ## 2. Lumiq e-pastu dizains
 
@@ -52,8 +52,8 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 
 ## 6. Fona darbi, rezerves kopijas un uzraudzība
 
-- [ ] Pievienot Production DLQ patērētāju un pārbaudīt Queue retry/DLQ dzīvajā vidē; pirms izvietošanas un kontrolētas kļūmes injicēšanas vajadzīgs atsevišķs apstiprinājums, jo tas var palaist Queue darbus pret Production DB.
-- [x] 2026-09-30 Cloudflare Queue read-only pārbaude: `lumiq-production-jobs` Active ar `lumiq-production-candidate` consumer; batch 1, max wait 5 s, 10 retry, retry delay 0 s, concurrency 1, piesaistīts `lumiq-production-jobs-dlq`. DLQ rinda ir Inactive bez consumer; dashboard rāda 0 queued un 0 average backlog. Dzīvu kļūmi neinjicēju.
+- [x] 2026-09-30 apstiprinātā kandidāta izvietošanā pārbaudīts Production Queue/DLQ patērētāju stāvoklis: `lumiq-production-jobs` consumer ir `lumiq-production-candidate` ar DLQ `lumiq-production-jobs-dlq`; DLQ rindai pievienots šis pats kandidāts kā flat consumer. Batch/retry iestatījumi atbilst izvietošanas konfigurācijai.
+- [ ] Ar kontrolētu kļūmi pārbaudīt Queue retry/DLQ dzīvajā vidē. Testa scenārijam jābūt tādam, kas nevar apstrādāt klienta datus vai mainīt Production DB; līdz atsevišķai drošības pārbaudei Production Queue neievietot patvaļīgus ziņojumus.
 - [x] Jaunākā Production rezerves kopija atkārtoti pārbaudīta 2026-09-30 ar DPAPI komandu `check-production-backup`: `production/2026-09-29T15-47-15-316Z`, 21 tabula, migrācijas 001–046, 0 foto objektu; kontrolsummas sakrīt un atjaunošana netika veikta.
 - [x] Recovery mērķa atjaunošana un migrāciju ķēde pārbaudīta; aizpildīto Recovery projektu nepārrakstīt.
 - [x] 2026-09-30 pārbaudīti divi aktīvi Cloudflare Billing Budget Alert: automātiskais `$10` slieksnis un `$50` slieksnis; abiem e-pasta saņēmējs ir īpašnieka konta adrese. Testa vēstule netika sūtīta.
