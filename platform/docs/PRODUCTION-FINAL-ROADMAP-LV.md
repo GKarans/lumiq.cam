@@ -65,6 +65,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 - [x] 2026-09-30 bezsesijas `curl` atkārtojums uz tiem pašiem pieciem ceļiem atkal atgrieza tikai HTTP `302`; `Location` URL un īslaicīgos Access metadatus neiekļāvu žurnālos.
 - [x] 2026-09-30 Cloudflare Worker `Access` avota skatā pārbaudīts, ka kandidāta `lumiq-production-candidate.gkarans-events.workers.dev` hostname politika ir `Lumiq closed test - owner` ar `Allow` tikai `guntars.karans@gmail.com`. Tas pierāda kandidāta hostname politiku; `lumiq.cam` maršruts nav mainīts un tā politika jāpārbauda cutover posmā.
 - [x] 2026-09-30 īpašnieka Access sesijā kandidātā ielādējās `/login`, `/register` un `/reset` formas. Neiesniedzu nevienu formu; konts netika izveidots un e-pasts netika nosūtīts. Auth piegāde un pilnā konta plūsma vēl nav verificēta.
+- [x] 2026-09-30 Supabase Production Auth `URL Configuration` tikai-lasāmi pārbaudīta pēc kandidāta izvietošanas: Site URL ir `https://lumiq-production-candidate.gkarans-events.workers.dev`; atļauti tikai četri precīzi kandidāta callback URL (`/auth/verify`, `/auth/reset`, `/auth/email`, Google callback). `lumiq.cam` nav pievienots pirms TET atbloķēšanas.
 - [x] 2026-09-30 kandidāta `/app` ar derīgu Cloudflare Access, bet bez Lumiq lietotnes sesijas, novirzīja uz `/login`; tas tieši apstiprina app līmeņa auth prasību, nevis testa konta pilno plūsmu vai divu organizatoru datu izolāciju.
 
 ### 4. Produkta pilnais foto cikls
