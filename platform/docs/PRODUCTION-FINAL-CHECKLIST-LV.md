@@ -60,6 +60,7 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 
 - [x] Lokālie sintētiskie Queue/DLQ, retry, job un backup testi izturēja 2026-09-30: `platform.test.mjs`, `worker-router.test.mjs`, `migrations.test.mjs` un `reliability.test.mjs`/`production-backup.test.mjs` kopā 81 pārbaude bez kļūdām. Tie nepierāda dzīvas Cloudflare Queue kļūmes apstrādi.
 - [x] Cloudflare Queue read-only konfigurācija 2026-09-30: `lumiq-production-jobs` ir aktīva, kandidāts ir Producer un Consumer; batch `1`, max wait `5 s`, max retries `10`, retry delay `0 s`, max concurrency `1`, DLQ piesaistīts. DLQ ir mērķa rinda bez consumer.
+- [x] 2026-09-30 Cloudflare Metrics `Last 24 hours` abās rindās rāda 0 messages ingested, 0 retried, 0 backlog un 0 s lag; `lumiq-production-jobs-dlq` ir `Inactive`. Tas ir tukšas rindas sākuma stāvoklis, nevis retry/DLQ funkcionalitātes pierādījums.
 - [x] Izolētais `node --test platform/tests/worker-router.test.mjs` izturēja 11/11, tostarp Consumer startup failure retry scenāriju. Tas nepierāda dzīvu Cloudflare retry/DLQ piegādi.
 - [ ] Ar kontrolētu nekaitīgu testa darbu pārbaudīt dzīvu retry un nonākšanu DLQ; neizmantot reālu klienta darbu vai datus.
 - [x] Jaunākā Production backup read-back un checksum pārbaude izturēja 2026-09-30.
