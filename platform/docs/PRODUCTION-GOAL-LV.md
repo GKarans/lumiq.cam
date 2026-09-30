@@ -90,7 +90,7 @@
 
 ## 10. Pabeigšana un tīrīšana
 
-- [x] Šim repo pēdējais koda labojums ir commit/push `0c334eb` uz `GKarans/lumiq.cam`; 183/183 lokālie testi, 60 publisko failu build un izolētā pārlūka pārbaude izturēja. Tie neaizstāj dzīvu Production QA.
+- [x] Pēdējais Production koda labojums ir commit/push `cc0eb01` uz `GKarans/lumiq.cam`; `npm run check` izturēja secret scan, `npm audit` (0 high), 188/188 testus, 60 publisko failu build un pārlūka pārbaudes 320–1440 px. Pēc tam commit `49d36dc` atjaunināja tikai Production pārbaudes dokumentāciju. Šie lokālie/automātiskie testi neaizstāj dzīvu Production QA.
 - [ ] Pēc katras nākamās izmaiņas veikt atbilstošu testu, dokumentēt pierādījumu, izveidot loģisku commit un push **tikai** uz `GKarans/lumiq.cam`.
 - [ ] Kad `lumiq-production` un `lumiq.cam` ir pārbaudīti, izņemt novecojušos Closed Test/restore drill/candidate resursus tikai pēc atkarību, datu, backup un izmaksu pārbaudes. Saglabāt nepieciešamo Production backup un Recovery infrastruktūru; `app-images` un nesaistīto `event-photo-media` neaiztikt.
 - [ ] Ar svaigu pārlūka sesiju un telefonu izpildīt pilnu ķēdi: Access -> register/invite -> login -> event -> QR -> guest photo -> R2 -> thumbnail/gallery -> delete -> ZIP -> logout -> reset password. Atkārtot otram organizatoram un pārbaudīt izolāciju.
