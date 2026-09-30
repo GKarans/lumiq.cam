@@ -82,7 +82,7 @@
 
 ## 9. Maksājumi, izmaksas un žurnāli
 
-- [ ] Pārbaudīt `lumiq.cam` Production privātuma, lietošanas noteikumu, atmaksas un kontaktu lapas, uzņēmuma/operatora datus un `support@lumiq.cam` saziņas ceļu. Pirms reālas klientu vai maksas piekļuves apstiprināt galīgo juridisko tekstu.
+- [ ] Pārbaudīt `lumiq.cam` Production privātuma, lietošanas noteikumu, atmaksas un kontaktu lapas, uzņēmuma/operatora datus un `support@lumiq.cam` saziņas ceļu. 2026-10-01 avotu audits `platform/public/content.js` un `platform/public/legal-lv.js` apstiprināja, ka lapas joprojām ir marķētas kā pirmsizlaišanas šabloni: uzņēmuma/pārdevēja nosaukums, reģistrācijas numurs un adrese ir vietturi; maksājumi ir simulēti, pakalpojumu sniedzēja un PVN statuss nav apstiprināts. Tekstā arī saglabājies novecojis apgalvojums, ka domēns nav izvēlēts, lai gan Production adrese ir `lumiq.cam`. Pirms jebkādas publiskas vai maksas palaišanas īpašniekam jāsniedz patiesie operatora rekvizīti un ar juristu/grāmatvedi jāapstiprina piemērojamie noteikumi; netiek izdomāti rekvizīti vai juridiski solījumi.
 - [ ] Ja Production piedāvā maksas plānus, pārbaudīt Stripe testa checkout, webhook parakstu, aizkavētu/atkārtotu notikumu, atcelšanu un tiesību piešķiršanu. Reālu maksājumu pieņemšanu ieslēgt tikai ar apstiprinātiem juridiskajiem/cenu/atmaksas noteikumiem un īpašnieka atļauju.
 - [ ] Pārbaudīt Cloudflare, Supabase, Resend un R2 izmaksu paneļus, brīdinājumu galamērķi, kļūdu žurnālus un veselības signālus. Saglabāt iepriekš noteikto papildu tēriņu robežu **€10** bez jauna īpašnieka apstiprinājuma.
 - [ ] Pārbaudīt, ka ražošanas brīdinājumi sasniedz īpašnieku un kļūdas var sasaistīt ar pieprasījumu, neatklājot paroles, tokenus vai pilnus foto.
