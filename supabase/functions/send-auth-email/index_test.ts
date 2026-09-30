@@ -113,6 +113,18 @@ Deno.test('magic link and reauthentication use the verified sign-in callback', (
   assertEquals(new URL(reauthenticationUrl.searchParams.get('redirect_to')!).pathname, '/auth/verify');
 });
 
+Deno.test('auth callback refuses a redirect outside the signed site origin', () => {
+  let rejected = false;
+  try {
+    buildAuthMessages(payload('signup', { redirect_to: 'https://attacker.example.test' }), {
+      supabaseUrl: env.SUPABASE_URL,
+    });
+  } catch {
+    rejected = true;
+  }
+  assertEquals(rejected, true);
+});
+
 Deno.test('invalid webhook signatures never send email', async () => {
   let sends = 0;
   const handler = createHandler(env, async () => { sends += 1; return new Response('{}'); });
