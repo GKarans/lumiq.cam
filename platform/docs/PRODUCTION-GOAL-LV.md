@@ -100,6 +100,7 @@
 
 ## 10. Pabeigšana un tīrīšana
 
+- [x] 2026-09-30 23:47 UTC pilns `npm run check` uz pašreizējā Production avota izturēja: secret scan 287 tracked/unignored failiem, `npm audit` 0 ievainojamību, 196/196 testus, 60 publisko failu build, pārlūka pārbaudes 9 platumos (320–1440 px), izolētās Auth/event/foto/QR/galerijas/checkout plūsmas un axe/keyboard/reduced-motion/200% zoom. Pārlūka dati bija sintētiski, ārēju pieprasījumu nebija; tas nepierāda dzīvu Production Auth vai R2 e-pastu piegādi.
 - [x] 2026-10-01 Production rezerves kopiju retention un kļūmes paziņojumu loģika commit/push `dad721d` uz `GKarans/lumiq.cam`; pēc izmaiņām `npm run check` izturēja secret scan (287 faili), `npm audit` (0 high), 196/196 testus, 60 publisko failu build, pārlūka plūsmas un piekļūstamības pārbaudes. Resend paziņojums pārbaudīts tikai ar viltotu HTTP atbildi; reāls e-pasts nav sūtīts. Šie lokālie/CI pierādījumi neaizstāj dzīvu Production QA.
 - [ ] Pēc katras nākamās izmaiņas veikt atbilstošu testu, dokumentēt pierādījumu, izveidot loģisku commit un push **tikai** uz `GKarans/lumiq.cam`.
 - [ ] Kad `lumiq-production` un `lumiq.cam` ir pārbaudīti, izņemt novecojušos Closed Test/restore drill/candidate resursus tikai pēc atkarību, datu, backup un izmaksu pārbaudes. Saglabāt nepieciešamo Production backup un Recovery infrastruktūru; `app-images` un nesaistīto `event-photo-media` neaiztikt.
