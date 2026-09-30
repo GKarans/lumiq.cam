@@ -168,12 +168,14 @@ test('organizer JWT policies isolate reads and expose only narrow RPCs',async()=
   await migrate(db,[{version:'046-production-runtime-access-hardening',sql:productionRuntimeHardeningSql}]);
   const authSchemaUsageSql=await readFile(new URL('../server/migrations/047-sync-account-auth-schema-usage.sql',import.meta.url),'utf8');
   assert.match(authSchemaUsageSql,/has_schema_privilege\(current_user,'auth','usage with grant option'\)/);
-  assert.match(authSchemaUsageSql,/Supabase must grant USAGE on schema auth to lumiq_api_owner/);
-  await db.query('revoke usage on schema auth from lumiq_api_owner');
-  assert.equal((await db.query("select has_schema_privilege('lumiq_api_owner','auth','usage') as allowed")).rows[0].allowed,false);
+  assert.match(authSchemaUsageSql,/Supabase must grant USAGE ON SCHEMA auth with grant option/);
+  const authRpcOwners=['lumiq_api_owner','lumiq_admin_owner','lumiq_billing_owner','lumiq_support_owner','lumiq_session_owner','lumiq_preview_owner'];
+  for(const role of authRpcOwners) await db.query(`revoke usage on schema auth from ${role}`);
+  for(const role of authRpcOwners) assert.equal((await db.query('select has_schema_privilege($1,\'auth\',\'usage\') as allowed',[role])).rows[0].allowed,false);
   await migrate(db,[{version:'047-sync-account-auth-schema-usage',sql:authSchemaUsageSql}]);
   await migrate(db,[{version:'047-sync-account-auth-schema-usage',sql:authSchemaUsageSql}]);
-  assert.equal((await db.query("select has_schema_privilege('lumiq_api_owner','auth','usage') as allowed")).rows[0].allowed,true);
+  for(const role of authRpcOwners) assert.equal((await db.query('select has_schema_privilege($1,\'auth\',\'usage\') as allowed',[role])).rows[0].allowed,true);
+  for(const role of ['lumiq_guest_owner','lumiq_job_owner','lumiq_limit_owner','lumiq_payment_owner','lumiq_storage_owner']) assert.equal((await db.query('select has_schema_privilege($1,\'auth\',\'usage\') as allowed',[role])).rows[0].allowed,false);
   assert.equal((await db.query("select has_schema_privilege('authenticated','auth','usage') as allowed")).rows[0].allowed,true);
   assert.equal((await db.query("select has_column_privilege('lumiq_api_owner','public.accounts','role','update') as allowed")).rows[0].allowed,false);
   await db.query('create table public.production_future_grant_probe(id serial primary key, name text)');

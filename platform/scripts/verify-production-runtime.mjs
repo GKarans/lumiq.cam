@@ -19,6 +19,7 @@ const internalRpcAllowlist=[
  'resolve_billing_owner','run_platform_retention_cycle','save_platform_thumbnail_details','settle_platform_delivery',
  'settle_platform_job'
 ];
+const authRpcOwners=['lumiq_api_owner','lumiq_admin_owner','lumiq_billing_owner','lumiq_support_owner','lumiq_session_owner','lumiq_preview_owner'];
 
 function readSecret(prompt){
  if(!process.stdin.isTTY||typeof process.stdin.setRawMode!=='function')throw new Error('Run this from the visible Codex terminal so the password can be entered without echo.');
@@ -60,9 +61,9 @@ try{
  `;
  stage='identity check';
  if(identity?.database_name!=='postgres'||identity.runtime_user!==roleName||!identity.rolcanlogin||identity.rolsuper||identity.rolcreatedb||identity.rolcreaterole||identity.rolreplication||identity.rolinherit||identity.rolbypassrls===hardened)throw new Error('Connected database or runtime role identity does not match the pinned Production target.');
- stage='account synchronization owner privileges check';
- const [accountSyncAccess]=await sql`select has_schema_privilege('lumiq_api_owner','auth','usage') as auth_schema_usage`;
- if(!accountSyncAccess.auth_schema_usage)throw new Error('The dedicated account-sync function owner is missing auth schema USAGE.');
+ stage='Auth RPC owner privileges check';
+ const authOwnerAccess=await sql`select r.rolname,has_schema_privilege(r.rolname,'auth','usage') as auth_schema_usage from pg_roles r where r.rolname=any(${authRpcOwners}) order by r.rolname`;
+ if(authOwnerAccess.length!==authRpcOwners.length||authOwnerAccess.some(role=>!role.auth_schema_usage))throw new Error('One or more JWT-bound Auth RPC owners are missing auth schema USAGE.');
  stage='migration ledger check';
  const versions=await sql`select version from public.platform_migrations order by version`;
  const applied=versions.map(row=>row.version);
@@ -113,7 +114,7 @@ try{
   if(JSON.stringify(definers)!==JSON.stringify(internalRpcAllowlist))throw new Error('Hardened Production SECURITY DEFINER RPC allowlist does not match the reviewed list.');
   runtimeAccess={...runtimeAccess,migrationVersionOnly:true,securityDefinerRpcAllowlist:definers};
  }
- console.log(JSON.stringify({targetProject:projectRef,database:identity.database_name,user:identity.runtime_user,login:identity.rolcanlogin,noinherit:!identity.rolinherit,bypassRls:identity.rolbypassrls,superuser:identity.rolsuper,createdb:identity.rolcreatedb,createrole:identity.rolcreaterole,replication:identity.rolreplication,accountSyncAccess,migrations:applied,access,runtimeAccess}));
+ console.log(JSON.stringify({targetProject:projectRef,database:identity.database_name,user:identity.runtime_user,login:identity.rolcanlogin,noinherit:!identity.rolinherit,bypassRls:identity.rolbypassrls,superuser:identity.rolsuper,createdb:identity.rolcreatedb,createrole:identity.rolcreaterole,replication:identity.rolreplication,authOwnerAccess,migrations:applied,access,runtimeAccess}));
 }catch(error){
  const code=typeof error?.code==='string'?error.code.replace(/[^A-Z0-9_]/g,'').slice(0,32):'CHECK_FAILED';
  console.error(`Production runtime verification failed during ${stage} (${code}). No database changes were made.`);

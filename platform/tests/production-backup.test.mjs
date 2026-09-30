@@ -217,7 +217,7 @@ test('Restore Drill migration apply is pinned, checksum-gated, forward-only, and
  assert.match(restoreApply,/exact manifest prefix/);
  assert.match(restoreApply,/checksum !== applied\[index\]\.checksum/);
  assert.match(restoreApply,/PLATFORM_MIGRATIONS\.slice\(applied\.length\)/);
- assert.match(restoreApply,/has_schema_privilege\('lumiq_api_owner','auth','usage'\)/);
+ assert.match(restoreApply,/lumiq_api_owner','lumiq_admin_owner','lumiq_billing_owner','lumiq_support_owner','lumiq_session_owner','lumiq_preview_owner/);
  assert.match(restoreApply,/rolbypassrls/);
  assert.match(restoreApply,/rolreplication/);
  assert.match(restoreApply,/noreplication/);
@@ -266,8 +266,8 @@ test('production runtime verifier is pinned read-only and masks the password',()
  assert.match(verifyRuntime,/column_write/);
  assert.match(verifyRuntime,/securityDefinerRpcAllowlist/);
  assert.match(verifyRuntime,/internalRpcAllowlist/);
- assert.match(verifyRuntime,/has_schema_privilege\('lumiq_api_owner','auth','usage'\)/);
- assert.match(verifyRuntime,/dedicated account-sync function owner is missing auth schema USAGE/);
+ assert.match(verifyRuntime,/const authRpcOwners=\['lumiq_api_owner','lumiq_admin_owner','lumiq_billing_owner','lumiq_support_owner','lumiq_session_owner','lumiq_preview_owner'\]/);
+ assert.match(verifyRuntime,/One or more JWT-bound Auth RPC owners are missing auth schema USAGE/);
  assert.match(verifyRuntime,/rolbypassrls/);
  assert.match(verifyRuntime,/rolreplication/);
  assert.match(verifyRuntime,/LUMIQ_PRODUCTION_RUNTIME_PASSWORD/);
