@@ -283,6 +283,8 @@ test('Production auth grant inspection is pinned, read-only, and uses the DPAPI 
  const wrapper=await readFile(new URL('../scripts/production-secrets.ps1',import.meta.url),'utf8');
  assert.match(inspector,/const projectRef = 'baqebydtinysosueksgr'/);
  assert.match(inspector,/has_schema_privilege\('lumiq_api_owner','auth','usage'\)/);
+ assert.match(inspector,/const authSchemaRoles = \(await db\.query/);
+ assert.match(inspector,/auth_uid_execute/);
  assert.match(inspector,/auth_schema_owner/);
  assert.match(inspector,/migrationLedger/);
  assert.doesNotMatch(inspector,/^\s*(?:grant|revoke|insert|update|delete|create|alter)\b/im);

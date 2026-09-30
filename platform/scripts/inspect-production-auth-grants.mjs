@@ -38,7 +38,15 @@ try {
     where member.rolname=current_user and role.rolname in ('supabase_admin','supabase_auth_admin','lumiq_api_owner')
     order by role.rolname
   `)).rows;
-  console.log(JSON.stringify({ targetProject: projectRef, identity, migrationLedger: ledger, memberships }));
+  const authSchemaRoles = (await db.query(`
+    select r.rolname,r.rolcanlogin,r.rolinherit,r.rolbypassrls,
+      has_schema_privilege(r.rolname,'auth','usage') as auth_schema_usage,
+      has_function_privilege(r.rolname,'auth.uid()','execute') as auth_uid_execute
+    from pg_roles r
+    where r.rolname like 'lumiq\\_%\\_owner' escape '\\'
+    order by r.rolname
+  `)).rows;
+  console.log(JSON.stringify({ targetProject: projectRef, identity, migrationLedger: ledger, memberships, authSchemaRoles }));
 } catch (error) {
   console.error(`Production Auth-grant inspection failed (${typeof error?.code === 'string' ? error.code.replace(/[^A-Z0-9_]/g, '').slice(0, 32) : 'CHECK_FAILED'}). No database changes were made.`);
   process.exitCode = 1;
