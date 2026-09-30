@@ -4,7 +4,7 @@ import {EventEmitter} from 'node:events';
 import {readFile} from 'node:fs/promises';
 import {assertEmptyAuthUsers,assertEmptyPublicSchema,ensureProductionCompatibilityRole,inspectPublicRestoreState,libpqConnectionForCli,provisionRestoredRuntimeRole,validateRestoreTarget,waitForChildExit} from '../scripts/restore-safety.mjs';
 
-const ref='cpweowosocjuccjsyyic';
+const ref='drilltestref1234567890';
 
 test('restore candidate config is isolated, closed and cannot run retention automatically',async()=>{
  const config=JSON.parse(await readFile(new URL('../../cloudflare/worker/wrangler.restore-drill.template.jsonc',import.meta.url),'utf8'));
@@ -37,6 +37,12 @@ test('restore target confirmation rejects wrong project refs and non-Supabase ho
  assert.throws(()=>validateRestoreTarget(`postgresql://postgres.${ref}:secret@pool.example.com:5432/postgres`,ref),/does not match/);
  assert.throws(()=>validateRestoreTarget(`postgresql://postgres.otherref:secret@pooler.supabase.com:5432/postgres`,ref),/does not match/);
  assert.throws(()=>validateRestoreTarget(`postgresql://postgres.${ref}:secret@pooler.supabase.com:5432/postgres`,''),/Confirm the exact/);
+});
+
+test('restore target confirmation rejects all protected Lumiq projects, even when explicitly named',()=>{
+ for(const protectedRef of ['baqebydtinysosueksgr','sprzlvywzpeyuzbsyplz','cpweowosocjuccjsyyic']){
+  assert.throws(()=>validateRestoreTarget(`postgresql://postgres.${protectedRef}:secret@aws-0-eu-central-1.pooler.supabase.com:5432/postgres`,protectedRef),/cannot target Production, the existing Restore Drill, or the paused test project/);
+ }
 });
 
 test('restore target confirmation rejects wrong schemes and transaction-pooler port',()=>{

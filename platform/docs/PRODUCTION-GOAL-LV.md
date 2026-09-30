@@ -78,7 +78,7 @@
 - [x] Izolētā Cloudflare Queue vingrinājumā sintētiska ziņa tika atkārtota trīs reizes un apstiprināta DLQ; pagaidu resursi izņemti. Tas nepierāda Production darbu patērētāja kļūmju uzvedību.
 - [ ] Pārbaudīt Production galvenās Queue un DLQ binding, patērētāju, backlog, retry, kļūdu paziņošanu un drošu operatora atkārtojumu bez klienta datu zuduma. Neievietot destruktīvu kļūmju testu īstā klienta darbā.
 - [ ] Ieviest/pārbaudīt regulāru Production DB/Auth un R2 foto rezerves kopiju, glabāšanas termiņu, šifrēšanu, piekļuvi, automātisku brīdinājumu un kontrolsummas.
-- [ ] Pilnu restore veikt tikai **jaunā tukšā izolētā** mērķī; nepārrakstīt esošo Recovery projektu. Salīdzināt DB/Auth rindu skaitu, foto/ZIP objektu skaitu un hash, migrācijas, RLS un izmērīto atjaunošanas laiku.
+- [ ] Pilnu restore veikt tikai **jaunā tukšā izolētā** mērķī; nepārrakstīt esošo Recovery projektu. Salīdzināt DB/Auth rindu skaitu, foto/ZIP objektu skaitu un hash, migrācijas, RLS un izmērīto atjaunošanas laiku. 2026-10-01 lokāli nostiprināts `validateRestoreTarget`: tas bez izņēmuma noraida Production, esošo Restore Drill un pauzēto testa projekta ID, pat ja tie ievadīti kā skaidri apstiprināts mērķis. Tas ir aizsardzības vārtu pierādījums, nevis restore izpilde.
 
 ## 9. Maksājumi, izmaksas un žurnāli
 

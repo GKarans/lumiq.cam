@@ -13,6 +13,8 @@ export function libpqConnectionForCli(connectionString){
 
 export function validateRestoreTarget(databaseUrl, expectedProjectRef){
  if(typeof expectedProjectRef!=='string'||! /^[a-z0-9-]{8,64}$/i.test(expectedProjectRef))throw new Error('Confirm the exact empty drill project reference in PLATFORM_RESTORE_TARGET_REF.');
+ const protectedProjectRefs=new Set(['baqebydtinysosueksgr','sprzlvywzpeyuzbsyplz','cpweowosocjuccjsyyic']);
+ if(protectedProjectRefs.has(expectedProjectRef))throw new Error('Restore drill cannot target Production, the existing Restore Drill, or the paused test project.');
  let url;try{url=new URL(databaseUrl);}catch{throw new Error('Restore target must be a valid PostgreSQL URL.');}
  if(!['postgres:','postgresql:'].includes(url.protocol)||(url.port&&url.port!=='5432'))throw new Error('Restore target must use the Supabase PostgreSQL endpoint on port 5432.');
  const username=decodeURIComponent(url.username),poolerRef=url.hostname.endsWith('.pooler.supabase.com')?username.match(/^postgres\.([a-z0-9-]+)$/i)?.[1]:null,directRef=url.hostname.match(/^db\.([a-z0-9-]+)\.supabase\.co$/i)?.[1],actualRef=poolerRef||directRef;
