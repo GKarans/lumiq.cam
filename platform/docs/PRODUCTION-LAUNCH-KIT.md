@@ -347,8 +347,12 @@ the candidate origin and routes against code. At cutover:
 - Lumiq-branded Supabase Auth templates are saved in the Production Auth
   dashboard. Worker transactional notices render branded HTML plus plain text.
   Verify actual delivery and rendering in Gmail and a second mail client before
-  declaring email QA complete. Set `PLATFORM_EMAIL_REPLY_TO` only after the
-  support inbox receives an external test message.
+  declaring email QA complete. The candidate Worker currently has
+  `PLATFORM_EMAIL_REPLY_TO=support@lumiq.cam`; verify a real message header too.
+  Supabase Auth SMTP has no documented Reply-To setting. Its Send Email Hook
+  replaces SMTP, so keep the Production hook disabled until every auth action,
+  security notification, delivery failure, and rollback path has been verified
+  in isolation.
 - In the production project's Supabase **Authentication → URL Configuration**,
   set the Site URL to `https://lumiq.cam`; add only the four exact redirect URLs
   in the matrix, with no wildcard. Before cutover, use only the candidate's

@@ -22,7 +22,8 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 - [x] 2026-09-30 Production Supabase Auth `Invite user` veidnei iestatīta tukšā tēma `Uzaicinājums uz Lumiq / Invitation to Lumiq`; pēc saglabāšanas un pārlādes tā joprojām redzama, HTML saturs nav mainīts.
 - [x] 2026-09-30 lokāli pārbaudīta e-pasta funkcionalitāte: `npm test` (171/171), Auth Edge Function testi (8/8), `deno check` un `deno audit` bez atrastām ievainojamībām. Tie nesūta īstu vēstuli un neaizstāj piegādes pārbaudi.
 - [ ] Nosūtīt kontrolētu Auth testa vēstuli un pārbaudīt reālu piegādi, saites un kļūdu žurnālus.
-- [ ] Konfigurēt un notestēt Reply-To atsevišķi; ienākošā pāradresācija pati par sevi nepierāda atbildes plūsmu.
+- [x] Kandidāta Worker dzīvajā konfigurācijā ir `PLATFORM_EMAIL_REPLY_TO=support@lumiq.cam`; faktiska nosūtīta ziņojuma galvene vēl nav pārbaudīta.
+- [ ] Supabase Auth SMTP neuzrāda Reply-To lauku. Send Email Hook prototips to atbalsta, bet aizstāj iebūvēto SMTP; pirms iespējamas aktivizācijas izolēti pārbaudīt visas Auth darbības, drošības paziņojumus un kļūmju scenārijus. Production SMTP paliek aktīvs.
 - [ ] Saņemt vēstules Gmail un vēl vienā pasta klientā; pārbaudīt abas valodas, saites, derīguma termiņu un mobilo izkārtojumu. Auth veidņu redaktorā nav atsevišķa `text/plain` lauka; Worker vēstulēm teksta alternatīva jau ir.
 
 ## 3. Production konta plūsma aiz Access
