@@ -1,0 +1,34 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "lumiq-queue-drill-20260930",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-09-30",
+  "workers_dev": false,
+  "preview_urls": false,
+  "vars": {
+    "DRILL_DLQ_QUEUE": "lumiq-queue-drill-20260930-dlq"
+  },
+  "queues": {
+    "consumers": [
+      {
+        "queue": "lumiq-queue-drill-20260930-main",
+        "max_batch_size": 1,
+        "max_batch_timeout": 1,
+        "max_retries": 2,
+        "retry_delay": 1,
+        "dead_letter_queue": "lumiq-queue-drill-20260930-dlq",
+        "max_concurrency": 1
+      },
+      {
+        "queue": "lumiq-queue-drill-20260930-dlq",
+        "max_batch_size": 1,
+        "max_batch_timeout": 1,
+        "max_retries": 1,
+        "max_concurrency": 1
+      }
+    ]
+  },
+  "observability": {
+    "enabled": true
+  }
+}
