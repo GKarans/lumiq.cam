@@ -1,5 +1,9 @@
 # Lumiq production migrācijas progress
 
+## 2026-10-01 - Resend Production Auth sūtījumu žurnāls
+
+Resend `Emails → Sending` (filtrs: pēdējās 15 dienas) rāda vairākas QA konta paroles atjaunošanas vēstules un paroles maiņas paziņojumus ar statusu `Delivered`. Atvērts paroles maiņas paziņojuma ieraksts apstiprināja `FROM "Lumiq" <noreply@lumiq.cam>`, saņēmēju `dev.guntars.karans@gmail.com` un tekstu, ka konta parole nupat nomainīta. Vēstules tokena saturs netika atvērts vai kopēts. Tas ir stiprāks pierādījums par sūtītāju/piegādes statusu un paroles maiņas notikuma e-pasta ģenerēšanu, bet ne par lietotāja gala pastkastes saņemšanu vai veiksmīgu login. Supabase ticket `SU-490545` meklējumā joprojām ir tikai automātiskā saņemšanas kvīts; Auth callback/login defekts nav atrisināts.
+
 ## 2026-10-01 - Production Access pieteikšanās ekrāns
 
 Atverot `https://lumiq.cam/` tīrā anonīmā pārlūka cilnē, Cloudflare Access parādīja pieteikšanās ekrānu ar Cloudflare identitātes nodrošinātāju un e-pasta vienreizējā koda formu. Ekrāna virsraksts ir “Log in to Lumiq Closed Development - lumiq.cam”, tātad lietotājam redzamais nosaukums vēl neatbilst Production. Kodu īpašniekam nesūtīju un neievadīju; bez owner Access sesijas autorizēto Worker un lietotnes stāvokli nevarēja pārbaudīt. Tā nav Supabase Auth parole un nav production login rezultāts.
