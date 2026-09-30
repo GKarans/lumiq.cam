@@ -448,6 +448,8 @@ test('Supabase adapter keeps provider tokens encrypted and out of browser cookie
   await assert.rejects(service.consume({access_token:'recovery-access-fixture',type:'recovery',purpose:'reset',password:'New-password-123!',password_confirm:'Different-password-456!'}),/Passwords do not match/);
   await assert.rejects(service.consume({token:'recovery-token-hash-fixture',purpose:'reset',password:'New-password-123!',password_confirm:'Different-password-456!'}),/Passwords do not match/);
   assert.equal(verifyCalls,0);assert.equal(passwordUpdate,undefined);
+  const hashRecovered=await service.consume({token:'recovery-token-hash-fixture',purpose:'reset',password:'New-password-123!',password_confirm:'New-password-123!'});
+  assert.match(hashRecovered.message,/account has been updated/);assert.equal(verifyCalls,1);assert.equal(recoveryAuthorization,'Bearer private-access-fixture');assert.equal(passwordUpdate,'New-password-123!');
   await db.query('insert into sessions(token_hash,account_id,expires_at) values($1,$2,now()+interval \'1 hour\')',['old-session',id]);
   const recovered=await service.consume({access_token:'recovery-access-fixture',type:'recovery',purpose:'reset',password:'New-password-123!',password_confirm:'New-password-123!'});
   assert.match(recovered.message,/password has been updated/);assert.equal(recoveryAuthorization,'Bearer recovery-access-fixture');assert.equal(passwordUpdate,'New-password-123!');assert.equal((await db.query('select 1 from sessions where account_id=$1',[id])).rows.length,0);
