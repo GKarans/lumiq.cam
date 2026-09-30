@@ -1,5 +1,9 @@
 # Lumiq production migrācijas progress
 
+## 2026-10-01 - Production Access pieteikšanās ekrāns
+
+Atverot `https://lumiq.cam/` tīrā anonīmā pārlūka cilnē, Cloudflare Access parādīja pieteikšanās ekrānu ar Cloudflare identitātes nodrošinātāju un e-pasta vienreizējā koda formu. Ekrāna virsraksts ir “Log in to Lumiq Closed Development - lumiq.cam”, tātad lietotājam redzamais nosaukums vēl neatbilst Production. Kodu īpašniekam nesūtīju un neievadīju; bez owner Access sesijas autorizēto Worker un lietotnes stāvokli nevarēja pārbaudīt. Tā nav Supabase Auth parole un nav production login rezultāts.
+
 ## 2026-10-01 - Publiskās DNS un anonīmās piekļuves atkārtota pārbaude
 
 Neatkarīgie DNS resolveri `1.1.1.1` un `8.8.8.8` atgrieza Cloudflare A ierakstus `lumiq.cam`. Bez sesijas `https://lumiq.cam/` un `/healthz` atgrieza Access `302`; `www.lumiq.cam/healthz` atgrieza `301` uz saknes hostu; `lumiq-production.gkarans-events.workers.dev/healthz` atgrieza `404`, bet kandidāta URL atgrieza Access `302`. Tas apstiprina publisko DNS un anonīmās piekļuves barjeru, bet ne īpašnieka Access politikas pilnu pārbaudi vai autorizētu produkta lietošanu. Kandidāta Worker joprojām eksistē un jāatstāj līdz pilnam Production QA/atkarību auditam. Supabase ticket `SU-490545` Gmail meklējumā joprojām ir tikai 2026-09-30 saņemšanas kvīts; tehniskas atbildes nav. DB/Auth konfigurācija un mākoņresursi šajā pārbaudē netika mainīti.
