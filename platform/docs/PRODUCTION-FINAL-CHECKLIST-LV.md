@@ -7,7 +7,7 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 ## Pārbaudītie infrastruktūras pamati
 
 - [x] Production Supabase Pro, drošā runtime loma un Hyperdrive ir piesaistīti; migrācijas `001–046` auditētas.
-- [x] Production backup no privātā R2 atkārtoti pārbaudīts 2026-09-30: 21 tabula, migrācijas `001–046`, 0 foto objektu, checksum derīgs.
+- [x] Production backup `production/2026-09-30T17-37-35-794Z` privātajā R2 izveidots un attāli atkārtoti nolasīts 2026-09-30: 21 tabula, migrācijas `001–046`, 0 foto objektu; lokālās un attālās SHA-256 kontrolsummas derīgas.
 - [x] Production kandidāts darbojas atsevišķā `workers.dev` adresē. `lumiq.cam` maršruts nav mainīts.
 - [x] EU Production foto, backup un recovery bucketu atdalījums pārbaudīts. `app-images` un `event-photo-media` neaiztikt.
 - [x] Supabase Auth SMTP izmanto verificēto Resend saknes `lumiq.cam` domēnu ar `Lumiq <noreply@lumiq.cam>`; Worker sūtītājam paredzēts verificētais `send.lumiq.cam`.
@@ -67,7 +67,7 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 - [x] 2026-09-30 Cloudflare Metrics `Last 24 hours` abās rindās rāda 0 messages ingested, 0 retried, 0 backlog un 0 s lag; `lumiq-production-jobs-dlq` ir `Inactive`. Tas ir tukšas rindas sākuma stāvoklis, nevis retry/DLQ funkcionalitātes pierādījums.
 - [x] Izolētais `node --test platform/tests/worker-router.test.mjs` izturēja 11/11, tostarp Consumer startup failure retry scenāriju. Tas nepierāda dzīvu Cloudflare retry/DLQ piegādi.
 - [x] 2026-09-30 izolēts dzīvs Cloudflare Queue/DLQ tests: viena sintētiska ziņa tika atkārtota galvenajā rindā 3 reizes, pēc tam DLQ consumer to apstiprināja; kļūdu un neapstiprinātu ziņu nebija. Pagaidu Worker un rindas izdzēstas; Production Queue saturs netika izmantots. Šis tests neapliecina Production consumer DB-side apstrādi.
-- [x] Jaunākā Production backup read-back un checksum pārbaude izturēja 2026-09-30.
+- [x] Jaunākais Production backup `production/2026-09-30T17-37-35-794Z` verificēts gan izveides remote read-back, gan atsevišķā `check-production-backup` lejupielādes/kontrolsummu pārbaudē; pagaidu lokālā kopija izdzēsta. Recovery restore netika palaists.
 - [x] Pilns Production backup restore ir veikts jaunajā izolētajā Recovery projektā; backup datu inventārs sakrita un migrācijas `001–046` pārbaudītas 2026-09-29. Esošo Recovery datubāzi atkārtoti nepārrakstīt.
 - [ ] Pārbaudīt aktuālos Production Worker kļūdu žurnālus un Queue/DLQ metriku, tostarp sintētisku kļūmes scenāriju bez reālu klientu datu ietekmes.
 - [x] 2026-09-30 Cloudflare Budget Alerts panelī automātiskajam `$10` un `$50` brīdinājumam ir pa vienam saņēmējam `guntars.karans@gmail.com`. Billable Usage ciklā 2026-09-12–2026-10-11 (19/30 dienas) patēriņš un projekcija bija `$0.00`; brīdinājumu faktiskā piegāde nav testēta.
