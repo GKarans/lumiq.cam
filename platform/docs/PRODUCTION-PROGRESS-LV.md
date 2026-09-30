@@ -1,5 +1,11 @@
 # Lumiq production migrācijas progress
 
+## 2026-09-30 - Supabase patēriņš un platformas statuss
+
+Supabase Organization Usage panelis (read-only) rāda Pro plānu un norēķinu periodu `29 Sep–29 Oct 2026`, paziņojumu “You have not exceeded your Pro Plan quota” un Micro Compute patēriņu `95 h` (`$1.28`). Pārējie redzamie rādītāji: MAU `4/100,000`, egress `0.001/250 GB`, vidējais Storage `0.00/100 GB`, log ingestion `0.03/20 GB`, log query `7.58/2,000 GB`; overage panelī nav redzams. Tie ir Usage paneļa patēriņa/kvotu skaitļi, nevis gala rēķina kopsumma, cenu prognoze vai apstiprinājums, ka nav citas maksas par Cloudflare, Resend vai R2. Nekas netika iegādāts vai mainīts.
+
+Supabase publiskajā statusa lapā pārbaudes brīdī bija atvērts incidents “Intermittent latency in Eastern US”; pēdējais redzētais atjauninājums `Sep 30, 2026 21:26 UTC` ziņoja par uzlabojuma pazīmēm un turpinātu darbu ar tīkla partneriem. API Gateway bija “Degraded Performance”, bet Auth “Operational”. Incidents skāra klientus, kas pieslēdzas no ASV austrumiem, neatkarīgi no projekta reģiona; Lumiq Production atrodas `eu-central-1`. Tas pats par sevi neizskaidro zināmo Auth `USAGE` grantu trūkumu vai iepriekšējo sinhronizācijas 403, un cēloņsakarība netiek pieņemta. Cloudflare, Resend un R2 izmaksu/brīdinājumu audita punkts paliek atvērts. Mākoņa konfigurācija nemainīta.
+
 ## 2026-10-01 - Auth e-pasta prototipa Production hosta piesaiste
 
 Repo auditā `supabase/functions/send-auth-email` testu paraugi vēl būvēja pozitīvas saites uz `lumiq-production-candidate.gkarans-events.workers.dev`. Production-only mērķim Auth e-pastu veidotājs tagad pieņem tikai `https://lumiq.cam` `site_url` un `redirect_to`; kandidāta hosta pozitīvie paraugi aizstāti ar Production, pievienoti negatīvie testi abām vietām, un README skaidri fiksē origin ierobežojumu. Deno `test` izturēja 10/10, `deno check index.ts` un `deno audit` izturēja bez zināmiem ievainojamības atradumiem. Hook ir prototips un paliek neizvietots/neieslēgts; Production SMTP un dzīvais Worker netika mainīti.
