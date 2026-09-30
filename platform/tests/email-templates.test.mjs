@@ -9,7 +9,7 @@ const templates=[
  ['supabase-confirm-signup.html','{{ .ConfirmationURL }}'],
  ['supabase-invite.html','{{ .ConfirmationURL }}'],
  ['supabase-magic-link.html','{{ .ConfirmationURL }}'],
- ['supabase-reset-password.html','{{ .ConfirmationURL }}'],
+ ['supabase-reset-password.html','{{ .RedirectTo }}?token={{ .TokenHash }}'],
  ['supabase-reauthentication.html','{{ .Token }}'],
  ['supabase-change-email.html','{{ .ConfirmationURL }}'],
  ['supabase-password-changed.html',null],
