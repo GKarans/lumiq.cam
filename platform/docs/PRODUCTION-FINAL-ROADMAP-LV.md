@@ -81,6 +81,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 ### 5. Drošība, darbi rindā un darbības gatavība
 
 - [ ] Ar diviem testa organizatoriem pārbaudīt savstarpēju pasākumu un galeriju izolāciju; ar anonīmu klientu pārbaudīt tiešos API un failu URL.
+- [x] 2026-09-30 lokālais `node --test platform/tests/migrations.test.mjs` izturēja 3/3 testus, tostarp organizatoru JWT/RLS izolācijas, anonīmo lomu robežu, kontu lomu neaizskaramības un šauro RPC atļauju scenārijus. Tas nepierāda divu īstu kontu izolāciju izvietotajā kandidātā.
 - [ ] Pirms Queue DLQ patērētāja izvietošanas saņemt īpašnieka atsevišķu apstiprinājumu; kandidāts paliek aiz Access, `lumiq.cam` netiek mainīts.
 - [x] 2026-09-30 atkārtota Wrangler read-only pārbaude (`queues consumer list` un `queues info`) apstiprināja vienu `lumiq-production-candidate` consumer galvenajai `lumiq-production-jobs` rindai (`batch=1`, `max_retries=10`, `max_concurrency=1`, DLQ `lumiq-production-jobs-dlq`); DLQ ir 0 consumer. Dzīvu kļūmes scenāriju neizraisīju, jo patvaļīga ziņojuma pievienošana varētu iedarbināt Production DB darbu.
 - [x] 2026-09-30 lokālie Queue/Worker/reliability testi izturēja 63/63: sintezēta Queue nosūtīšanas kļūme un atkopšana, dead-letter apstrāde un manuāls retry, Worker starta kļūdas retry un ierobežota job apstrāde. Tas nav dzīvas Production Queue/DLQ pārbaudes pierādījums.
