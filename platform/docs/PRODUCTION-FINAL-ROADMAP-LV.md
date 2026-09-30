@@ -24,6 +24,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 ### 1. E-pasta sūtīšana
 
 - [ ] **Lumiq dizaina standarts:** visām Auth un Worker transakciju vēstulēm lietot vienotu Lumiq tēmu, skaidru virsrakstu un darbības pogu, salasāmu mobilo izkārtojumu un teksta alternatīvu. Vēstulēs neiekļaut paroles vai tokenus.
+- [x] 2026-09-30 Resend panelī atkārtoti pārbaudīts: `lumiq.cam` un `send.lumiq.cam` ir `Verified`. Supabase Auth un sagatavotais Worker kandidāts izmanto `Lumiq <noreply@lumiq.cam>`; Worker piegāde vēl jātestē pēc apstiprinātas kandidāta izvietošanas.
 - [ ] Veidņu komplektā pārbaudīt reģistrācijas apstiprinājumu, uzaicinājumu, paroles atjaunošanu, e-pasta maiņu, drošības paziņojumus un produkta transakciju vēstules; `support@lumiq.cam` likt Reply-To tikai pēc ienākošā pasta pārbaudes.
 - [x] 2026-09-30 Supabase Production SMTP pārbaudīts pēc pārlādes: custom SMTP ieslēgts, `smtp.resend.com:465`, sūtītājs `Lumiq <noreply@lumiq.cam>`, lietotājvārds `resend`; saglabātā parole ir noslēpta un netika mainīta.
 - [ ] Nosūtīt kontrolētu Auth testa vēstuli uz savu testa pastkasti; pārbaudīt piegādi, saites un kļūdu žurnālus. Pirms īstas vēstules nosūtīšanas apstiprināt konkrēto testa sūtījumu.

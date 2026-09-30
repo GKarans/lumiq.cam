@@ -36,7 +36,7 @@ export function validateProductionConfig(candidate, closedTestHyperdriveId) {
   const authProjectRef = new URL(vars.PLATFORM_SUPABASE_URL).hostname.split(".")[0].toLowerCase();
   requireThat(typeof vars.PLATFORM_SUPABASE_PROJECT_REF === "string" && /^[a-z0-9]+$/i.test(vars.PLATFORM_SUPABASE_PROJECT_REF) && vars.PLATFORM_SUPABASE_PROJECT_REF.toLowerCase() === authProjectRef, "Production Auth URL and verified database project reference must match.");
   requireThat(typeof vars.PLATFORM_SUPABASE_PUBLISHABLE_KEY === "string" && vars.PLATFORM_SUPABASE_PUBLISHABLE_KEY.length > 0, "Supabase publishable key is required.");
-  requireThat(vars.PLATFORM_EMAIL_FROM === "Lumiq <noreply@send.lumiq.cam>", "Production email sender must use the verified Lumiq send.lumiq.cam domain.");
+  requireThat(vars.PLATFORM_EMAIL_FROM === "Lumiq <noreply@lumiq.cam>", "Production email sender must use the verified Lumiq root domain.");
   requireThat(!Object.keys(vars).some(key => /(?:SECRET|TOKEN|PASSWORD|DATABASE_URL|ACCESS_KEY|SERVICE_ROLE|PRIVATE_KEY|SESSION_ENCRYPTION_KEY|EMAIL_KEY)/i.test(key)), "Secrets must be configured with secret bindings, not vars.");
 
   const prodDb = oneBinding(candidate.hyperdrive, "HYPERDRIVE", "Hyperdrive");

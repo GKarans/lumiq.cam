@@ -19,12 +19,13 @@ Templates**:
 | Email address changed notification | `supabase-email-changed.html` | `Lumiq konta e-pasts nomainīts / Lumiq email address changed` |
 
 Resend has verified both `send.lumiq.cam` and the root `lumiq.cam` domain. The
-Production Supabase Auth sender is `Lumiq <noreply@lumiq.cam>`; the prepared
-Cloudflare Worker release configuration expects
-`Lumiq <noreply@send.lumiq.cam>`, but this value is not yet present in the live
-Runtime variables. The root domain uses its separate `outbound` Return-Path.
-Existing root MX and SPF records must remain unchanged unless an approved
-receiving-mail migration requires a coordinated change.
+Both `lumiq.cam` and `send.lumiq.cam` are currently verified in Resend. The
+Production Supabase Auth sender and the prepared Cloudflare Worker release
+configuration use `Lumiq <noreply@lumiq.cam>`. The root domain uses its
+separate `outbound` Return-Path. Existing root MX and SPF records must remain
+unchanged unless an approved receiving-mail migration requires a coordinated
+change. The Worker sender must still be added to the candidate and tested after
+an explicitly approved candidate deployment.
 
 `support@lumiq.cam` is not yet a verified receiving mailbox. Do not set it as
 the `Reply-To` address until incoming mail has been configured and a message

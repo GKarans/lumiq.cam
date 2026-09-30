@@ -17,7 +17,7 @@
     "PLATFORM_SUPABASE_URL": "https://replacewithprodprojectref.supabase.co",
     "PLATFORM_SUPABASE_PROJECT_REF": "replacewithprodprojectref",
     "PLATFORM_SUPABASE_PUBLISHABLE_KEY": "REPLACE_WITH_PRODUCTION_PUBLISHABLE_KEY",
-    "PLATFORM_EMAIL_FROM": "Lumiq <noreply@send.lumiq.cam>",
+    "PLATFORM_EMAIL_FROM": "Lumiq <noreply@lumiq.cam>",
     "R2_BUDGET_ENABLED": "true",
     "R2_MAX_CLASS_A_OPS_MONTH": "1",
     "R2_MAX_CLASS_B_OPS_MONTH": "1",
