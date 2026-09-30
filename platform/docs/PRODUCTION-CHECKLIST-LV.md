@@ -6,6 +6,7 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 
 - [x] Production Supabase SMTP pēc pārlādes izmanto verificēto `Lumiq <noreply@lumiq.cam>` ar Resend lietotājvārdu `resend`; saglabātā SMTP parole paliek noslēpta.
 - [x] Resend saknes `lumiq.cam` domēns verificēts ar pielāgoto Return-Path `outbound`, neskarot piecus Namecheap MX, Namecheap SPF un Worker DNS ierakstus.
+- [x] 2026-09-30 publiskā DNS pārbaude: pieci Namecheap MX un Namecheap SPF joprojām publicēti, Resend DKIM atrodams, `_dmarc.lumiq.cam` nav publicēts; pārbaude bija tikai lasāma un DNS netika mainīts.
 - [ ] Nosūtīt kontrolētu Auth testa vēstuli no `noreply@lumiq.cam` un pārbaudīt piegādi.
 - [ ] Izveidot `support@lumiq.cam` kā īstu ienākošo adresi vai pāradresāciju un pārbaudīt saņemšanu.
 - [ ] Apstiprināt pāradresācijas saņēmēja adresi.
