@@ -113,6 +113,41 @@ Deno.test('magic link and reauthentication use the verified sign-in callback', (
   assertEquals(new URL(reauthenticationUrl.searchParams.get('redirect_to')!).pathname, '/auth/verify');
 });
 
+Deno.test('every supported Auth action and locale includes matching text and HTML alternatives', () => {
+  const actions = ['signup', 'invite', 'magiclink', 'reauthentication', 'recovery', 'email_change'];
+  for (const locale of ['lv', 'en']) {
+    for (const action of actions) {
+      const extra = action === 'email_change'
+        ? { token_hash_new: 'c'.repeat(64) }
+        : {};
+      const data = {
+        ...payload(action, extra),
+        user: {
+          email: 'guest@example.test',
+          ...(action === 'email_change' ? { new_email: 'new@example.test' } : {}),
+          user_metadata: { locale },
+        },
+      };
+      const messages = buildAuthMessages(data, {
+        supabaseUrl: env.SUPABASE_URL,
+        replyTo: env.LUMIQ_SUPPORT_REPLY_TO,
+      });
+
+      assertEquals(messages.length, action === 'email_change' ? 2 : 1);
+      for (const message of messages) {
+        assertEquals(message.replyTo, 'support@lumiq.cam');
+        assertStringIncludes(message.text, message.subject);
+        assertStringIncludes(message.html, '<!doctype html>');
+        const actionUrl = message.text.split('\n').find((line) => line.startsWith('https://'));
+        if (!actionUrl) throw new Error(`Missing plain-text action URL for ${action}/${locale}.`);
+        const htmlActionUrl = actionUrl.replaceAll('&', '&amp;');
+        assertStringIncludes(message.html, `href="${htmlActionUrl}"`);
+        assertStringIncludes(message.html, htmlActionUrl);
+      }
+    }
+  }
+});
+
 Deno.test('auth callback refuses a redirect outside the signed site origin', () => {
   let rejected = false;
   try {
