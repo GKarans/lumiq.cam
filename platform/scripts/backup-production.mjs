@@ -11,6 +11,7 @@ import {GetObjectCommand,ListObjectsV2Command,PutObjectCommand,S3Client} from '@
 import {libpqConnectionForCli,waitForChildExit} from './restore-safety.mjs';
 import {captureTableInventory} from './restore-verification.mjs';
 import {validateMigrationPrefix} from './validate-migration-prefix.mjs';
+import {pruneProductionBackups} from './prune-production-backups.mjs';
 import {pipeline} from 'node:stream/promises';
 
 const sourceProject='baqebydtinysosueksgr';
@@ -110,6 +111,8 @@ try{
   if(size!==local.size||hash.digest('hex')!==local.sha256)throw new Error(`Uploaded backup checksum mismatch at ${file.key}.`);
  }
  console.log(`Production backup verified in private R2: ${remotePrefix}; ${inventory.length} tables, ${migrations.length} migrations, ${objects.length} photos.`);
+ const retention=await pruneProductionBackups({s3:backupS3,bucket:backupBucket});
+ console.log(`Production backup retention: ${retention.retentionDays} days; removed ${retention.deletedPrefixes.length} complete expired backup sets; newest set retained; blocked by incomplete newest: ${retention.blockedByIncompleteNewest}.`);
 }finally{
  await rm(root,{recursive:true,force:true});
  await sql.end();

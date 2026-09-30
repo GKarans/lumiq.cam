@@ -48,6 +48,7 @@ test('production backup is pinned to the independent production project and R2 b
  assert.match(backup,/endpoint='https:\/\/af664043db99694ff5a6ac88a7e7dc4d\.eu\.r2\.cloudflarestorage\.com'/);
  assert.doesNotMatch(backup,/cpweowosocjuccjsyyic|lumiq-closed-test-photos|sprzlvywzpeyuzbsyplz/);
  assert.match(backup,/validateMigrationPrefix\(migrations\)/);
+ assert.match(backup,/pruneProductionBackups\(\{s3:backupS3,bucket:backupBucket\}\)/);
  assert.match(backup,/lumiq_production_runtime state is not the reviewed least-privilege state/);
  assert.match(backup,/migrations\.length\} migrations/);
 });
@@ -78,6 +79,8 @@ test('scheduled Production backup task is user-scoped, DPAPI-backed, and never i
  assert.match(task,/StartWhenAvailable/);
  assert.match(task,/run-backup/);
  assert.match(runner,/\$env:LUMIQ_BACKUP_NONINTERACTIVE = '1'/);
+ assert.match(runner,/send-production-backup-alert\.mjs/);
+ assert.match(runner,/backupFailed/);
  assert.match(wrapper,/Scheduled backup is missing required credential/);
 });
 

@@ -469,15 +469,29 @@ switch ($Action) {
         throw "Missing encrypted credential '$name'. Run production-secrets.ps1 save-backup first."
       }
     }
+    $backupFailed = $false
     try {
       foreach ($name in $backupNames) { Set-ProcessSecret $name $vault[$name] }
       $env:LUMIQ_BACKUP_NONINTERACTIVE = '1'
       & (Join-Path $PSScriptRoot 'backup-production.ps1')
-      if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { $backupFailed = $true }
+    } catch {
+      $backupFailed = $true
     } finally {
       foreach ($name in @($backupNames + 'LUMIQ_BACKUP_NONINTERACTIVE')) { [Environment]::SetEnvironmentVariable($name, $null, 'Process') }
-      foreach ($value in $vault.Values) { if ($value -is [System.Security.SecureString]) { $value.Dispose() } }
     }
+    if ($backupFailed -and $vault.Contains($productionEmailKeyName) -and $vault[$productionEmailKeyName] -is [System.Security.SecureString]) {
+      try {
+        Set-ProcessSecret $productionEmailKeyName $vault[$productionEmailKeyName]
+        & node (Join-Path $PSScriptRoot 'send-production-backup-alert.mjs')
+      } catch {
+        Write-Warning 'Production backup failure alert could not be sent; check the scheduled task result.'
+      } finally {
+        [Environment]::SetEnvironmentVariable($productionEmailKeyName, $null, 'Process')
+      }
+    }
+    foreach ($value in $vault.Values) { if ($value -is [System.Security.SecureString]) { $value.Dispose() } }
+    if ($backupFailed) { throw 'Production backup failed. A sanitized owner alert was attempted; inspect the scheduled task result.' }
   }
   'check-production-backup' {
     $vault = Read-Vault
