@@ -32,3 +32,36 @@ test('Supabase Auth failures log safe request metadata without credentials or pr
   for(const [key,value] of Object.entries(previous)){if(value===undefined)delete process.env[key];else process.env[key]=value;}
  }
 });
+
+test('Supabase RPC failures log only safe status metadata',async()=>{
+ const previous={
+  PLATFORM_SUPABASE_URL:process.env.PLATFORM_SUPABASE_URL,
+  PLATFORM_SUPABASE_PUBLISHABLE_KEY:process.env.PLATFORM_SUPABASE_PUBLISHABLE_KEY,
+  PLATFORM_SESSION_ENCRYPTION_KEY:process.env.PLATFORM_SESSION_ENCRYPTION_KEY
+ };
+ Object.assign(process.env,{
+  PLATFORM_SUPABASE_URL:'https://isolated-fixture.supabase.co',
+  PLATFORM_SUPABASE_PUBLISHABLE_KEY:'fixture-publishable-key',
+  PLATFORM_SESSION_ENCRYPTION_KEY:'34'.repeat(32)
+ });
+ const warnings=[],originalWarn=console.warn,user={id:'user-fixture',email:'private@example.test',email_confirmed_at:new Date().toISOString(),user_metadata:{name:'Test User'}};
+ console.warn=message=>warnings.push(message);
+ try{
+  const service=supabaseAuthService({}, {
+   origin:'https://lumiq.cam',mail:async()=>{},
+   fetcher:async url=>url.includes('/auth/v1/token')
+    ?Response.json({user,access_token:'private-access-token',refresh_token:'private-refresh-token'})
+    :Response.json({code:'42501',message:'private@example.test bearer private-database-detail'},
+     {status:403,headers:{'sb-request-id':'request-fixture'}})
+  });
+  await assert.rejects(service.login({email:user.email,password:'private-password'}),/account could not be synchronized/i);
+  assert.equal(warnings.length,1);
+  assert.deepEqual(JSON.parse(warnings[0]),{
+   level:'warn',component:'supabase-auth-rpc',rpc:'sync_own_account',status:403,code:'42501',requestId:'request-fixture'
+  });
+  assert.doesNotMatch(warnings[0],/private@example|private-access|private-refresh|private-password|private-database-detail|bearer/i);
+ }finally{
+  console.warn=originalWarn;
+  for(const [key,value] of Object.entries(previous)){if(value===undefined)delete process.env[key];else process.env[key]=value;}
+ }
+});
