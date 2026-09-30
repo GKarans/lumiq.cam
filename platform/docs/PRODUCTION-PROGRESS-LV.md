@@ -6,6 +6,8 @@ Cloudflare `lumiq-production-candidate` Settings pārbaudīti tikai lasīšanai.
 
 Tātad kandidāts nav datu ziņā izolēta vide: pieprasījumi caur to var izpildīt kodu pret tiem pašiem Production servisiem. Kandidātā neveicu testus, datus nemainīju un Worker neizdzēsu. Īpašniekam lūgts apstiprināt tikai `workers.dev` hostname atslēgšanu kā atgriezenisku tūlītēju riska mazinājumu; `lumiq.cam` Production maršruts netiek aiztikts. Pilna kandidāta noņemšana paliek pēc QA/atkarību/backup audita.
 
+Salīdzinājumam Cloudflare `lumiq-closed-test` ir `PLATFORM_MODE=staging`, atsevišķs test Supabase projekta ref, Closed Test Hyperdrive un `lumiq-closed-test-photos` R2 binding; tam ir ieplānota Cron un nav Queue consumer. `lumiq-restore-drill-candidate` izmanto atsevišķu Recovery Supabase projekta ref, `lumiq-restore-drill` Hyperdrive un `lumiq-restore-drill-20260925` bucket, `PLATFORM_MODE=staging`, `PLATFORM_RELEASE_APPROVED=NOT_APPROVED`; tam ir ieplānota Cron un nav Queue consumer. Tos nedrīkst uztvert kā pierādīti liekus, līdz restore atkarības un Cron mērķis ir pārbaudīti. Secret vērtības netika lasītas; konfigurācijas nemainītas.
+
 ## 2026-10-01 - Cloudflare resursu inventārs (read-only)
 
 Cloudflare Workers & Pages rāda 5 Worker: `lumiq-production` (71 request saraksta pēdējā intervālā), `lumiq-production-candidate` (143), `lumiq-closed-test` (1.5k requests un 1.5k errors), `lumiq-restore-drill-candidate` (1.5k) un `event-photo-media` (4). Workers perioda panelis rādīja `$0.00` billable usage `Sep 12–Oct 12`; kopējie rādītāji tajā brīdī bija 25.75k requests, 230,282 ms CPU un 26.1k observability events. Tie ir konta redzamie skaitītāji, nevis katra Worker atsevišķs izdevumu vai atkarību audits.
