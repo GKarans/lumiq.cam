@@ -9,7 +9,7 @@ const templates=[
  ['supabase-confirm-signup.html','{{ .ConfirmationURL }}'],
  ['supabase-invite.html','{{ .ConfirmationURL }}'],
  ['supabase-magic-link.html','{{ .ConfirmationURL }}'],
- ['supabase-reset-password.html','{{ .RedirectTo }}?token={{ .TokenHash }}'],
+ ['supabase-reset-password.html','{{ .SiteURL }}/auth/reset?token={{ .TokenHash }}'],
  ['supabase-reauthentication.html','{{ .Token }}'],
  ['supabase-change-email.html','{{ .ConfirmationURL }}'],
  ['supabase-password-changed.html',null],
@@ -27,6 +27,10 @@ test('Supabase Auth email templates are responsive, localized and use supported 
   assert.match(html,/{{ else }}/,file);
   assert.match(html,/{{ end }}/,file);
   if(requiredVariable)assert.ok(html.includes(requiredVariable),`${file} includes ${requiredVariable}`);
+  if(file==='supabase-reset-password.html'){
+   assert.equal((html.match(/<a\s+href=/gi)||[]).length,2,'reset template has exactly one localized reset link per language');
+   assert.doesNotMatch(html,/\.ConfirmationURL|\.RedirectTo/,'reset link never falls back to a root or fragment callback');
+  }
  }
  const changedEmail=await readFile(path.join(root,'supabase-change-email.html'),'utf8');
  assert.match(changedEmail,/{{ \.NewEmail }}/);
