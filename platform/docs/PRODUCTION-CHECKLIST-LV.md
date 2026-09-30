@@ -19,6 +19,7 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 - [x] Sagatavotas sešas responsīvas, LV/EN Supabase Auth HTML veidnes: reģistrācijas apstiprinājums, uzaicinājums, paroles atiestatīšana, e-pasta maiņa un abu izmaiņu drošības paziņojumi.
 - [x] Saglabāts `Lumiq` sūtītāja nosaukums; Worker paziņojumi atbalsta gan teksta, gan HTML saturu.
 - [x] Pēc pārlādes pārbaudīts Production SMTP sūtītājs `noreply@lumiq.cam`, lietotājvārds `resend`, host `smtp.resend.com:465`; saglabātā parole paliek noslēpta.
+- [x] 2026-09-30 Production Supabase Auth `Invite user` veidnei iestatīta tukšā tēma `Uzaicinājums uz Lumiq / Invitation to Lumiq`; pēc saglabāšanas un pārlādes tā joprojām redzama, HTML saturs nav mainīts.
 - [x] 2026-09-30 lokāli pārbaudīta e-pasta funkcionalitāte: `npm test` (171/171), Auth Edge Function testi (8/8), `deno check` un `deno audit` bez atrastām ievainojamībām. Tie nesūta īstu vēstuli un neaizstāj piegādes pārbaudi.
 - [ ] Nosūtīt kontrolētu Auth testa vēstuli un pārbaudīt reālu piegādi, saites un kļūdu žurnālus.
 - [ ] Pēc `support@` saņemšanas konfigurēt un notestēt Reply-To.
