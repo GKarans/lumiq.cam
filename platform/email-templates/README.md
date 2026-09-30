@@ -2,7 +2,8 @@
 
 These Supabase Auth templates use the supported Go-template variables
 `ConfirmationURL`, `NewEmail`, and user metadata `Data.locale`. Registration
-stores `locale` as `lv` or `en`; other Auth messages fall back to English.
+stores `locale` as `lv` or `en`; the reset email is a single static bilingual
+card, while other localized Auth messages select one language using `Data.locale`.
 
 ## Supabase Authentication templates
 
@@ -14,7 +15,7 @@ Templates**:
 | Confirm signup | `supabase-confirm-signup.html` | `Apstiprini Lumiq e-pastu / Confirm your Lumiq email` |
 | Invite user | `supabase-invite.html` | `Uzaicinājums uz Lumiq / Invitation to Lumiq` |
 | Magic link or OTP | `supabase-magic-link.html` | `Pieraksties Lumiq / Sign in to Lumiq` |
-| Reset password | `supabase-reset-password.html` (uses `{{ .SiteURL }}/auth/reset?token={{ .TokenHash }}` so recovery always reaches the canonical production callback) | `Atjauno Lumiq paroli / Reset your Lumiq password` |
+| Reset password | `supabase-reset-password.html` (one static bilingual card and one `{{ .SiteURL }}/auth/reset?token={{ .TokenHash }}` link so recovery always reaches the canonical production callback) | `Atjauno Lumiq paroli / Reset your Lumiq password` |
 | Reauthentication | `supabase-reauthentication.html` | `{{ if eq .Data.locale "lv" }}Lumiq drošības kods{{ else }}Lumiq verification code{{ end }}` |
 | Change email address | `supabase-change-email.html` | `Apstiprini jauno Lumiq e-pastu / Confirm your new Lumiq email` |
 | Password changed notification | `supabase-password-changed.html` | `Lumiq konta paroles drošības paziņojums / Lumiq password security notice` |

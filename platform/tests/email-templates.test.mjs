@@ -23,12 +23,17 @@ test('Supabase Auth email templates are responsive, localized and use supported 
   assert.equal((html.match(/<!doctype html>/gi)||[]).length,1,`${file} contains one HTML document`);
   assert.match(html,/<meta name="viewport" content="width=device-width,initial-scale=1">/,file);
   assert.match(html,/Lumiq/,file);
-  assert.match(html,/{{ if eq \.Data\.locale "lv" }}/,file);
-  assert.match(html,/{{ else }}/,file);
-  assert.match(html,/{{ end }}/,file);
+  if(file!=='supabase-reset-password.html'){
+   assert.match(html,/{{ if eq \.Data\.locale "lv" }}/,file);
+   assert.match(html,/{{ else }}/,file);
+   assert.match(html,/{{ end }}/,file);
+  }
   if(requiredVariable)assert.ok(html.includes(requiredVariable),`${file} includes ${requiredVariable}`);
   if(file==='supabase-reset-password.html'){
-   assert.equal((html.match(/<a\s+href=/gi)||[]).length,2,'reset template has exactly one localized reset link per language');
+   assert.equal((html.match(/<a\s+href=/gi)||[]).length,1,'reset template has exactly one reset link');
+   assert.equal((html.match(/<h1\b/gi)||[]).length,1,'reset template has exactly one card heading');
+   assert.equal((html.match(/<table\b/gi)||[]).length,2,'reset template has one logo table and one email table');
+   assert.doesNotMatch(html,/{{\s*(?:if|else|end)\b/,'reset template does not duplicate locale branches in rendered email');
    assert.doesNotMatch(html,/\.ConfirmationURL|\.RedirectTo/,'reset link never falls back to a root or fragment callback');
   }
  }
