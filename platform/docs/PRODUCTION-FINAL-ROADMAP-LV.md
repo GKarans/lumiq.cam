@@ -2,7 +2,7 @@
 
 Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `lumiq.cam` maršruta pārslēgšanas. Kandidāts paliek aiz Cloudflare Access ar atļauju tikai īpašniekam. `app-images` un `event-photo-media` ir neaizskarami. Šis ir jaunais darba saraksts; statusu atzīmē tikai pēc norādītā pierādījuma.
 
-**Pēdējā pārskatīšana:** 2026-09-30. Apstiprināta `support@` pāradresācija un izvietota izolētā kandidāta versija ar DLQ consumer, saglabājot Access. Šis saraksts neaizstāj pienākumu pārbaudīt katru dzīvo plūsmu; lokāli testi nav Production pierādījums.
+**Pēdējā pārskatīšana:** 2026-09-30. Apstiprināta `support@` pāradresācija un izolētajā kandidātā izvietota precizēta Production datu apstrādes un testa datu atruna; DLQ consumer un Access saglabāti. Šis saraksts neaizstāj pienākumu pārbaudīt katru dzīvo plūsmu; lokāli testi nav Production pierādījums.
 
 **Darba princips:** kamēr TET izskata 2026-09-25 pieteikumu, pabeigt visus pārējos darbus kandidātā aiz Cloudflare Access. `lumiq.cam` DNS/Worker maršrutu neaiztikt. TET atbilde un bloķējuma noņemšana ir ārējs priekšnoteikums, nevis iemesls apturēt pārējo darbu; domēna pārslēgšana ir pēdējais solis.
 
@@ -11,7 +11,7 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 ## Īsā izpildes secība
 
 1. [x] Iestatīt un ar testa vēstuli pārbaudīt `support@lumiq.cam` saņemšanu; `noreply@lumiq.cam` piegādes un Lumiq veidnes pārbaudes turpinās atsevišķi.
-2. [x] Ar īpašnieka apstiprinājumu atjaunināts kandidāta Worker, saglabājot Cloudflare Access un nemainot `lumiq.cam` maršrutu.
+2. [x] 2026-09-30 ar īpašnieka iepriekšēju apstiprinājumu atjaunināts tikai `workers.dev` kandidāts, skaidri norādot Production Supabase/R2 izmantošanu, sintētisku testa datu prasību un simulētus maksājumus; `support@` kontaktinformācija izlabota. Cloudflare Access un DLQ consumer saglabāts, `lumiq.cam` maršruts nav mainīts.
 3. [ ] Kandidātā aiz Access pārbaudīt konta/Auth plūsmas un visu foto ciklu ar QA datiem.
 4. [ ] Pārbaudīt divu organizatoru izolāciju, anonīmo piekļuvi, Queue/DLQ, rezerves kopijas, brīdinājumus un žurnālus.
 5. [ ] Pabeigt kandidāta pieņemšanas pārbaudi un gaidīt TET atbildi. Atbilde gaidāma līdz 2026-10-02; ja tās nav, 2026-10-05 nosūtīt atgādinājumu.
@@ -76,6 +76,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 - [x] 2026-09-30 novecojušais `/demo` ceļš lokālajā vidē turpina atvērt parauga pasākumu; ar Production konfigurāciju tas novirza uz `/features` un neizsauc `/api/local/demo`. Pilnais `npm run check` izturēja: 171/171 testi, secret scan, `npm audit` (0 ievainojamību), build (60 publiskie faili), pārlūka/aksesibilitātes plūsmas un 9 ekrāna platumi. Tas ir lokāls pierādījums, nevis izvietotas Production izmaiņas.
 - [x] 2026-09-30 atkārtots `npm run browser`: izolēta lokāla reģistrācijas/pieteikšanās un ielūguma callback pārbaude, 20 foto augšupielāde ar īslaicīgas kļūmes retry, sīktēli/priekšskatījums, viesu pasākuma redaktors, norēķinu skati un piekļūstamība. Pārbaudīti 9 platumi (320–1440 px); izmantoti sintētiski dati un nav veikti ārēji pieprasījumi. Tas neaizstāj kandidāta/Production pārbaudi aiz Access.
 - [x] 2026-09-30 pēc īpašnieka apstiprinājuma `lumiq-production-candidate` izvietots ar versiju `9288f54b-33be-49de-b50d-ba454cc79e4c` (100%); izmantots tikai `workers.dev`, saglabāta Production DB, `lumiq_production_runtime`, foto R2 un galvenās Queue piesaiste. `lumiq.cam` maršruts netika konfigurēts vai mainīts.
+- [x] 2026-09-30 izvietota gala kandidāta versija `13d547b3-de96-4cec-9076-d58d72f4c6d5`; izvade apstiprināja Production DB, `lumiq_production_runtime`, foto R2 un Production DLQ consumer. Anonīma `curl` pārbaude saņēma `302` uz Cloudflare Access login. Aiz īpašnieka sesijas pārbaudītas `/privacy`, `/terms` un `/refunds`; visās redzams 30. septembra datums, un atbalsta adrese ir `support@lumiq.cam`. Privātuma teksts skaidro Production Supabase/R2 izmantošanu, testu sintētisko datu prasību un simulētus maksājumus. Pilnais `npm run check` izturēja 179 testus, build, pārlūka plūsmas un piekļūstamības pārbaudes. `lumiq.cam` maršruts nav konfigurēts vai mainīts.
 - [x] Pēc izvietošanas anonīmi pārbaudīti `/`, `/healthz`, `/register`, `/demo` un `/features`; visi atgrieza `302` uz Cloudflare Access login hostname `lumiq-closed-test.cloudflareaccess.com`. Tas pārbauda bezsesijas vārtus, nevis īpašnieka sesijas UI vai Auth plūsmu.
 - [ ] Kandidātā izveidot marķētu QA pasākumu un QR kodu.
 - [ ] Ar telefonu atvērt viesa saiti, ievadīt vārdu, uzņemt foto, augšupielādēt to un pārbaudīt galeriju/sīktēlus.
