@@ -150,19 +150,28 @@ production-compatible Worker version that is still bound to the production
 resources and supports the current additive DB schema; otherwise fix forward
 while access is contained. Worker rollback does not restore DB/R2 state.
 
-For a later production release, record the exact known-good production version
-ID and rehearse that same-backend rollback before promotion. Use Wrangler's
-version/deployment commands only after confirming the Worker name and current
-production bindings:
+For a later production release, before promotion record the active deployment
+ID from `lumiq-production`, verify the version's Production Hyperdrive, EU photo
+R2 and Queue bindings, and rehearse that same-backend rollback before promotion.
+The live deployment list on 2026-10-01 showed
+`c685f77b-68ea-42f0-a2c3-264966f1bdd8` at 100%; this is the current baseline,
+not an independently QA-certified rollback target (the Auth sync defect is still
+open). Never roll back to `lumiq-production-candidate`, Closed Test, or Restore
+Drill. Keep owner-only Access in place throughout containment and rollback.
+Use Wrangler only after confirming the Worker name and the exact selected
+version's Production bindings:
 
 ```powershell
-npx wrangler deployments list --name <production-worker-name>
-npx wrangler rollback <known-good-production-version-id> --name <production-worker-name> --message "Lumiq production rollback"
+npx wrangler deployments list --name lumiq-production
+npx wrangler rollback <verified-production-version-id> --name lumiq-production --message "Lumiq production rollback"
 ```
 
 After rollback, verify the active deployment ID, production health, login,
-existing event/gallery access, one synthetic upload and R2/DB error rates.
-Never assume a rollback restores external resources or user data.
+existing event/gallery access, one consented synthetic upload, and R2/DB error
+rates. The rollback command has been checked against the installed Wrangler
+CLI syntax; rollback itself has not been rehearsed because it changes the live
+Worker. Never assume a rollback restores external resources, database schema,
+or user data.
 
 ## Cloudflare behavior references
 
