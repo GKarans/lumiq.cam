@@ -10,7 +10,7 @@ import postgres from 'postgres';
 import {GetObjectCommand,ListObjectsV2Command,PutObjectCommand,S3Client} from '@aws-sdk/client-s3';
 import {libpqConnectionForCli,waitForChildExit} from './restore-safety.mjs';
 import {captureTableInventory} from './restore-verification.mjs';
-import {PLATFORM_MIGRATIONS} from '../server/migration-manifest.mjs';
+import {validateMigrationPrefix} from './validate-migration-prefix.mjs';
 import {pipeline} from 'node:stream/promises';
 
 const sourceProject='baqebydtinysosueksgr';
@@ -59,13 +59,7 @@ try{
  await sql.begin('isolation level repeatable read, read only',async tx=>{
   const snapshot=(await tx`select pg_export_snapshot() as id`)[0].id;
   migrations=await tx`select version,checksum from public.platform_migrations order by version`;
-  const expected=PLATFORM_MIGRATIONS.map(entry=>entry.version).sort();
-  if(JSON.stringify(migrations.map(entry=>entry.version))!==JSON.stringify(expected))throw new Error('Production migration ledger does not match the complete application manifest; refusing the backup.');
-  for(let index=0;index<PLATFORM_MIGRATIONS.length;index++){
-   const source=await readFile(new URL(`../server/${PLATFORM_MIGRATIONS[index].file}`,import.meta.url),'utf8');
-   const checksum=createHash('sha256').update(source.replaceAll('\r\n','\n')).digest('hex');
-   if(migrations[index].version!==PLATFORM_MIGRATIONS[index].version||migrations[index].checksum!==checksum)throw new Error(`Production migration checksum differs at ${PLATFORM_MIGRATIONS[index].version}; refusing the backup.`);
-  }
+  await validateMigrationPrefix(migrations);
   const [runtime]=await tx`select rolcanlogin,rolinherit,rolbypassrls,rolsuper,rolcreatedb,rolcreaterole,rolreplication from pg_roles where rolname='lumiq_production_runtime'`;
   if(!runtime?.rolcanlogin||runtime.rolinherit||runtime.rolbypassrls||runtime.rolsuper||runtime.rolcreatedb||runtime.rolcreaterole||runtime.rolreplication)throw new Error('Production lumiq_production_runtime state is not the reviewed least-privilege state.');
   const [security]=await tx`
@@ -115,10 +109,9 @@ try{
   const local=await digest(file.local);
   if(size!==local.size||hash.digest('hex')!==local.sha256)throw new Error(`Uploaded backup checksum mismatch at ${file.key}.`);
  }
- await rm(root,{recursive:true});
  console.log(`Production backup verified in private R2: ${remotePrefix}; ${inventory.length} tables, ${migrations.length} migrations, ${objects.length} photos.`);
- console.log('Temporary local dump and photo copies were removed after remote read-back checks.');
 }finally{
+ await rm(root,{recursive:true,force:true});
  await sql.end();
  sourceS3.destroy();
  backupS3.destroy();

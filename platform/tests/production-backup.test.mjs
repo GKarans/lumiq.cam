@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
 import test from 'node:test';
 
 const [backup,wrapper,vaultWrapper,vaultTest,packageJson,verifyRuntime,rotateRuntime,rotateSafeRuntime,restoreAudit,restoreApply,checkRecoveryR2,provisionSafeRuntime,recoveryRestore,checkProductionBackup,putWorkerSecret,securityScan,restoreLocal]=await Promise.all([
@@ -46,10 +47,38 @@ test('production backup is pinned to the independent production project and R2 b
  assert.match(backup,/backupBucket='lumiq-production-backups'/);
  assert.match(backup,/endpoint='https:\/\/af664043db99694ff5a6ac88a7e7dc4d\.eu\.r2\.cloudflarestorage\.com'/);
  assert.doesNotMatch(backup,/cpweowosocjuccjsyyic|lumiq-closed-test-photos|sprzlvywzpeyuzbsyplz/);
- assert.match(backup,/PLATFORM_MIGRATIONS\.map\(entry=>entry\.version\)/);
- assert.match(backup,/Production migration ledger does not match the complete application manifest/);
+ assert.match(backup,/validateMigrationPrefix\(migrations\)/);
  assert.match(backup,/lumiq_production_runtime state is not the reviewed least-privilege state/);
  assert.match(backup,/migrations\.length\} migrations/);
+});
+
+test('backup migration ledger must be a contiguous, checksum-valid application prefix',async()=>{
+ const {validateMigrationPrefix}=await import('../scripts/validate-migration-prefix.mjs');
+ const {PLATFORM_MIGRATIONS}=await import('../server/migration-manifest.mjs');
+ const ledger=[];
+ for(const entry of PLATFORM_MIGRATIONS.slice(0,PLATFORM_MIGRATIONS.length-1)){
+  const source=await readFile(new URL(`../server/${entry.file}`,import.meta.url),'utf8');
+  ledger.push({version:entry.version,checksum:createHash('sha256').update(source.replaceAll('\r\n','\n')).digest('hex')});
+ }
+ await assert.doesNotReject(validateMigrationPrefix(ledger));
+ await assert.rejects(validateMigrationPrefix([]),/empty or longer/);
+ await assert.rejects(validateMigrationPrefix([{...ledger[0],checksum:'0'.repeat(64)}]),/differs from the application manifest/);
+ await assert.rejects(validateMigrationPrefix([{...ledger[0],version:'047-missing-prefix'}]),/differs from the application manifest/);
+ await assert.rejects(validateMigrationPrefix([...ledger,{version:'099-unexpected',checksum:'0'.repeat(64)}]),/differs from the application manifest/);
+});
+
+test('scheduled Production backup task is user-scoped, DPAPI-backed, and never interactive',async()=>{
+ const [task,runner,wrapper]=await Promise.all([
+  readFile(new URL('../scripts/register-production-backup-task.ps1',import.meta.url),'utf8'),
+  readFile(new URL('../scripts/production-secrets.ps1',import.meta.url),'utf8'),
+  readFile(new URL('../scripts/backup-production.ps1',import.meta.url),'utf8')
+ ]);
+ assert.match(task,/LogonType Interactive -RunLevel Limited/);
+ assert.match(task,/New-ScheduledTaskTrigger -Daily -At '2:30AM'/);
+ assert.match(task,/StartWhenAvailable/);
+ assert.match(task,/run-backup/);
+ assert.match(runner,/\$env:LUMIQ_BACKUP_NONINTERACTIVE = '1'/);
+ assert.match(wrapper,/Scheduled backup is missing required credential/);
 });
 
 test('production backup validates and hashes a private R2 copy without changing database schema',()=>{
@@ -64,7 +93,7 @@ test('production backup validates and hashes a private R2 copy without changing 
  assert.match(backup,/PutObjectCommand/);
  assert.match(backup,/GetObjectCommand/);
  assert.match(backup,/Uploaded backup checksum mismatch/);
- assert.match(backup,/await rm\(root,\{recursive:true\}\)/);
+ assert.match(backup,/await rm\(root,\{recursive:true,force:true\}\)/);
  assert.doesNotMatch(backup,/\b(?:alter|create|drop)\s+(?:table|role|schema)\b/i);
 });
 

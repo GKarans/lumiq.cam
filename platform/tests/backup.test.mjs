@@ -38,9 +38,9 @@ test('version 4 backup validates an applied migration-chain prefix',async t=>{
  await writeFile(path.join(root,'manifest.json'),JSON.stringify(manifest));
  assert.equal(verify(root).status,0,verify(root).stderr);
  manifest.database.migrations[10].checksum='0'.repeat(64);await writeFile(path.join(root,'manifest.json'),JSON.stringify(manifest));
- assert.match(verify(root).stderr,/Backup migration chain differs at/);
+ assert.match(verify(root).stderr,/Migration ledger differs from the application manifest/);
  manifest.database.migrations=validMigrations;manifest.database.migrations.push({version:'999-unrecognized',checksum:'0'.repeat(64)});await writeFile(path.join(root,'manifest.json'),JSON.stringify(manifest));
- assert.match(verify(root).stderr,/Backup migration chain differs at 047-sync-account-auth-schema-usage/);
+ assert.match(verify(root).stderr,/Migration ledger differs from the application manifest at 047-sync-account-auth-schema-usage/);
 });
 
 test('backup verifier rejects altered dump, mismatched object size and escaping paths',async t=>{

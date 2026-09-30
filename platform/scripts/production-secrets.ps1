@@ -468,13 +468,14 @@ switch ($Action) {
         foreach ($value in $vault.Values) { if ($value -is [System.Security.SecureString]) { $value.Dispose() } }
         throw "Missing encrypted credential '$name'. Run production-secrets.ps1 save-backup first."
       }
-      Set-ProcessSecret $name $vault[$name]
     }
     try {
+      foreach ($name in $backupNames) { Set-ProcessSecret $name $vault[$name] }
+      $env:LUMIQ_BACKUP_NONINTERACTIVE = '1'
       & (Join-Path $PSScriptRoot 'backup-production.ps1')
       if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     } finally {
-      foreach ($name in $backupNames) { [Environment]::SetEnvironmentVariable($name, $null, 'Process') }
+      foreach ($name in @($backupNames + 'LUMIQ_BACKUP_NONINTERACTIVE')) { [Environment]::SetEnvironmentVariable($name, $null, 'Process') }
       foreach ($value in $vault.Values) { if ($value -is [System.Security.SecureString]) { $value.Dispose() } }
     }
   }

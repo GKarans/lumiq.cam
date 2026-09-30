@@ -2,7 +2,7 @@ import {readFile,lstat,realpath} from 'node:fs/promises';
 import {createReadStream} from 'node:fs';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
-import {PLATFORM_MIGRATIONS} from '../server/migration-manifest.mjs';
+import {validateMigrationPrefix} from './validate-migration-prefix.mjs';
 
 const root=path.resolve(process.argv[2]||'');
 if(!process.argv[2])throw new Error('Usage: node platform/scripts/verify-backup.mjs <backup-directory>');
@@ -31,13 +31,8 @@ const database=manifest.database;
  throw new Error('Backup manifest is incomplete or outdated. Create a new version 4 backup.');
  }
 if(manifest.format_version===4){
- if(database.public_dump!=='data-only'||!Array.isArray(database.migrations)||database.migrations.length===0||database.migrations.length>PLATFORM_MIGRATIONS.length)throw new Error('Version 4 backup is missing its data-only marker or has an invalid migration chain.');
- for(let index=0;index<database.migrations.length;index++){
-  const entry=PLATFORM_MIGRATIONS[index],applied=database.migrations[index];
-  const source=(await readFile(new URL(`../server/${entry.file}`,import.meta.url),'utf8')).replaceAll('\r\n','\n');
-  const checksum=createHash('sha256').update(source).digest('hex');
-  if(applied?.version!==entry.version||applied?.checksum!==checksum)throw new Error(`Backup migration chain differs at ${entry.version}.`);
- }
+ if(database.public_dump!=='data-only'||!Array.isArray(database.migrations))throw new Error('Version 4 backup is missing its data-only marker or migration chain.');
+ await validateMigrationPrefix(database.migrations);
 }
 const tableNames=new Set();
 for(const table of database.tables){

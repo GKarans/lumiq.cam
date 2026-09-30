@@ -45,11 +45,17 @@ $names = @(
 $backupPath = Join-Path ([IO.Path]::GetTempPath()) ('lumiq-production-backup-' + [guid]::NewGuid().ToString())
 $success = $false
 try {
+  if ($env:LUMIQ_BACKUP_NONINTERACTIVE -eq '1') {
+    foreach ($name in $names) {
+      if (-not [Environment]::GetEnvironmentVariable($name, 'Process')) { throw "Scheduled backup is missing required credential '$name'; no interactive prompt will be opened." }
+    }
+  } else {
   if (-not $env:LUMIQ_PRODUCTION_DB_PASSWORD) { Set-MaskedProcessValue 'LUMIQ_PRODUCTION_DB_PASSWORD' 'Lumiq Production postgres admin password (hidden; backup only)' }
   if (-not $env:LUMIQ_PRODUCTION_PHOTOS_R2_ACCESS_KEY_ID) { Set-MaskedProcessValue 'LUMIQ_PRODUCTION_PHOTOS_R2_ACCESS_KEY_ID' 'Production photos read-only R2 access key ID (hidden)' }
   if (-not $env:LUMIQ_PRODUCTION_PHOTOS_R2_SECRET_ACCESS_KEY) { Set-MaskedProcessValue 'LUMIQ_PRODUCTION_PHOTOS_R2_SECRET_ACCESS_KEY' 'Production photos read-only R2 secret (hidden)' }
   if (-not $env:LUMIQ_PRODUCTION_BACKUPS_R2_ACCESS_KEY_ID) { Set-MaskedProcessValue 'LUMIQ_PRODUCTION_BACKUPS_R2_ACCESS_KEY_ID' 'Production backups read-write R2 access key ID (hidden)' }
   if (-not $env:LUMIQ_PRODUCTION_BACKUPS_R2_SECRET_ACCESS_KEY) { Set-MaskedProcessValue 'LUMIQ_PRODUCTION_BACKUPS_R2_SECRET_ACCESS_KEY' 'Production backups read-write R2 secret (hidden)' }
+  }
   foreach ($name in $names) {
     if (-not [Environment]::GetEnvironmentVariable($name, 'Process')) { throw "Missing required credential '$name'. Run production-secrets.ps1 save-backup or enter it at the hidden prompt." }
   }
@@ -60,6 +66,6 @@ try {
 } finally {
   foreach ($name in $names) { [Environment]::SetEnvironmentVariable($name, $null, 'Process') }
   if (-not $success -and (Test-Path -LiteralPath $backupPath)) {
-    Write-Warning "Backup failed. Temporary production data remains at '$backupPath'; secure it and inspect the error before retrying."
+    Remove-Item -LiteralPath $backupPath -Recurse -Force
   }
 }
