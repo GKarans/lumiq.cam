@@ -119,7 +119,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 - [ ] Saņemt TET atbildi un skaidru apstiprinājumu par `lumiq.cam` atbloķēšanu. Ja līdz piecu darbdienu termiņam nav atbildes, sekot līdzi 2026-10-05.
 - [ ] Pēc apstiprinājuma pārbaudīt `lumiq.cam` no Tet tīkla un vēl viena neatkarīga tīkla; pārliecināties, ka STOP pāradresācija vairs nenotiek. Līdz šai pārbaudei domēna cutover nav atļauts.
 - [x] 2026-09-30 Cloudflare `lumiq-closed-test` Worker `Access` skatā `lumiq.cam` hostname atbilst `Lumiq closed test - owner` politikai; izvērstajā politikā redzams `Allow` tikai `guntars.karans@gmail.com`. Tā ir konfigurācijas pārbaude, nevis pierādījums, ka Tet tīkls vairs nerāda STOP lapu.
-- [x] 2026-09-30 anonīms `curl` uz pašreizējā kandidāta `/healthz` saņēma HTTP `302`, `WWW-Authenticate: Cloudflare-Access` un novirzījumu uz kandidāta Access pieteikšanos. Pārbaudīts bez sesijas sīkdatnēm; novirzījuma parakstītais metadatu tokens netika saglabāts. Tas pierāda anonīmas piekļuves bloķēšanu, nevis autorizēta īpašnieka lietotnes darbību.
+- [x] 2026-09-30 anonīmi `curl` uz kandidāta `/`, `/api/auth/session`, `/assets/app.js` un `/healthz` katram atgrieza HTTP `302` uz Cloudflare Access pieteikšanos; `/healthz` atbildē bija arī `WWW-Authenticate: Cloudflare-Access`. Pieprasījumi veikti bez sesijas sīkdatnēm; parakstītais novirzījuma metadatu tokens netika saglabāts. Tas pierāda, ka kandidāta lietotne, Auth sesija un statiskie faili nav anonīmi pieejami, nevis autorizēta īpašnieka lietotnes darbību.
 - Līdz šim brīdim `lumiq.cam` maršrutu nemainīt un STOP lapā neievadīt konta datus.
 
 ## C. Pēdējais darbs pēc TET atbloķēšanas: `lumiq.cam` pieslēgšana Production
