@@ -18,9 +18,9 @@
 - [x] Cloudflare ir `lumiq.cam` DNS zona ar Cloudflare nameserveriem; MX ieraksti e-pasta saņemšanai publiski atbild.
 - [x] `lumiq.cam` Cloudflare Custom Domain ir piesaistīts `lumiq-production`; Cloudflare un Google publiskais DNS atgrieza saknes A ierakstus uz Cloudflare.
 - [x] Pēc maršruta piesaistes TLS pieprasījums uz `lumiq.cam/healthz` atgrieza anonīmu Access `302`; saknes Access politika atļauj tikai īpašnieka e-pastu.
-- [ ] Pārbaudīt `lumiq.cam` no otra neatkarīga tīkla un pārbaudīt anonīmu Access atteikumu visām galvenajām lapām un API. 2026-09-30 šīs stacijas Wi-Fi DNS `192.168.1.254` atgrieza AAAA, bet A vaicājumam nebija atbildes; `1.1.1.1` atgrieza Cloudflare A/AAAA. Lietotāja ekrānā redzēts `DNS_PROBE_FINISHED_NXDOMAIN`; mājas tīkla/TET diagnostika paliek atvērta.
+- [x] 2026-09-30 pašreizējā stacija un publiskie `1.1.1.1`/`8.8.8.8` resolvers `lumiq.cam` atrisina uz Cloudflare A/AAAA. Anonīmie pieprasījumi uz `/`, `/api/auth/session`, `/event/not-a-real-event`, `/assets/app.js` un `/healthz` visi atgrieza `302` uz Access. Tas pierāda piekļuves bloķēšanu šajos maršrutos, nevis autorizēta Production sesijas funkcionalitāti vai pārbaudi no otra neatkarīga interneta pieslēguma. Agrākais lietotāja `DNS_PROBE_FINISHED_NXDOMAIN` un TET mājas tīkla diagnostika paliek atvērta.
 - [ ] Saglabāt dokumentētu atgriešanās procedūru uz iepriekšējo **Production** versiju, nevis uz testu datubāzi.
-- [ ] `www.lumiq.cam` novirzīt uz primāro adresi vai aizsargāt tikpat stingri; noņemt vecu parking lapu, ja tā vēl eksistē. Nav publiskas atvērtas alternatīvas Production lietotnei.
+- [ ] `www.lumiq.cam` DNS atrisina uz Cloudflare, bet anonīmais `https://www.lumiq.cam/healthz` 2026-09-30 atgrieza `522` (origin nav sasniedzams). Piesaistīt to primārajam Production hostam ar atbilstošu Access aizsardzību vai noņemt DNS ierakstu; pirms tam pārbaudīt, ka netiek radīta publiska apiešana. Pašlaik neapgalvot, ka `www` darbojas.
 - [ ] TET mājas Wi-Fi bloķējumu risināt paralēli ar TET pieteikumu. Tas nav priekšnoteikums Production darba turpināšanai, ja citi tīkli un autoritatīvais DNS ir pārbaudīti; neapiet brīdinājumu ar nedrošu sertifikāta vai pāradresācijas izņēmumu.
 
 ## 3. Datubāze, Auth un noslēpumi
