@@ -37,6 +37,7 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 
 - [x] Lokālajā izolētajā pārlūka testā izieta reģistrācija, e-pasta verifikācija, pieslēgšanās, paroles atjaunošanas saite un jauna parole; uzaicinājuma callback tests izturēja. Sintētiski dati, nevis Production.
 - [x] 2026-09-30 Supabase Production Auth žurnāli apstiprināja dzīvās paroles atjaunošanas saites `/verify` (`303`), sekojošu `Login` notikumu un autorizētu `/user` pieprasījumu testa kontam. Izrakstīšanās, sesijas atjaunošana un konta sakopšana vēl nav pārbaudīta.
+- [ ] 2026-09-30 atkārtotais Supabase Auth `Last hour` žurnāla vaicājums atgrieza `No data`, tādēļ jaunāko lietotāja autentifikācijas kļūdu ar to nevarēja diagnosticēt. Supabase publiskajā statusa lapā `Auth` un `eu-central-1` ir `Operational`; atvērtais incidents skar ASV austrumu latentumu un pats par sevi nepierāda cēloni šim kontam.
 - [ ] Ar atsevišķu testa kontu pārbaudīt reģistrāciju vai uzaicinājumu, apstiprinājuma saiti, pieslēgšanos, paroles atjaunošanu un izrakstīšanos.
 - [ ] Pārbaudīt sesijas atkārtotu ielādi un kļūdainas/expired saites saprotamu apstrādi.
 - [ ] Skaidri marķēt testa kontu, un pēc pārbaudes dzēst testa lietotāju un saistītos datus.
@@ -54,6 +55,7 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 - [x] Bez cookies kandidāta `/`, `/login`, `/api/auth/session`, `/api/config` un `/healthz` katrs atgrieza `302` uz Cloudflare Access login (2026-09-30).
 - [x] Workers → Access pašreizējā skatā kandidāta hostname un `lumiq.cam` ir piesaistīti `Lumiq closed test - owner` Allow politikai; abiem Worker nav atsevišķas Worker-level politikas.
 - [x] 2026-09-30 Cloudflare Access politikas definīcijā pārbaudīts: darbība `Allow`, vienīgais `Include` ir īpašnieka e-pasts `guntars.karans@gmail.com`; papildu `Require`/`Exclude` nav. Kandidāta un `lumiq.cam` Self-hosted lietotnes izmanto šo politiku.
+- [x] 2026-09-30 atkārtotā anonīmā pieprasījumu pārbaudē bez cookies kandidāta `/`, `/app`, `/api/auth/session` un `/healthz` atbildēja ar `302` uz `lumiq-closed-test.cloudflareaccess.com`. Tas apstiprina Access vārtus, nevis lietotnes datu izolāciju pēc Access autentifikācijas.
 - [x] Lokālais sintētiskais migrāciju tests apliecina organizer JWT lasījumu izolāciju un šauru RPC piekļuvi (`node --test platform/tests/migrations.test.mjs`, 3/3, 2026-09-30); tas nav dzīvs Production tests.
 - [ ] Ar diviem atsevišķiem testa organizatoriem Production kandidātā pierādīt, ka pasākumi un galerijas ir savstarpēji izolēti.
 - [ ] Ar anonīmu klientu pārbaudīt, ka organizatora API, dati un faili nav pieejami arī ar tiešu URL; sākotnējais `302` pārbauda Access robežu, nevis iekšējās lietotnes autorizāciju.
