@@ -27,17 +27,20 @@ test('backup verifier accepts matching application, Auth and object checksums',a
  const root=await fixture();try{const result=verify(root);assert.equal(result.status,0,result.stderr);assert.match(result.stdout,/database\/Auth data and 1 R2 objects/);}finally{await rm(root,{recursive:true,force:true});}
 });
 
-test('version 4 backup requires an exact data-only migration chain',async t=>{
+test('version 4 backup validates an applied migration-chain prefix',async t=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'lumiq-backup-v4-'));t.after(()=>rm(root,{recursive:true,force:true}));
  const database=Buffer.from('application data-only dump'),auth=Buffer.from('auth data-only dump');
  await writeFile(path.join(root,'database.dump'),database);await writeFile(path.join(root,'auth-users.dump'),auth);
  const digest=data=>createHash('sha256').update(data).digest('hex');
- const migrations=await Promise.all(PLATFORM_MIGRATIONS.map(async entry=>({version:entry.version,checksum:digest((await readFile(path.resolve('platform/server',entry.file),'utf8')).replaceAll('\r\n','\n'))})));
+ const migrations=await Promise.all(PLATFORM_MIGRATIONS.slice(0,46).map(async entry=>({version:entry.version,checksum:digest((await readFile(path.resolve('platform/server',entry.file),'utf8')).replaceAll('\r\n','\n'))})));
+ const validMigrations=structuredClone(migrations);
  const manifest={format_version:4,database:{scope:'lumiq-public-plus-auth-users-identities',public_dump:'data-only',file:'database.dump',size:database.length,sha256:digest(database),auth_file:'auth-users.dump',auth_size:auth.length,auth_sha256:digest(auth),tables:[{schema:'auth',name:'identities',rows:'0'},{schema:'auth',name:'users',rows:'0'},{schema:'public',name:'accounts',rows:'0'}],migrations},objects:[]};
  await writeFile(path.join(root,'manifest.json'),JSON.stringify(manifest));
  assert.equal(verify(root).status,0,verify(root).stderr);
  manifest.database.migrations[10].checksum='0'.repeat(64);await writeFile(path.join(root,'manifest.json'),JSON.stringify(manifest));
  assert.match(verify(root).stderr,/Backup migration chain differs at/);
+ manifest.database.migrations=validMigrations;manifest.database.migrations.push({version:'999-unrecognized',checksum:'0'.repeat(64)});await writeFile(path.join(root,'manifest.json'),JSON.stringify(manifest));
+ assert.match(verify(root).stderr,/Backup migration chain differs at 047-sync-account-auth-schema-usage/);
 });
 
 test('backup verifier rejects altered dump, mismatched object size and escaping paths',async t=>{

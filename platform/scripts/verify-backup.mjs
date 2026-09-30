@@ -31,8 +31,8 @@ const database=manifest.database;
  throw new Error('Backup manifest is incomplete or outdated. Create a new version 4 backup.');
  }
 if(manifest.format_version===4){
- if(database.public_dump!=='data-only'||!Array.isArray(database.migrations)||database.migrations.length!==PLATFORM_MIGRATIONS.length)throw new Error('Version 4 backup is missing its data-only marker or migration chain.');
- for(let index=0;index<PLATFORM_MIGRATIONS.length;index++){
+ if(database.public_dump!=='data-only'||!Array.isArray(database.migrations)||database.migrations.length===0||database.migrations.length>PLATFORM_MIGRATIONS.length)throw new Error('Version 4 backup is missing its data-only marker or has an invalid migration chain.');
+ for(let index=0;index<database.migrations.length;index++){
   const entry=PLATFORM_MIGRATIONS[index],applied=database.migrations[index];
   const source=(await readFile(new URL(`../server/${entry.file}`,import.meta.url),'utf8')).replaceAll('\r\n','\n');
   const checksum=createHash('sha256').update(source).digest('hex');
