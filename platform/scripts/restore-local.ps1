@@ -1,13 +1,23 @@
-param([string]$BackupPath)
+param(
+  [string]$BackupPath,
+  [string]$TargetProjectRef,
+  [string]$TargetBucket
+)
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
-$expectedProjectRef = 'sprzlvywzpeyuzbsyplz'
-$targetBucket = 'lumiq-restore-drill-20260925'
+$protectedProjectRefs = @('baqebydtinysosueksgr', 'mokdvgxxxcuqgzimofut', 'sprzlvywzpeyuzbsyplz', 'cpweowosocjuccjsyyic')
+$protectedBucketNames = @('app-images', 'event-photo-media', 'lumiq-production-photos', 'lumiq-production-backups', 'lumiq-production-recovery', 'lumiq-restore-drill-20260925')
 $r2Endpoint = 'https://af664043db99694ff5a6ac88a7e7dc4d.r2.cloudflarestorage.com'
 $backupRoot = Join-Path $env:LOCALAPPDATA 'Lumiq\backups'
-if ([string]::IsNullOrWhiteSpace($BackupPath)) {
-  $BackupPath = Join-Path $backupRoot 'lumiq-restore-drill-20260925-221255'
+if ([string]::IsNullOrWhiteSpace($BackupPath)) { throw 'Pass the exact locally saved, verified Production backup directory as BackupPath.' }
+if ([string]::IsNullOrWhiteSpace($TargetProjectRef)) { $TargetProjectRef = Read-Host 'New empty Supabase restore project ref' }
+if ([string]::IsNullOrWhiteSpace($TargetBucket)) { $TargetBucket = Read-Host 'New empty R2 bucket name (lumiq-restore-drill-<unique-suffix>)' }
+if ($TargetProjectRef -notmatch '^[a-z0-9-]{8,64}$' -or $protectedProjectRefs -contains $TargetProjectRef) {
+  throw 'Restore target project ref is invalid or protected; Production, Recovery, Restore Drill and paused test projects are never valid targets.'
+}
+if ($TargetBucket -notmatch '^lumiq-restore-drill-[a-z0-9](?:[a-z0-9-]{2,38}[a-z0-9])$' -or $protectedBucketNames -contains $TargetBucket) {
+  throw 'Restore target bucket must be a new, uniquely named lumiq-restore-drill bucket; protected or existing Lumiq buckets are not valid targets.'
 }
 
 $resolvedBackup = (Resolve-Path -LiteralPath $BackupPath).Path
@@ -38,8 +48,10 @@ if ($restoreVersion -notmatch '^pg_restore \(PostgreSQL\) 17\.') {
   throw "PostgreSQL 17 client tools are required. Found: '$restoreVersion'."
 }
 
-$confirmation = Read-Host "Type ONLY '$expectedProjectRef' to confirm the empty restore target"
-if ($confirmation -cne $expectedProjectRef) { throw 'Restore target confirmation did not match; no restore was run.' }
+$confirmation = Read-Host "Type ONLY '$TargetProjectRef' to confirm the new empty Supabase project"
+if ($confirmation -cne $TargetProjectRef) { throw 'Restore target confirmation did not match; no restore was run.' }
+$bucketConfirmation = Read-Host "Type ONLY '$TargetBucket' to confirm the new empty R2 bucket"
+if ($bucketConfirmation -cne $TargetBucket) { throw 'R2 bucket confirmation did not match; no restore was run.' }
 
 $environmentNames = @(
   'PLATFORM_DATABASE_URL',
@@ -73,19 +85,19 @@ try {
   if ($LASTEXITCODE -ne 0) { throw 'Backup verification failed; restore was not started.' }
 
   Set-MaskedProcessValue 'PLATFORM_DATABASE_URL' 'TARGET Supabase Session Pooler URL (5432)'
-  $env:PLATFORM_RESTORE_TARGET_REF = $expectedProjectRef
+  $env:PLATFORM_RESTORE_TARGET_REF = $TargetProjectRef
   $env:PLATFORM_RESTORE_DRILL = 'EMPTY-ISOLATED-TARGET'
-  $env:PLATFORM_R2_BUCKET = $targetBucket
+  $env:PLATFORM_R2_BUCKET = $TargetBucket
   $env:PLATFORM_R2_ENDPOINT = $r2Endpoint
   Set-MaskedProcessValue 'PLATFORM_R2_ACCESS_KEY_ID' 'Target-bucket Object Read & Write access key ID'
   Set-MaskedProcessValue 'PLATFORM_R2_SECRET_ACCESS_KEY' 'Target-bucket Object Read & Write secret key'
   Set-MaskedProcessValue 'PLATFORM_RUNTIME_PASSWORD' 'New lumiq_restore_runtime password (32+ URL-safe characters)'
-  $partialConfirmation = Read-Host "If retrying this partial drill restore, type ONLY 'RESET PARTIAL $expectedProjectRef'; otherwise press Enter"
-  if ($partialConfirmation -ceq "RESET PARTIAL $expectedProjectRef") {
+  $partialConfirmation = Read-Host "If retrying this partial drill restore, type ONLY 'RESET PARTIAL $TargetProjectRef $TargetBucket'; otherwise press Enter"
+  if ($partialConfirmation -ceq "RESET PARTIAL $TargetProjectRef $TargetBucket") {
     $env:PLATFORM_RESTORE_ALLOW_PARTIAL = '1'
   }
 
-  Write-Host "Restoring only to Supabase project '$expectedProjectRef' and R2 bucket '$targetBucket'."
+  Write-Host "Restoring only to Supabase project '$TargetProjectRef' and R2 bucket '$TargetBucket'."
   & npm.cmd run restore:drill -- $resolvedBackup
   if ($LASTEXITCODE -ne 0) { throw 'Restore drill failed. Do not use this target until the cause is reviewed.' }
 } finally {

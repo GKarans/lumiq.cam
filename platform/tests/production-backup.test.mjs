@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 
-const [backup,wrapper,vaultWrapper,vaultTest,packageJson,verifyRuntime,rotateRuntime,rotateSafeRuntime,restoreAudit,restoreApply,checkRecoveryR2,provisionSafeRuntime,recoveryRestore,checkProductionBackup,putWorkerSecret,securityScan]=await Promise.all([
+const [backup,wrapper,vaultWrapper,vaultTest,packageJson,verifyRuntime,rotateRuntime,rotateSafeRuntime,restoreAudit,restoreApply,checkRecoveryR2,provisionSafeRuntime,recoveryRestore,checkProductionBackup,putWorkerSecret,securityScan,restoreLocal]=await Promise.all([
  readFile(new URL('../scripts/backup-production.mjs',import.meta.url),'utf8'),
  readFile(new URL('../scripts/backup-production.ps1',import.meta.url),'utf8'),
  readFile(new URL('../scripts/production-secrets.ps1',import.meta.url),'utf8'),
@@ -18,7 +18,8 @@ const [backup,wrapper,vaultWrapper,vaultTest,packageJson,verifyRuntime,rotateRun
  readFile(new URL('../scripts/restore-production-recovery.mjs',import.meta.url),'utf8'),
  readFile(new URL('../scripts/check-production-backup.mjs',import.meta.url),'utf8'),
  readFile(new URL('../scripts/put-production-worker-secret.mjs',import.meta.url),'utf8'),
- readFile(new URL('../scripts/security-scan.mjs',import.meta.url),'utf8')
+ readFile(new URL('../scripts/security-scan.mjs',import.meta.url),'utf8'),
+ readFile(new URL('../scripts/restore-local.ps1',import.meta.url),'utf8')
 ]);
 
 test('Production email key and session key use fixed Worker bindings and stdin only',()=>{
@@ -186,6 +187,20 @@ test('Production recovery restore uses a new isolated target, verified latest ba
  assert.match(recoveryRestore,/PLATFORM_RESTORE_TARGET_REF:projectRef/);
  assert.match(recoveryRestore,/await rm\(root,\{recursive:true,force:true\}\)/);
  assert.doesNotMatch(recoveryRestore,/console\.(?:log|error)\([^\n]*(?:databasePassword|runtimePassword|accessKeyId|secretAccessKey)/i);
+});
+
+test('manual restore wrapper requires a new unprotected project and uniquely named empty drill bucket',()=>{
+ assert.match(restoreLocal,/\[string\]\$TargetProjectRef/);
+ assert.match(restoreLocal,/\[string\]\$TargetBucket/);
+ assert.match(restoreLocal,/protectedProjectRefs = @\('baqebydtinysosueksgr', 'mokdvgxxxcuqgzimofut', 'sprzlvywzpeyuzbsyplz', 'cpweowosocjuccjsyyic'\)/);
+ assert.match(restoreLocal,/TargetProjectRef -notmatch '\^\[a-z0-9-\]\{8,64\}\$' -or \$protectedProjectRefs -contains \$TargetProjectRef/);
+ assert.match(restoreLocal,/TargetBucket -notmatch '\^lumiq-restore-drill-\[a-z0-9\]\(\?:\[a-z0-9-\]\{2,38\}\[a-z0-9\]\)\$'/);
+ assert.match(restoreLocal,/protectedBucketNames = @\('app-images'.*'lumiq-restore-drill-20260925'\)/);
+ assert.match(restoreLocal,/Type ONLY '\$TargetProjectRef'/);
+ assert.match(restoreLocal,/Type ONLY '\$TargetBucket'/);
+ assert.match(restoreLocal,/Pass the exact locally saved, verified Production backup directory/);
+ assert.doesNotMatch(restoreLocal,/expectedProjectRef = 'sprzlvywzpeyuzbsyplz'/);
+ assert.doesNotMatch(restoreLocal,/targetBucket = 'lumiq-restore-drill-20260925'/);
 });
 
 test('latest Production backup verifier is bucket-pinned, read-only and runs through the DPAPI vault',()=>{
