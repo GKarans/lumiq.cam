@@ -125,6 +125,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 
 ## C. Pēdējais darbs pēc TET atbloķēšanas: `lumiq.cam` pieslēgšana Production
 
+- [x] 2026-09-30 Supabase Production Auth `URL Configuration` tikai-lasāmajā pārbaudē `Site URL` ir kandidāta `workers.dev`; atļautas četras precīzas kandidāta saites: `/auth/verify`, `/auth/reset`, `/auth/email` un Google callback. `lumiq.cam` vēl nav sarakstā un iestatījumus nemainīju, jo TET bloķējums nav atrisināts.
 - [ ] Pārbaudīt kandidāta gatavību: veselība, īpašnieka vienīgā Access politika, SMTP/Auth saites, foto plūsma un atgriešanas plāns.
 - [ ] Supabase Production Auth atļautajos URL pievienot precīzos `https://lumiq.cam` callback/redirect maršrutus, nepievienojot plašus wildcard.
 - [ ] Pēc īpašnieka apstiprinājuma pārslēgt `lumiq.cam` Worker maršrutu no Closed Test uz Production, saglabājot Access un īpašnieka ierobežojumu.
