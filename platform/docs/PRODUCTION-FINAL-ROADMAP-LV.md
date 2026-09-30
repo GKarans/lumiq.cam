@@ -24,7 +24,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 ### 1. E-pasta sūtīšana
 
 - [ ] **Lumiq dizaina standarts:** visām Auth un Worker transakciju vēstulēm lietot vienotu Lumiq tēmu, skaidru virsrakstu un darbības pogu, salasāmu mobilo izkārtojumu un teksta alternatīvu. Vēstulēs neiekļaut paroles vai tokenus.
-- [x] 2026-09-30 Resend panelī atkārtoti pārbaudīts: `lumiq.cam` un `send.lumiq.cam` ir `Verified`. Supabase Auth un Worker kandidāts izmanto `Lumiq <noreply@lumiq.cam>`; kandidāts izvietots, bet īsta Worker vēstules piegāde un `Reply-To` galvene vēl jāpārbauda.
+- [x] 2026-09-30 Resend panelī atkārtoti pārbaudīts: `lumiq.cam` un `send.lumiq.cam` ir `Verified`. Supabase Auth un Worker kandidāts izmanto `Lumiq <noreply@lumiq.cam>`; kandidāta Worker konfigurācijā noteikts `Reply-To: support@lumiq.cam`. Faktiskā Worker vēstules piegāde un saņemtā `Reply-To` galvene vēl jāpārbauda.
 - [ ] Veidņu komplektā pārbaudīt reģistrācijas apstiprinājumu, uzaicinājumu, paroles atjaunošanu, e-pasta maiņu, drošības paziņojumus un produkta transakciju vēstules; `support@lumiq.cam` likt Reply-To tikai pēc ienākošā pasta pārbaudes.
 - [x] 2026-09-30 Supabase Production SMTP pārbaudīts pēc pārlādes: custom SMTP ieslēgts, `smtp.resend.com:465`, sūtītājs `Lumiq <noreply@lumiq.cam>`, lietotājvārds `resend`; saglabātā parole ir noslēpta un netika mainīta.
 - [ ] Nosūtīt kontrolētu Auth testa vēstuli uz savu testa pastkasti; pārbaudīt piegādi, saites un kļūdu žurnālus. Pirms īstas vēstules nosūtīšanas apstiprināt konkrēto testa sūtījumu.
@@ -34,6 +34,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 - [ ] Pārbaudīt Auth e-pastus Gmail un vēl vienā pasta klientā: Lumiq dizainu, attēlojumu mobilajā izkārtojumā, LV/EN tekstu, saites un derīguma termiņu.
 - [x] Sagatavotas sešas Lumiq tēmas Supabase Auth HTML veidnes: reģistrācija, uzaicinājums, paroles atjaunošana, e-pasta maiņa un drošības paziņojumi.
 - [x] Worker transakciju vēstules veidnes atbalsta HTML un teksta variantu; lokālie e-pasta testi izturēti.
+- [x] 2026-09-30 mērķētie Auth callback, veidņu, operāciju, kandidāta deploy un Production preflight testi izturēja 27/27. Tie pārbauda lokālo sūtītāja/`Reply-To` konfigurāciju un veidņu kodu, nevis īstu piegādi vai saņemto MIME.
 - [x] 2026-09-30 atkārtoti palaisti `email-templates.test.mjs`, `auth-callback.test.mjs` un `operations.test.mjs`: 11/11 izturēti. Tie nepārbauda SMTP piegādi no Production.
 - [x] 2026-09-30 visas sešas Auth HTML veidnes lokāli vizuāli renderētas latviešu un angļu valodā 390 px mobilajā platumā ar sintētiskiem datiem; 12/12 renderējumi saturēja vēstules saturu un nepārsniedza pieejamo platumu. Pārbaude neizmantoja SMTP un neaizstāj īstu Gmail un otra pasta klienta pārbaudi.
 
@@ -53,7 +54,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 - [x] 2026-09-30 publiska DNS pārbaude caur Cloudflare 1.1.1.1 resolveri apstiprināja saknes Cloudflare Email Routing MX un SPF `v=spf1 include:_spf.mx.cloudflare.net ~all`. `outbound.lumiq.cam` CNAME norāda uz Resend `send.forge.rmta.net` SPF/MX, un Resend DKIM TXT ir publicēts gan saknei, gan `send.lumiq.cam`.
 - [x] 2026-09-30 pēc iepriekš apstiprinātās SPF saskaņošanas Cloudflare DNS saknes SPF ierakstā noņemts vairs neizmantotais Namecheap forwarding include; atstāts Cloudflare Email Routing dokumentētais SPF. Pēc saglabāšanas 1.1.1.1 publiski atgrieza jauno vērtību, Cloudflare MX palika nemainīti. Netika mainīts Resend CNAME/DKIM, nameserveri vai `lumiq.cam` Worker maršruts.
 - [ ] Publiskajā DNS nav `_dmarc.lumiq.cam` TXT ieraksta. Pirms publiskas sūtīšanas apstiprināt DMARC monitoringa politiku un nepieciešamo ziņojumu pārskatu galamērķi; līdz tam nepublicēt stingrāku `quarantine`/`reject` politiku.
-- [x] 2026-09-30 kandidāta Worker `Settings` panelī pārbaudīti `PLATFORM_EMAIL_FROM=Lumiq <noreply@lumiq.cam>` un `PLATFORM_EMAIL_REPLY_TO=support@lumiq.cam`. Tas apstiprina dzīvo konfigurāciju, bet ne faktiski nosūtītas Worker vēstules `Reply-To` galveni.
+- [x] 2026-09-30 kandidāta Worker `Settings` panelī pārbaudīti `PLATFORM_EMAIL_FROM=Lumiq <noreply@lumiq.cam>` un `PLATFORM_EMAIL_REPLY_TO=support@lumiq.cam`; mērķētie deploy/preflight testi un kandidāta dry-run arī izturēti. Tas apstiprina konfigurāciju, bet ne faktiski nosūtītas Worker vēstules `Reply-To` galveni.
 - [ ] Pārbaudīt Worker transakciju vēstules `Reply-To` galveni ar kontrolētu sūtījumu.
 - [ ] Supabase Auth SMTP konfigurācijai Reply-To parametrs nav norādīts oficiālajā iestatījumu dokumentācijā. Lokālais Send Email Hook prototips to atbalsta, taču aktivizēts Hook aizstāj iebūvēto SMTP. Pirms jebkādas aktivizēšanas pilnībā pārbaudīt Auth darbību/paziņojumu tipus un piegādes kļūmes izolētā projektā; Production SMTP paliek aktīvs.
 - [ ] Vēlāk vajadzīgās adreses, piemēram, `privacy@` vai `billing@`, sākumā veidot kā aliasus uz apstiprināto atbalsta galamērķi; šobrīd tās nav Production palaišanas priekšnoteikums.
