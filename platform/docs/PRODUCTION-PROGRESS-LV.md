@@ -229,6 +229,8 @@ Production backup un runtime drošības atkārtota pārbaude 2026-09-30, izmanto
 
 Šīs pārbaudes vēlreiz izpildītas šī turpinājuma laikā ar DPAPI vault: `check-production-backup` atkārtoti apstiprināja to pašu 21 tabulas/46 migrāciju backup un 0 foto objektus; `run-safe-runtime-check` atkārtoti apstiprināja RLS/runtime lomas robežas un 29 RPC allowlist. Restore un Production DB/R2 izmaiņas netika veiktas.
 
+Cloudflare Worker Observability `Invocations` read-only skatā 2026-09-30 pēdējās stundas jaunākie redzamie pieprasījumi uz kandidāta `/healthz` un `/api/auth/session` atgrieza HTTP 200; `/api/local/demo` atgrieza HTTP 404 ar Worker `outcome=ok`. Skatā nebija redzamu error invokāciju, taču tas nepierāda, ka vēsturisko 503 cēlonis ir atrisināts. Worker, Access un dati netika mainīti.
+
 Cloudflare Production Worker Settings atkārtoti apskatīti 2026-09-30: `PLATFORM_MODE=production`, `PLATFORM_RELEASE_APPROVED=production`, `PLATFORM_EMAIL_KEY` ir šifrēts noslēpums, bet `PLATFORM_EMAIL_FROM` Runtime mainīgais nav iestatīts. Repozitorija preflight prasa precīzi `Lumiq <noreply@send.lumiq.cam>`; to nepievienoju, jo tas var aktivizēt dzīvu transakciju sūtīšanu, pirms ir apstiprināts kontrolēts tests. Observability Logs, Invocation logs un persistētie Worker žurnāli ir ieslēgti ar 100% sampling; Traces un ārējie logu eksporta galamērķi nav ieslēgti. Worker iestatījumus nemainīju.
 
 Cloudflare Production Worker Observability Events skatā 2026-09-30 pēdējās stundas filtrs rādīja 7 `Success` un 0 `Errors`. Tabulā bija tikai GET izsaukumi uz konfigurācijas, sesijas un lokālā demo API ceļiem. Tas ir ierobežots darbības signāls, nevis pierādījums Auth e-pastu piegādei vai foto augšupielādei; nekādus pieprasījumus no šī paneļa neizraisīju.
