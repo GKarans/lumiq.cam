@@ -54,6 +54,7 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 - [ ] Ar diviem testa organizatoriem pārbaudīt savstarpēju pasākumu un galeriju izolāciju; ar anonīmu klientu pārbaudīt tiešos API un failu URL.
 - [ ] Pirms Queue DLQ patērētāja izvietošanas saņemt īpašnieka atsevišķu apstiprinājumu; kandidāts paliek aiz Access, `lumiq.cam` netiek mainīts.
 - 2026-09-30 Wrangler tiešā pārbaudē galvenajam `lumiq-production-jobs` patērētājam ir 10 retry un DLQ `lumiq-production-jobs-dlq`; DLQ patērētāju saraksts ir tukšs.
+- [x] 2026-09-30 lokālie Queue/Worker/reliability testi izturēja 63/63: sintezēta Queue nosūtīšanas kļūme un atkopšana, dead-letter apstrāde un manuāls retry, Worker starta kļūdas retry un ierobežota job apstrāde. Tas nav dzīvas Production Queue/DLQ pārbaudes pierādījums.
 - [ ] Pēc apstiprinātas izvietošanas pārbaudīt kontrolētu retry/DLQ scenāriju bez reālu klientu datu ietekmes.
 - [x] Production rezerves kopija pārbaudīta: 21 tabula, migrācijas `001–046`, kontrolsummas sakrīt. Esošo Recovery projektu nepārrakstīt.
 - [x] Recovery atjaunošanas pārbaude un migrāciju ķēde izieta.
