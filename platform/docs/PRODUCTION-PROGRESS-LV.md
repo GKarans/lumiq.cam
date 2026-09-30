@@ -268,3 +268,5 @@ Cloudflare Billing Budget Alerts read-only pārbaude 2026-09-30: automātiskajam
 Cloudflare Queue metrikas read-only pārbaude 2026-09-30, `Last 24 hours` (GMT+3): `lumiq-production-jobs` un `lumiq-production-jobs-dlq` katrai ir 0 messages ingested, 0 retried, 0 backlog un 0 s consumer lag; DLQ statuss ir `Inactive`. Rindās testa ziņojumus nepievienoju; DLQ consumer/deploy nemainīju. Šie dati apstiprina tukšu sākuma stāvokli, nevis dzīvu kļūmes/retry/DLQ ceļu.
 
 Cloudflare kandidāta Worker Observability `Events` read-only skatā 2026-09-30 ap 05:25 GMT+3, periodā `Last 1 hour`, bija 15 `Success`, 0 `Errors`. Redzamie ieraksti bija GET `/api/config`, `/api/auth/session` un `/api/local/demo`; tādēļ tas neapstiprina reģistrācijas, Auth e-pasta vai foto plūsmas sekmes. Worker darbības izmaiņas neveicu.
+
+Supabase Production Auth SMTP read-only pārbaude 2026-09-30: custom SMTP ir ieslēgts, sender name `Lumiq`, sender email `noreply@lumiq.cam`, host `smtp.resend.com`, ports `465`, minimum interval 60 s. SMTP parole bija paslēpta; to nenolasīju un iestatījumu nemainīju.
