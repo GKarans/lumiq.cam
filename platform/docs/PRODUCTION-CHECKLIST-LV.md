@@ -50,7 +50,8 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 
 ## 6. Fona darbi, rezerves kopijas un uzraudzība
 
-- [ ] Pievienot un pārbaudīt Production DLQ patērētāju; pašlaik DLQ nav patērētāja, lai gan pēdējā pārbaudē backlog bija 0. Pirms izvietošanas vajadzīgs atsevišķs apstiprinājums.
+- [ ] Pievienot Production DLQ patērētāju un pārbaudīt Queue retry/DLQ dzīvajā vidē; pirms izvietošanas un kontrolētas kļūmes injicēšanas vajadzīgs atsevišķs apstiprinājums, jo tas var palaist Queue darbus pret Production DB.
+- [x] 2026-09-30 Cloudflare Queue read-only pārbaude: `lumiq-production-jobs` Active ar `lumiq-production-candidate` consumer; batch 1, max wait 5 s, 10 retry, retry delay 0 s, concurrency 1, piesaistīts `lumiq-production-jobs-dlq`. DLQ rinda ir Inactive bez consumer; dashboard rāda 0 queued un 0 average backlog. Dzīvu kļūmi neinjicēju.
 - [x] Jaunākā Production rezerves kopija atkārtoti pārbaudīta 2026-09-30 ar DPAPI komandu `check-production-backup`: `production/2026-09-29T15-47-15-316Z`, 21 tabula, migrācijas 001–046, 0 foto objektu; kontrolsummas sakrīt un atjaunošana netika veikta.
 - [x] Recovery mērķa atjaunošana un migrāciju ķēde pārbaudīta; aizpildīto Recovery projektu nepārrakstīt.
 - [x] 2026-09-30 pārbaudīti divi aktīvi Cloudflare Billing Budget Alert: automātiskais `$10` slieksnis un `$50` slieksnis; abiem e-pasta saņēmējs ir īpašnieka konta adrese. Testa vēstule netika sūtīta.
