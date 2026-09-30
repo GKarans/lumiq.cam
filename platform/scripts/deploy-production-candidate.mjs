@@ -43,6 +43,17 @@ export function assertOwnerAccessRedirect(status, location) {
   requireThat(status === 302 && redirect.protocol === "https:" && redirect.hostname.endsWith(".cloudflareaccess.com"), "Candidate is not protected by the expected Cloudflare Access login redirect.");
 }
 
+export function latestDeployedVersion(deployments) {
+  const latest = [...(Array.isArray(deployments) ? deployments : [])]
+    .filter(deployment => Number.isFinite(Date.parse(deployment.created_on || "")))
+    .sort((a, b) => Date.parse(b.created_on) - Date.parse(a.created_on))[0];
+  return latest?.versions?.find(item => item.percentage === 100)?.version_id || null;
+}
+
+export function assertDlqConsumerState(consumers) {
+  requireThat(Array.isArray(consumers) && (consumers.length === 0 || (consumers.length === 1 && consumers[0].script === workerName && !consumers[0].dead_letter_queue)), "The Production DLQ already has an unexpected consumer; stop for a separate review.");
+}
+
 function wrangler(args, {json = false} = {}) {
   const command = path.join(root, "node_modules/wrangler/bin/wrangler.js");
   try {
@@ -92,7 +103,7 @@ async function main() {
   requireThat(queues.includes(queueName) && queues.includes(dlqName), "Both existing Production Queue resources must be present before deployment.");
   const mainConsumers = readConsumer(queueName);
   requireThat(mainConsumers.length === 1 && mainConsumers[0].script === workerName && mainConsumers[0].dead_letter_queue === dlqName, "The existing Production queue consumer differs from the reviewed candidate configuration.");
-  requireThat(readConsumer(dlqName).length === 0, "The Production DLQ already has a consumer; stop for a separate review.");
+  assertDlqConsumerState(readConsumer(dlqName));
 
   await assertAccess(validated.origin);
   const tempDir = await mkdtemp(path.join(workerDir, ".candidate-deploy-"));
@@ -112,12 +123,13 @@ async function main() {
 
     wrangler(["deploy", "--config", configPath]);
     await assertAccess(validated.origin);
+    const mainConsumersAfter = readConsumer(queueName);
+    requireThat(mainConsumersAfter.length === 1 && mainConsumersAfter[0].script === workerName && mainConsumersAfter[0].dead_letter_queue === dlqName, "The deployed candidate no longer consumes the Production jobs Queue as reviewed.");
     const dlqConsumers = readConsumer(dlqName);
     requireThat(dlqConsumers.length === 1 && dlqConsumers[0].script === workerName && !dlqConsumers[0].dead_letter_queue, "The deployed candidate did not attach the expected flat DLQ consumer.");
     const secretsAfter = readSecretNames();
     requireThat(["PLATFORM_EMAIL_KEY", "PLATFORM_SESSION_ENCRYPTION_KEY"].every(name => secretsAfter.includes(name)), "A required pre-existing Worker secret is no longer configured.");
-    const deployment = parseJson(wrangler(["deployments", "list", "--name", workerName, "--json"], {json: true}), "Worker deployment list")[0];
-    const version = deployment?.versions?.find(item => item.percentage === 100)?.version_id;
+    const version = latestDeployedVersion(parseJson(wrangler(["deployments", "list", "--name", workerName, "--json"], {json: true}), "Worker deployment list"));
     requireThat(version, "Cloudflare did not report a 100% candidate deployment version.");
     console.log(`Owner-only candidate deployed: worker=${workerName}, version=${version}, DB project=${remote.projectRef}, runtime=${remote.runtimeRole}, R2=${validated.bucket}, Production DLQ consumer attached. No custom route was configured.`);
   } finally {

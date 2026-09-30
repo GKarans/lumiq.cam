@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFile} from "node:fs/promises";
-import {assertOwnerAccessRedirect, prepareCandidateDeployment} from "../scripts/deploy-production-candidate.mjs";
+import {assertDlqConsumerState, assertOwnerAccessRedirect, latestDeployedVersion, prepareCandidateDeployment} from "../scripts/deploy-production-candidate.mjs";
 
 const closedTestId = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 
@@ -64,6 +64,21 @@ test("candidate deployment must keep owner-only Access redirect", () => {
   assert.doesNotThrow(() => assertOwnerAccessRedirect(302, "https://lumiq.cloudflareaccess.com/cdn-cgi/access/login"));
   assert.throws(() => assertOwnerAccessRedirect(200, "https://lumiq.cloudflareaccess.com/cdn-cgi/access/login"), /not protected/);
   assert.throws(() => assertOwnerAccessRedirect(302, "https://attacker.example/login"), /not protected/);
+});
+
+test("candidate deployment verification selects the newest fully deployed version", () => {
+  assert.equal(latestDeployedVersion([
+    {created_on: "2026-09-29T19:19:11.000Z", versions: [{version_id: "old", percentage: 100}]},
+    {created_on: "2026-09-30T12:51:31.000Z", versions: [{version_id: "new", percentage: 100}]}
+  ]), "new");
+  assert.equal(latestDeployedVersion([]), null);
+});
+
+test("candidate deploy can be rechecked after it has attached its own flat DLQ consumer", () => {
+  assert.doesNotThrow(() => assertDlqConsumerState([]));
+  assert.doesNotThrow(() => assertDlqConsumerState([{script: "lumiq-production-candidate"}]));
+  assert.throws(() => assertDlqConsumerState([{script: "other-worker"}]), /unexpected consumer/);
+  assert.throws(() => assertDlqConsumerState([{script: "lumiq-production-candidate", dead_letter_queue: "nested"}]), /unexpected consumer/);
 });
 
 test("deployment command stays explicit and the generic Cloudflare deploy guard remains intact", async () => {
