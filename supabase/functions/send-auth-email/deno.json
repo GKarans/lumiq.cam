@@ -1,0 +1,7 @@
+{
+  "nodeModulesDir": "auto",
+  "lock": "./deno.lock",
+  "imports": {
+    "standardwebhooks": "npm:standardwebhooks@1.0.0"
+  }
+}
