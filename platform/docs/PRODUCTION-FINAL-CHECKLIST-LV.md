@@ -25,6 +25,7 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 ## 2. Lumiq e-pastu dizains un pārbaude
 
 - [x] Sagatavotas un Production Supabase Auth saglabātas Lumiq HTML veidnes reģistrācijas apstiprināšanai, uzaicinājumam, paroles atjaunošanai, e-pasta maiņai un konta drošības paziņojumiem.
+- [x] 2026-09-30 Supabase Production veidnē `Change email address` saglabāta tēma `Apstiprini jauno Lumiq e-pastu / Confirm your new Lumiq email`; pēc lapas pārlādes vērtība joprojām bija iestatīta.
 - [x] Worker transakciju vēstulēm Resend payload satur gan `text`, gan `html`; pēdējā `node --test platform/tests/email-templates.test.mjs platform/tests/operations.test.mjs` pārbaude 2026-09-30 izturēja 8/8.
 - [ ] Kontrolēti nosūtīt Auth vēstules uz testa pastkasti; pārbaudīt reālo piegādi, saites, LV/EN tekstu, mobilā izkārtojuma un MIME/plain-text uzvedību.
 - [ ] Pārbaudīt vēstules Gmail un vismaz vienā citā pasta klientā.
