@@ -36,6 +36,17 @@ test('all legal policy copy is translated in Latvian and remains English in Engl
  }finally{globalThis.localStorage=previous;}
 });
 
+test('legal operator fields use the selected Lumiq domain in both locales',()=>{
+ const previous=globalThis.localStorage;
+ const fields=[legal.privacy.sections[0][1],legal.terms.sections[0][1],legal.refunds.sections.at(-1)[1]];
+ try{
+  globalThis.localStorage={getItem:()=> 'en'};
+  for(const source of fields){assert.match(source,/https:\/\/lumiq\.cam/);assert.doesNotMatch(source,/domain: \[not selected\]|website\/domain: \[not selected\]/i);}
+  globalThis.localStorage={getItem:()=> 'lv'};
+  for(const source of fields){assert.match(t(source),/https:\/\/lumiq\.cam/);assert.doesNotMatch(t(source),/domēns: \[nav izvēlēts\]|vietne\/domēns: \[vēl nav izvēlēts\]/i);}
+ }finally{globalThis.localStorage=previous;}
+});
+
 test('gallery empty-state counters and update time follow the selected language',()=>{
  const previous=globalThis.localStorage;const time=new Date('2026-09-26T17:21:00Z');
  try{
