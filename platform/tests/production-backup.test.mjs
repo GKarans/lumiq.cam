@@ -46,7 +46,7 @@ test('production backup is pinned to the independent production project and R2 b
  assert.match(backup,/endpoint='https:\/\/af664043db99694ff5a6ac88a7e7dc4d\.eu\.r2\.cloudflarestorage\.com'/);
  assert.doesNotMatch(backup,/cpweowosocjuccjsyyic|lumiq-closed-test-photos|sprzlvywzpeyuzbsyplz/);
  assert.match(backup,/PLATFORM_MIGRATIONS\.map\(entry=>entry\.version\)/);
- assert.match(backup,/Production migration ledger is not exactly 001-046/);
+ assert.match(backup,/Production migration ledger does not match the complete application manifest/);
  assert.match(backup,/lumiq_production_runtime state is not the reviewed least-privilege state/);
  assert.match(backup,/migrations\.length\} migrations/);
 });
@@ -217,6 +217,7 @@ test('Restore Drill migration apply is pinned, checksum-gated, forward-only, and
  assert.match(restoreApply,/exact manifest prefix/);
  assert.match(restoreApply,/checksum !== applied\[index\]\.checksum/);
  assert.match(restoreApply,/PLATFORM_MIGRATIONS\.slice\(applied\.length\)/);
+ assert.match(restoreApply,/has_schema_privilege\('lumiq_api_owner','auth','usage'\)/);
  assert.match(restoreApply,/rolbypassrls/);
  assert.match(restoreApply,/rolreplication/);
  assert.match(restoreApply,/noreplication/);
@@ -265,6 +266,8 @@ test('production runtime verifier is pinned read-only and masks the password',()
  assert.match(verifyRuntime,/column_write/);
  assert.match(verifyRuntime,/securityDefinerRpcAllowlist/);
  assert.match(verifyRuntime,/internalRpcAllowlist/);
+ assert.match(verifyRuntime,/has_schema_privilege\('lumiq_api_owner','auth','usage'\)/);
+ assert.match(verifyRuntime,/dedicated account-sync function owner is missing auth schema USAGE/);
  assert.match(verifyRuntime,/rolbypassrls/);
  assert.match(verifyRuntime,/rolreplication/);
  assert.match(verifyRuntime,/LUMIQ_PRODUCTION_RUNTIME_PASSWORD/);

@@ -4,6 +4,14 @@ Pēdējā pārbaude: 2026-09-30, pēc Production Queue, Worker Access un e-pasta
 attālināti pārbaudītiem faktiem. Gatavs lokāls fails vai tests pats par sevi
 nenozīmē, ka izmaiņa ir palaista Production.
 
+## Jaunākais Auth diagnostikas statuss (2026-09-30)
+
+Production SQL Editor tika veikta tikai-lasāma pārbaude: `sync_own_account` ir `SECURITY DEFINER`, `lumiq_api_owner` ir funkcijas īpašnieks, `auth.uid()` izpilde un vajadzīgās tabulu/kolonnu tiesības ir piešķirtas, bet šai lomai trūkst `USAGE` uz `auth` shēmas. Tas izskaidro, kādēļ paroles formas secīgais konta sinhronizācijas solis varēja atgriezt 403. DB lomas/grants iepriekšējais audits nebija pārbaudījis šo atsevišķo funkcijas īpašnieka shēmas tiesību.
+
+Repo pievienota forward migrācija `047-sync-account-auth-schema-usage.sql`; tā piešķir tikai `USAGE ON SCHEMA auth` lomai `lumiq_api_owner`. Pievienotas idempotences, privilege robežu, Production runtime preflight un restore apply pārbaudes. Migration ledger Production šobrīd ir `001–046`, tātad migrācija 047 vēl nav piemērota. Pirms tās izpildes gaidām īpašnieka skaidru apstiprinājumu; Production dati un grants šajā diagnostikā nav mainīti. Pēc apstiprinātas piemērošanas vajadzīga read-only runtime pārbaude un īpašnieka paroles login/reset atkārtots tests.
+
+Verifikācija pēc koda izmaiņām: mērķētie migrāciju/backup testi `19/19`; pilnais `npm run verify` `184/184` testi un build ar 60 publiskajiem failiem. Deploy un DB rakstīšana nav veikti.
+
 ## Pašreizējais stāvoklis
 
 | Posms | Stāvoklis | Pierādījums / nākamais solis |

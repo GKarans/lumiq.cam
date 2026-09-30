@@ -160,6 +160,8 @@ try {
     if (access.tables_without_rls || access.anon_direct_select || access.authenticated_direct_select) throw new Error('Post-migration RLS or browser-role access verification failed.');
 
     if (recoveryMode || productionMode) {
+      const [accountSyncAccess] = (await tx.query("select has_schema_privilege('lumiq_api_owner','auth','usage') as auth_schema_usage")).rows;
+      if (!accountSyncAccess?.auth_schema_usage) throw new Error('The account-sync function owner is missing auth schema USAGE.');
       const [productionRuntime] = (await tx.query(`
         select r.rolcanlogin,r.rolinherit,r.rolbypassrls,r.rolsuper,r.rolcreatedb,r.rolcreaterole,r.rolreplication,
           has_column_privilege(r.rolname,'public.platform_migrations','version','select') as can_read_versions,

@@ -60,7 +60,7 @@ try{
   const snapshot=(await tx`select pg_export_snapshot() as id`)[0].id;
   migrations=await tx`select version,checksum from public.platform_migrations order by version`;
   const expected=PLATFORM_MIGRATIONS.map(entry=>entry.version).sort();
-  if(JSON.stringify(migrations.map(entry=>entry.version))!==JSON.stringify(expected))throw new Error('Production migration ledger is not exactly 001-046; refusing the backup.');
+  if(JSON.stringify(migrations.map(entry=>entry.version))!==JSON.stringify(expected))throw new Error('Production migration ledger does not match the complete application manifest; refusing the backup.');
   for(let index=0;index<PLATFORM_MIGRATIONS.length;index++){
    const source=await readFile(new URL(`../server/${PLATFORM_MIGRATIONS[index].file}`,import.meta.url),'utf8');
    const checksum=createHash('sha256').update(source.replaceAll('\r\n','\n')).digest('hex');

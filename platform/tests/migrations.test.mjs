@@ -85,6 +85,7 @@ test('organizer JWT policies isolate reads and expose only narrow RPCs',async()=
   await db.query("delete from platform_migrations where version='044-internal-mail-delivery-rpcs'");
   await db.query("delete from platform_migrations where version='045-runtime-table-access-hardening'");
   await db.query("delete from platform_migrations where version='046-production-runtime-access-hardening'");
+  await db.query("delete from platform_migrations where version='047-sync-account-auth-schema-usage'");
   await db.query('create role authenticated');await db.query('create role anon');await db.query('create role lumiq_restore_runtime login noinherit nobypassrls');await db.query('create role lumiq_production_runtime login noinherit nobypassrls');
   await db.query('create schema auth');
   await db.query("create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$");
@@ -165,6 +166,14 @@ test('organizer JWT policies isolate reads and expose only narrow RPCs',async()=
   await db.query('alter default privileges in schema public grant usage,select,update on sequences to lumiq_production_runtime');
   const productionRuntimeHardeningSql=await readFile(new URL('../server/migrations/046-production-runtime-access-hardening.sql',import.meta.url),'utf8');
   await migrate(db,[{version:'046-production-runtime-access-hardening',sql:productionRuntimeHardeningSql}]);
+  const authSchemaUsageSql=await readFile(new URL('../server/migrations/047-sync-account-auth-schema-usage.sql',import.meta.url),'utf8');
+  await db.query('revoke usage on schema auth from lumiq_api_owner');
+  assert.equal((await db.query("select has_schema_privilege('lumiq_api_owner','auth','usage') as allowed")).rows[0].allowed,false);
+  await migrate(db,[{version:'047-sync-account-auth-schema-usage',sql:authSchemaUsageSql}]);
+  await migrate(db,[{version:'047-sync-account-auth-schema-usage',sql:authSchemaUsageSql}]);
+  assert.equal((await db.query("select has_schema_privilege('lumiq_api_owner','auth','usage') as allowed")).rows[0].allowed,true);
+  assert.equal((await db.query("select has_schema_privilege('authenticated','auth','usage') as allowed")).rows[0].allowed,true);
+  assert.equal((await db.query("select has_column_privilege('lumiq_api_owner','public.accounts','role','update') as allowed")).rows[0].allowed,false);
   await db.query('create table public.production_future_grant_probe(id serial primary key, name text)');
   const futureAccess=(await db.query("select has_table_privilege('lumiq_production_runtime','public.production_future_grant_probe','select') as can_read,has_column_privilege('lumiq_production_runtime','public.events','name','update') as can_update_column,has_sequence_privilege('lumiq_production_runtime','public.production_future_grant_probe_id_seq','usage,select,update') as can_use_sequence")).rows[0];
   assert.deepEqual(futureAccess,{can_read:false,can_update_column:false,can_use_sequence:false});

@@ -24,7 +24,7 @@ try{
  stage='migration ledger';
  const applied=(await sql`select version from public.platform_migrations order by version`).map(row=>row.version);
  const expected=PLATFORM_MIGRATIONS.map(entry=>entry.version).sort();
- if(JSON.stringify(applied)!==JSON.stringify(expected))throw new Error('Expected the complete Production migration ledger 001-046.');
+ if(JSON.stringify(applied)!==JSON.stringify(expected))throw new Error('Expected the complete Production migration manifest.');
 
  stage='safe role review';
  const [role]=await sql`select rolcanlogin,rolinherit,rolbypassrls,rolsuper,rolcreatedb,rolcreaterole,rolreplication from pg_roles where rolname='lumiq_production_runtime'`;

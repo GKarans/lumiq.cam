@@ -44,5 +44,6 @@ export const PLATFORM_MIGRATIONS = Object.freeze([
   {version:'043-r2-budget-reservation-rpc',file:'migrations/043-r2-budget-reservation-rpc.sql'},
   {version:'044-internal-mail-delivery-rpcs',file:'migrations/044-internal-mail-delivery-rpcs.sql'},
   {version:'045-runtime-table-access-hardening',file:'migrations/045-runtime-table-access-hardening.sql'},
-  {version:'046-production-runtime-access-hardening',file:'migrations/046-production-runtime-access-hardening.sql'}
+  {version:'046-production-runtime-access-hardening',file:'migrations/046-production-runtime-access-hardening.sql'},
+  {version:'047-sync-account-auth-schema-usage',file:'migrations/047-sync-account-auth-schema-usage.sql'}
 ]);
