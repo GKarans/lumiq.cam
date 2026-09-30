@@ -1,5 +1,11 @@
 # Lumiq production migrācijas progress
 
+## 2026-10-01 - Atklāta kandidāta piesaiste Production resursiem
+
+Cloudflare `lumiq-production-candidate` Settings pārbaudīti tikai lasīšanai. Tajā norādīts Supabase Production projekta ref `baqebydtinysosueksgr`, `HYPERDRIVE` binding uz `lumiq-production`, `LUMIQ_JOBS_QUEUE` uz `lumiq-production-jobs`, `R2_PHOTOS` uz EU `lumiq-production-photos`, kā arī `PLATFORM_MODE=production`, `PLATFORM_RELEASE_APPROVED=production` un `PLATFORM_SERVICE_NAME=lumiq-production-candidate`. Kandidāts joprojām ir pieejams savā `workers.dev` hostname; tobrīd Workers sarakstā redzami 143 pieprasījumi pēdējā saraksta intervālā. Secret vērtības netika atvērtas vai salīdzinātas.
+
+Tātad kandidāts nav datu ziņā izolēta vide: pieprasījumi caur to var izpildīt kodu pret tiem pašiem Production servisiem. Kandidātā neveicu testus, datus nemainīju un Worker neizdzēsu. Īpašniekam lūgts apstiprināt tikai `workers.dev` hostname atslēgšanu kā atgriezenisku tūlītēju riska mazinājumu; `lumiq.cam` Production maršruts netiek aiztikts. Pilna kandidāta noņemšana paliek pēc QA/atkarību/backup audita.
+
 ## 2026-10-01 - Cloudflare resursu inventārs (read-only)
 
 Cloudflare Workers & Pages rāda 5 Worker: `lumiq-production` (71 request saraksta pēdējā intervālā), `lumiq-production-candidate` (143), `lumiq-closed-test` (1.5k requests un 1.5k errors), `lumiq-restore-drill-candidate` (1.5k) un `event-photo-media` (4). Workers perioda panelis rādīja `$0.00` billable usage `Sep 12–Oct 12`; kopējie rādītāji tajā brīdī bija 25.75k requests, 230,282 ms CPU un 26.1k observability events. Tie ir konta redzamie skaitītāji, nevis katra Worker atsevišķs izdevumu vai atkarību audits.
