@@ -48,7 +48,7 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 ## 6. Fona darbi, rezerves kopijas un uzraudzība
 
 - [ ] Pievienot un pārbaudīt Production DLQ patērētāju; pašlaik DLQ nav patērētāja, lai gan pēdējā pārbaudē backlog bija 0. Pirms izvietošanas vajadzīgs atsevišķs apstiprinājums.
-- [x] Jaunākā Production rezerves kopija atkārtoti pārbaudīta 2026-09-30: 21 tabula, migrācijas 001–046 un kontrolsummas sakrīt; netika veikta atjaunošana.
+- [x] Jaunākā Production rezerves kopija atkārtoti pārbaudīta 2026-09-30 ar DPAPI komandu `check-production-backup`: `production/2026-09-29T15-47-15-316Z`, 21 tabula, migrācijas 001–046, 0 foto objektu; kontrolsummas sakrīt un atjaunošana netika veikta.
 - [x] Recovery mērķa atjaunošana un migrāciju ķēde pārbaudīta; aizpildīto Recovery projektu nepārrakstīt.
 - [x] 2026-09-30 pārbaudīti divi aktīvi Cloudflare Billing Budget Alert: automātiskais `$10` slieksnis un `$50` slieksnis; abiem e-pasta saņēmējs ir īpašnieka konta adrese. Testa vēstule netika sūtīta.
 - [x] 2026-09-30 Production Worker Observability pēdējā stundā rādīja 4 veiksmīgus notikumus un 0 kļūdu; Worker Logs ir ieslēgti. Logu payloadi netika atvērti.
