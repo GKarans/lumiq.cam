@@ -91,7 +91,7 @@ test("production preflight rejects closed-test resources, retired names and miss
 
   const retiredWorker = candidate();
   retiredWorker.name = "lumiq-cam";
-  assert.throws(() => validateProductionConfig(retiredWorker, testHyperdriveId), /separate Worker name/);
+  assert.throws(() => validateProductionConfig(retiredWorker, testHyperdriveId), /canonical Worker or the existing migration source/);
 
   for (const bucket of ["lumiq-staging-photos", "lumiq-closed-test-photos", "app-images"]) {
     const sharedBucket = candidate();
@@ -135,11 +135,11 @@ test("production preflight rejects unsafe public variables and disabled preview 
 
   const previews = candidate();
   previews.preview_urls = true;
-  assert.throws(() => validateProductionConfig(previews, testHyperdriveId), /preview URLs disabled/);
+  assert.throws(() => validateProductionConfig(previews, testHyperdriveId), /preview URLs must remain disabled/);
 
   const otherWorkersOrigin = candidate();
   otherWorkersOrigin.vars.PLATFORM_ORIGIN = "https://another-worker.example.workers.dev";
-  assert.throws(() => validateProductionConfig(otherWorkersOrigin, testHyperdriveId), /own bare HTTPS/);
+  assert.throws(() => validateProductionConfig(otherWorkersOrigin, testHyperdriveId), /canonical domain or the existing Worker workers.dev origin/);
 
   const environmentOverride = candidate();
   environmentOverride.env = {production: {vars: {PLATFORM_MODE: "production"}}};

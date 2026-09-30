@@ -6,18 +6,20 @@
 
 ## 1. Viena Production arhitektūra
 
-- [x] Ir atsevišķs Supabase Production projekts `baqebydtinysosueksgr`, Production Hyperdrive, ierobežotā `lumiq_production_runtime` loma, EU foto R2 un Production Queue/DLQ. 2026-09-30 deploy pārbaude apstiprināja šo piesaisti esošajā Worker ar tehnisko nosaukumu `lumiq-production-candidate`.
-- [x] Esošā Production konfigurācija lieto `PLATFORM_MODE=production`, Production datubāzi un krātuvi; anonīms pieprasījums uz tās `workers.dev/healthz` 2026-09-30 saņēma Cloudflare Access `302`.
-- [ ] Sagatavot vienu kanonisku Worker `lumiq-production` un pārbaudītu izvietošanas konfigurāciju ar Production Supabase, Hyperdrive, EU R2, Queue/DLQ, e-pasta noslēpumiem un pareizo `PLATFORM_ORIGIN`. Neizmantot Closed Test datus vai noslēpumus.
-- [ ] Pirms jaunā Worker atvēršanas tam uzlikt Cloudflare Access politiku tikai `guntars.karans@gmail.com`; anonīmam klientam pārbaudīt `302` gan `workers.dev`, gan vēlāk `lumiq.cam` adresē. Izslēgt neaizsargātus preview URL.
-- [ ] Pārcelt Production Queue un DLQ patērētājus uz vienīgo Production Worker, pārbaudīt, ka katrai rindai ir viens paredzētais patērētājs, un pēc pārbaudes izņemt veco `lumiq-production-candidate` servisu. Saglabāt zināmu labu Production versiju atgriešanās vajadzībām.
+- [x] Ir atsevišķs Supabase Production projekts `baqebydtinysosueksgr`, Production Hyperdrive, ierobežotā `lumiq_production_runtime` loma, EU foto R2 un Production Queue/DLQ. Iepriekšējais `lumiq-production-candidate` bija pārejas avots, ne gala Worker.
+- [x] Kanoniskais Worker `lumiq-production` izvietots ar `PLATFORM_MODE=production`, Production DB/Hyperdrive, EU R2, Queue producer un abiem Worker noslēpumiem, ko ielika no DPAPI. Aktīvā 100% versija `df4d58f1-c3dc-4478-b0ba-853d2e91c0d6`; `PLATFORM_ORIGIN=https://lumiq.cam`, `workers.dev` un Preview URL ir izslēgti.
+- [x] `lumiq.cam` Cloudflare Access lietotnei piesaistīta politika ar vienu atļauto e-pastu `guntars.karans@gmail.com`. Kanoniskajam Worker ir izslēgts `workers.dev` hostname; anonīms `lumiq.cam/healthz` pieprasījums atgrieza Cloudflare Access `302`.
+- [x] Production Queue un DLQ katrai ir tieši viens patērētājs `lumiq-production`; saraksti apstiprināja galvenās rindas DLQ piesaisti, `batch=1`, `retries=10`, `concurrency=1`.
+- [ ] Pēc pilnā Production QA izņemt veco `lumiq-production-candidate` Worker un tā tikai-pārejas Access lietotni. Saglabāt zināmu labu Production versiju un atgriešanās iespēju.
 - [ ] Inventarizēt visus Cloudflare Worker, Hyperdrive un R2 resursus, Supabase projektus, Access lietotnes, DNS ierakstus un API tokenus. Katram fiksēt īpašnieku, atkarības, izmaksas un lēmumu `paturēt / izņemt`. Izņemt lieko tikai pēc atkarību, datu un backup pārbaudes; Recovery resursus nepārrakstīt.
 
 ## 2. Domēns un piekļuve
 
 - [x] Cloudflare ir `lumiq.cam` DNS zona ar Cloudflare nameserveriem; MX ieraksti e-pasta saņemšanai publiski atbild.
-- [ ] Atjaunot `lumiq.cam` tīmekļa maršrutu uz **Production** Worker. 2026-09-30 gan Cloudflare, gan Google publiskais DNS neatgrieza saknes A/AAAA/CNAME ierakstu; pašreizējais dators `lumiq.cam` neatrisināja. Cita tīkla agrāku piekļuvi neuzskatīt par pašreizējās maršrutēšanas pierādījumu.
-- [ ] Pirms maršruta piesaistes pārbaudīt owner-only Access; pēc piesaistes pārbaudīt TLS, DNS no vismaz diviem tīkliem un anonīmu atteikumu visām galvenajām lapām un API. Saglabāt drošu atgriešanās plānu uz iepriekšējo **Production** versiju, nevis uz testu datubāzi.
+- [x] `lumiq.cam` Cloudflare Custom Domain ir piesaistīts `lumiq-production`; Cloudflare un Google publiskais DNS atgrieza saknes A ierakstus uz Cloudflare.
+- [x] Pēc maršruta piesaistes TLS pieprasījums uz `lumiq.cam/healthz` atgrieza anonīmu Access `302`; saknes Access politika atļauj tikai īpašnieka e-pastu.
+- [ ] Pārbaudīt `lumiq.cam` no otra neatkarīga tīkla un pārbaudīt anonīmu Access atteikumu visām galvenajām lapām un API. Šī datora noklusētais mājas tīkla DNS joprojām neatrisināja `lumiq.cam`; piespiedu TLS pieprasījums uz publiskā DNS Cloudflare IP strādāja, tāpēc jānošķir vietējais/TET DNS filtrs no publiskā domēna maršruta.
+- [ ] Saglabāt dokumentētu atgriešanās procedūru uz iepriekšējo **Production** versiju, nevis uz testu datubāzi.
 - [ ] `www.lumiq.cam` novirzīt uz primāro adresi vai aizsargāt tikpat stingri; noņemt vecu parking lapu, ja tā vēl eksistē. Nav publiskas atvērtas alternatīvas Production lietotnei.
 - [ ] TET mājas Wi-Fi bloķējumu risināt paralēli ar TET pieteikumu. Tas nav priekšnoteikums Production darba turpināšanai, ja citi tīkli un autoritatīvais DNS ir pārbaudīti; neapiet brīdinājumu ar nedrošu sertifikāta vai pāradresācijas izņēmumu.
 

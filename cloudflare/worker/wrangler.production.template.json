@@ -1,19 +1,19 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
-  "name": "lumiq-production-candidate",
+  "name": "lumiq-production",
   "main": "src/index.js",
   "compatibility_date": "2026-09-22",
   "compatibility_flags": [
     "nodejs_compat",
     "nodejs_compat_populate_process_env"
   ],
-  "workers_dev": true,
+  "workers_dev": false,
   "preview_urls": false,
   "vars": {
     "PLATFORM_MODE": "production",
     "PLATFORM_RELEASE_APPROVED": "NOT_APPROVED",
-    "PLATFORM_SERVICE_NAME": "lumiq-production-candidate",
-    "PLATFORM_ORIGIN": "https://lumiq-production-candidate.REPLACE_WITH_WORKERS_SUBDOMAIN.workers.dev",
+    "PLATFORM_SERVICE_NAME": "lumiq-production",
+    "PLATFORM_ORIGIN": "https://lumiq.cam",
     "PLATFORM_SUPABASE_URL": "https://replacewithprodprojectref.supabase.co",
     "PLATFORM_SUPABASE_PROJECT_REF": "replacewithprodprojectref",
     "PLATFORM_SUPABASE_PUBLISHABLE_KEY": "REPLACE_WITH_PRODUCTION_PUBLISHABLE_KEY",
@@ -72,5 +72,11 @@
   },
   "observability": {
     "enabled": true
-  }
+  },
+  "routes": [
+    {
+      "pattern": "lumiq.cam",
+      "custom_domain": true
+    }
+  ]
 }

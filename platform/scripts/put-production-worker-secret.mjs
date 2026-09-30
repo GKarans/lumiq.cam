@@ -9,14 +9,16 @@ const sources={
  PLATFORM_EMAIL_KEY:{name:'LUMIQ_PRODUCTION_EMAIL_KEY',valid:value=>typeof value==='string'&&value.length>0}
 };
 const binding=process.env.LUMIQ_PRODUCTION_WORKER_SECRET_BINDING;
+const targetWorker=process.env.LUMIQ_PRODUCTION_WORKER_NAME||'lumiq-production-candidate';
 const source=sources[binding];
 const secret=source&&process.env[source.name];
+if(!['lumiq-production-candidate','lumiq-production'].includes(targetWorker))throw new Error('Unexpected Production Worker target.');
 if(!source||!source.valid(secret))throw new Error('DPAPI Worker secret is missing or has an invalid format.');
 
 const wrangler=path.join(root,'node_modules/wrangler/bin/wrangler.js');
-const child=spawn(process.execPath,[wrangler,'secret','put',binding,'--config',config,'--name','lumiq-production-candidate'],{
+const child=spawn(process.execPath,[wrangler,'secret','put',binding,'--config',config,'--name',targetWorker],{
  cwd:root,
- env:Object.fromEntries(Object.entries(process.env).filter(([name])=>name!==source.name&&name!=='LUMIQ_PRODUCTION_WORKER_SECRET_BINDING')),
+ env:Object.fromEntries(Object.entries(process.env).filter(([name])=>name!==source.name&&name!=='LUMIQ_PRODUCTION_WORKER_SECRET_BINDING'&&name!=='LUMIQ_PRODUCTION_WORKER_NAME')),
  stdio:['pipe','pipe','pipe'],
  windowsHide:true
 });
@@ -28,6 +30,6 @@ const exitCode=await new Promise((resolve,reject)=>{
  child.once('close',resolve);
 });
 if(exitCode!==0){
- console.error(`Candidate Worker secret was not updated (wrangler exit ${exitCode}). No secret values were printed.`);
+ console.error(`Production Worker secret was not updated (wrangler exit ${exitCode}). No secret values were printed.`);
  process.exitCode=exitCode||1;
-}else console.log(`Production candidate ${binding} saved in Cloudflare.`);
+}else console.log(`Production Worker ${targetWorker} ${binding} saved in Cloudflare.`);

@@ -19,19 +19,27 @@ export function validateProductionConfig(candidate, closedTestHyperdriveId) {
   requireThat(candidate && typeof candidate === "object", "Production config must be an object.");
   requireThat(typeof closedTestHyperdriveId === "string" && /^[a-f0-9]{32}$/i.test(closedTestHyperdriveId), "Supply the current closed-test Hyperdrive ID.");
   requireThat(typeof candidate.name === "string" && candidate.name.length > 0, "Production worker name is required.");
-  requireThat(!["lumiq-cam", "lumiq-closed-test"].includes(candidate.name), "Production candidate must use a separate Worker name.");
-  requireThat(candidate.workers_dev === true && candidate.preview_urls === false, "Candidate must use workers.dev with preview URLs disabled.");
+  requireThat(["lumiq-production", "lumiq-production-candidate"].includes(candidate.name), "Production must use the canonical Worker or the existing migration source.");
+  requireThat(candidate.preview_urls === false, "Production preview URLs must remain disabled.");
+  requireThat(candidate.workers_dev === (candidate.name === "lumiq-production-candidate"), "Only the existing migration source may expose its workers.dev hostname.");
   requireThat(!candidate.env || Object.keys(candidate.env).length === 0, "Named Wrangler environments require a separate reviewed preflight.");
-  requireThat(!candidate.routes?.length, "Candidate must not claim custom domains or routes.");
+  if (candidate.name === "lumiq-production") {
+    requireThat(Array.isArray(candidate.routes) && candidate.routes.length === 1 && candidate.routes[0].pattern === "lumiq.cam" && candidate.routes[0].custom_domain === true, "The canonical Production Worker must own only the lumiq.cam custom domain.");
+  } else {
+    requireThat(!candidate.routes?.length, "The existing migration source must not claim custom domains or routes.");
+  }
   for (const bindingGroup of ["services", "d1_databases", "kv_namespaces", "durable_objects", "workflows", "dispatch_namespaces", "vectorize", "r2_data_catalogs"]) {
     requireThat(!candidate[bindingGroup]?.length, `Unexpected ${bindingGroup} binding requires separate review.`);
   }
 
   const vars = candidate.vars || {};
-  requireThat(vars.PLATFORM_MODE === "production" && vars.PLATFORM_RELEASE_APPROVED === "NOT_APPROVED", "Production candidate must stay release-locked as NOT_APPROVED.");
+  requireThat(vars.PLATFORM_MODE === "production" && vars.PLATFORM_RELEASE_APPROVED === "NOT_APPROVED", "Production preflight config must stay release-locked as NOT_APPROVED.");
   let origin;
-  try { origin = new URL(vars.PLATFORM_ORIGIN); } catch { throw new Error("Production candidate origin is invalid."); }
-  requireThat(origin.protocol === "https:" && origin.hostname.startsWith(`${candidate.name}.`) && origin.hostname.endsWith(".workers.dev") && origin.origin === vars.PLATFORM_ORIGIN, "Candidate origin must be its own bare HTTPS workers.dev origin.");
+  try { origin = new URL(vars.PLATFORM_ORIGIN); } catch { throw new Error("Production origin is invalid."); }
+  const validOrigin = candidate.name === "lumiq-production"
+    ? origin.origin === "https://lumiq.cam"
+    : origin.hostname.startsWith(`${candidate.name}.`) && origin.hostname.endsWith(".workers.dev") && origin.origin === vars.PLATFORM_ORIGIN;
+  requireThat(origin.protocol === "https:" && validOrigin, "Production origin must be the canonical domain or the existing Worker workers.dev origin.");
   requireThat(typeof vars.PLATFORM_SUPABASE_URL === "string" && /^https:\/\/[a-z0-9]+\.supabase\.co$/i.test(vars.PLATFORM_SUPABASE_URL), "Production Supabase project URL is required.");
   const authProjectRef = new URL(vars.PLATFORM_SUPABASE_URL).hostname.split(".")[0].toLowerCase();
   requireThat(typeof vars.PLATFORM_SUPABASE_PROJECT_REF === "string" && /^[a-z0-9]+$/i.test(vars.PLATFORM_SUPABASE_PROJECT_REF) && vars.PLATFORM_SUPABASE_PROJECT_REF.toLowerCase() === authProjectRef, "Production Auth URL and verified database project reference must match.");
