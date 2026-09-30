@@ -1,6 +1,6 @@
 param(
   [Parameter(Mandatory = $true, Position = 0)]
-  [ValidateSet('save-backup', 'save-runtime', 'create-production-safe-runtime', 'copy-production-safe-runtime', 'create-production-session-key', 'save-production-email', 'provision-production-safe-runtime', 'rotate-production-safe-runtime', 'apply-production-migrations', 'save-recovery-r2', 'check-recovery-r2', 'save-recovery', 'save-recovery-db-password', 'create-recovery-db-password', 'create-recovery-runtime', 'run-recovery-restore', 'apply-recovery-migrations', 'save-restore-drill', 'save-restore-drill-r2', 'create-restore-drill-runtime', 'audit-restore-drill-migrations', 'apply-restore-drill-migrations', 'apply-restore-drill-runtime', 'apply-production-runtime', 'show', 'run-backup', 'check-production-backup', 'set-candidate-session-secret', 'set-candidate-email-secret', 'set-production-session-secret', 'set-production-email-secret', 'run-runtime-check', 'run-safe-runtime-check', 'run-safe-runtime-bootstrap-check')]
+  [ValidateSet('save-backup', 'save-runtime', 'create-production-safe-runtime', 'copy-production-safe-runtime', 'create-production-session-key', 'save-production-email', 'provision-production-safe-runtime', 'rotate-production-safe-runtime', 'apply-production-migrations', 'inspect-production-auth-grants', 'save-recovery-r2', 'check-recovery-r2', 'save-recovery', 'save-recovery-db-password', 'create-recovery-db-password', 'create-recovery-runtime', 'run-recovery-restore', 'apply-recovery-migrations', 'save-restore-drill', 'save-restore-drill-r2', 'create-restore-drill-runtime', 'audit-restore-drill-migrations', 'apply-restore-drill-migrations', 'apply-restore-drill-runtime', 'apply-production-runtime', 'show', 'run-backup', 'check-production-backup', 'set-candidate-session-secret', 'set-candidate-email-secret', 'set-production-session-secret', 'set-production-email-secret', 'run-runtime-check', 'run-safe-runtime-check', 'run-safe-runtime-bootstrap-check')]
   [string]$Action
 )
 
@@ -246,6 +246,21 @@ switch ($Action) {
       if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { throw 'Production migration failed; review the sanitized output before retrying.' }
     } finally {
       foreach ($name in @('LUMIQ_PRODUCTION_DB_PASSWORD', $productionSafeRuntimeName, 'LUMIQ_MIGRATION_TARGET')) { [Environment]::SetEnvironmentVariable($name, $null, 'Process') }
+      foreach ($value in $vault.Values) { if ($value -is [System.Security.SecureString]) { $value.Dispose() } }
+    }
+  }
+  'inspect-production-auth-grants' {
+    $vault = Read-Vault
+    if (-not $vault.Contains('LUMIQ_PRODUCTION_DB_PASSWORD') -or $vault['LUMIQ_PRODUCTION_DB_PASSWORD'] -isnot [System.Security.SecureString]) {
+      foreach ($value in $vault.Values) { if ($value -is [System.Security.SecureString]) { $value.Dispose() } }
+      throw 'Missing encrypted Production database credential.'
+    }
+    Set-ProcessSecret 'LUMIQ_PRODUCTION_DB_PASSWORD' $vault['LUMIQ_PRODUCTION_DB_PASSWORD']
+    try {
+      & node (Join-Path $PSScriptRoot 'inspect-production-auth-grants.mjs')
+      if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { throw 'Read-only Production Auth-grant inspection failed.' }
+    } finally {
+      [Environment]::SetEnvironmentVariable('LUMIQ_PRODUCTION_DB_PASSWORD', $null, 'Process')
       foreach ($value in $vault.Values) { if ($value -is [System.Security.SecureString]) { $value.Dispose() } }
     }
   }

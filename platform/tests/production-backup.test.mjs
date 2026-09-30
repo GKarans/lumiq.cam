@@ -277,3 +277,15 @@ test('production runtime verifier is pinned read-only and masks the password',()
  assert.match(verifyRuntime,/during \$\{stage\} \(\$\{code\}\)/);
  assert.doesNotMatch(verifyRuntime,/\b(?:alter|create|drop|insert|update|delete)\s+(?:table|role|schema|into|set)\b/i);
 });
+
+test('Production auth grant inspection is pinned, read-only, and uses the DPAPI secret wrapper',async()=>{
+ const inspector=await readFile(new URL('../scripts/inspect-production-auth-grants.mjs',import.meta.url),'utf8');
+ const wrapper=await readFile(new URL('../scripts/production-secrets.ps1',import.meta.url),'utf8');
+ assert.match(inspector,/const projectRef = 'baqebydtinysosueksgr'/);
+ assert.match(inspector,/has_schema_privilege\('lumiq_api_owner','auth','usage'\)/);
+ assert.match(inspector,/auth_schema_owner/);
+ assert.match(inspector,/migrationLedger/);
+ assert.doesNotMatch(inspector,/^\s*(?:grant|revoke|insert|update|delete|create|alter)\b/im);
+ assert.match(wrapper,/inspect-production-auth-grants/);
+ assert.match(wrapper,/Set-ProcessSecret 'LUMIQ_PRODUCTION_DB_PASSWORD'/);
+});

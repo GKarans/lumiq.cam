@@ -167,6 +167,8 @@ test('organizer JWT policies isolate reads and expose only narrow RPCs',async()=
   const productionRuntimeHardeningSql=await readFile(new URL('../server/migrations/046-production-runtime-access-hardening.sql',import.meta.url),'utf8');
   await migrate(db,[{version:'046-production-runtime-access-hardening',sql:productionRuntimeHardeningSql}]);
   const authSchemaUsageSql=await readFile(new URL('../server/migrations/047-sync-account-auth-schema-usage.sql',import.meta.url),'utf8');
+  assert.match(authSchemaUsageSql,/has_schema_privilege\(current_user,'auth','usage with grant option'\)/);
+  assert.match(authSchemaUsageSql,/Supabase must grant USAGE on schema auth to lumiq_api_owner/);
   await db.query('revoke usage on schema auth from lumiq_api_owner');
   assert.equal((await db.query("select has_schema_privilege('lumiq_api_owner','auth','usage') as allowed")).rows[0].allowed,false);
   await migrate(db,[{version:'047-sync-account-auth-schema-usage',sql:authSchemaUsageSql}]);
