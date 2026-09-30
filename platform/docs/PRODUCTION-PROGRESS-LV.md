@@ -1,5 +1,13 @@
 # Lumiq production migrācijas progress
 
+## 2026-10-01 - Cloudflare resursu inventārs (read-only)
+
+Cloudflare Workers & Pages rāda 5 Worker: `lumiq-production` (71 request saraksta pēdējā intervālā), `lumiq-production-candidate` (143), `lumiq-closed-test` (1.5k requests un 1.5k errors), `lumiq-restore-drill-candidate` (1.5k) un `event-photo-media` (4). Workers perioda panelis rādīja `$0.00` billable usage `Sep 12–Oct 12`; kopējie rādītāji tajā brīdī bija 25.75k requests, 230,282 ms CPU un 26.1k observability events. Tie ir konta redzamie skaitītāji, nevis katra Worker atsevišķs izdevumu vai atkarību audits.
+
+Hyperdrive sarakstā: `lumiq-production` Active ar 37 query pēdējās 24 stundās; `lumiq-closed-test` un `lumiq-restore-drill` Inactive, katram 0 query. R2 sarakstā: `app-images` 121 objekts / 36.32 MB (neaiztikt), `lumiq-closed-test-photos` 30 / 2.71 MB, EU `lumiq-production-backups` 21 / 322.07 kB, EU `lumiq-production-photos` 0 / 0 B, EU `lumiq-production-recovery` 0 / 0 B un `lumiq-restore-drill-20260925` 0 / 0 B. R2 perioda panelis rādīja `$0.00` billable usage `Sep 12–Oct 12`, 1.31k Class A, 2.2k Class B operācijas un 39.35 MB kopējo storage.
+
+Šis ir sarakstu līmeņa momentuzņēmums; tas neuzrāda Worker bindings, Hyperdrive/R2 atkarības, API tokenu īpašniekus, backup derīgumu vai kopējo Cloudflare rēķinu. Inactive resursi var būt apzināta Recovery/backup infrastruktūra, tādēļ neko nedzēsu. `app-images` un `event-photo-media` netika mainīti; pēdējam nav dots jauns īpašnieka lēmums. Nākamais inventāra solis ir salīdzināt Worker bindings ar DB/bucketiem, pēc tam pārbaudīt Access, DNS, tokenus un Supabase projektu sarakstu.
+
 ## 2026-09-30 - Supabase patēriņš un platformas statuss
 
 Supabase Organization Usage panelis (read-only) rāda Pro plānu un norēķinu periodu `29 Sep–29 Oct 2026`, paziņojumu “You have not exceeded your Pro Plan quota” un Micro Compute patēriņu `95 h` (`$1.28`). Pārējie redzamie rādītāji: MAU `4/100,000`, egress `0.001/250 GB`, vidējais Storage `0.00/100 GB`, log ingestion `0.03/20 GB`, log query `7.58/2,000 GB`; overage panelī nav redzams. Tie ir Usage paneļa patēriņa/kvotu skaitļi, nevis gala rēķina kopsumma, cenu prognoze vai apstiprinājums, ka nav citas maksas par Cloudflare, Resend vai R2. Nekas netika iegādāts vai mainīts.
