@@ -4,6 +4,10 @@
 
 Cloudflare `lumiq-production-candidate` → Domains: izslēgts tikai `Production Worker URL` (`lumiq-production-candidate.gkarans-events.workers.dev`); Preview URL jau bija izslēgts un paliek izslēgts. Panelī pēc saglabāšanas abi pārslēgi ir `off`. Neizdzēsu Worker, nemainīju tā Production DB/Hyperdrive/Queue/R2 bindings, noslēpumus vai `lumiq.cam` Custom Domain/Access konfigurāciju. Svaigs anonīms GET uz kandidāta `/healthz` tagad atgriež HTTP `404`; `https://lumiq.cam/healthz` turpina atgriezt Cloudflare Access HTTP `302`. Tas samazina nejaušu tiešu piekļuvi kandidātam, taču nepierāda, ka Worker vai visi tā trigeri ir izņemti; jāpabeidz pilnā atkarību/backup pārbaude un tikai tad jāizlemj par resursa dzēšanu.
 
+## 2026-10-01 - Production Access lietotnes nosaukums
+
+Cloudflare Zero Trust → Access controls → Applications: `lumiq.cam` self-hosted lietotnes redzamais nosaukums nomainīts no `Lumiq Closed Development - lumiq.cam` uz `Lumiq Production - lumiq.cam`. Tajā pašā saglabāšanas skatā galamērķis bija `lumiq.cam` bez ceļa ierobežojuma un piesaistītā Allow politika `Lumiq closed test - owner`; politikas nosacījums iepriekš pārbaudīts kā tikai `guntars.karans@gmail.com`. Netika mainīts hostname, politika vai 24h sesijas termiņš. Pēc saglabāšanas Applications saraksts rāda jauno nosaukumu pie `lumiq.cam` un to pašu owner politiku. Autorizēta pieteikšanās joprojām nav testēta.
+
 ## 2026-10-01 - Atklāta kandidāta piesaiste Production resursiem
 
 Cloudflare `lumiq-production-candidate` Settings pārbaudīti tikai lasīšanai. Tajā norādīts Supabase Production projekta ref `baqebydtinysosueksgr`, `HYPERDRIVE` binding uz `lumiq-production`, `LUMIQ_JOBS_QUEUE` uz `lumiq-production-jobs`, `R2_PHOTOS` uz EU `lumiq-production-photos`, kā arī `PLATFORM_MODE=production`, `PLATFORM_RELEASE_APPROVED=production` un `PLATFORM_SERVICE_NAME=lumiq-production-candidate`. Kandidāts joprojām ir pieejams savā `workers.dev` hostname; tobrīd Workers sarakstā redzami 143 pieprasījumi pēdējā saraksta intervālā. Secret vērtības netika atvērtas vai salīdzinātas.
