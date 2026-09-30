@@ -10,7 +10,7 @@ async function render(){const request=++version;disposeGuest();disposeWorkspace(
  if(path==='/auth/verify'||path==='/'){
   const query=new URLSearchParams(location.search),fragment=new URLSearchParams(location.hash.slice(1)),value=key=>query.get(key)||fragment.get(key);
   const accessToken=value('access_token'),invite=path==='/'&&value('type')==='invite';
-  if(invite&&accessToken){history.replaceState({},'','/');const result=await api('/auth/consume',{method:'POST',body:{access_token:accessToken,type:'invite',purpose:'verify'}});app.innerHTML=`<main id="main" class="narrow"><h1>Invitation confirmed</h1><p>${esc(result.message)}</p></main>`;return;}
+  if(invite&&accessToken){const confirmation={access_token:accessToken,refresh_token:value('refresh_token'),expires_in:value('expires_in'),type:'invite',purpose:'verify'};history.replaceState({},'','/');const result=await api('/auth/consume',{method:'POST',body:confirmation});app.innerHTML=`<main id="main" class="narrow"><h1>Invitation confirmed</h1><p>${esc(result.message)}</p></main>`;return;}
   if(path==='/auth/verify'&&accessToken){const confirmation={access_token:accessToken,refresh_token:value('refresh_token'),expires_in:value('expires_in'),type:value('type'),purpose:'verify'};history.replaceState({},'','/auth/verify');await api('/auth/consume',{method:'POST',body:confirmation});toast('Email confirmed. Your account is ready.');history.replaceState({},'','/app');return await render();}
  }
  const [config,session]=await Promise.all([state.config?Promise.resolve(state.config):api('/config'),api('/auth/session')]);state.config=config;state.user=session.user;
