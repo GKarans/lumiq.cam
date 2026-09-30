@@ -309,4 +309,6 @@ Production Queue/DLQ read-only pārbaude 2026-09-30 19:44 GMT+3: `lumiq-producti
 
 Production backup kontrolsummu pārbaude atkārtota 2026-09-30 pēc Auth veidnes atjaunināšanas: DPAPI autentificētais `check-production-backup` veiksmīgi verificēja jaunāko privāto objektu `production/2026-09-29T15-47-15-316Z`, 21 DB/Auth tabulu, 46 migrācijas un 0 foto objektus. Restore netika veikts un Recovery dati netika mainīti.
 
+Cloudflare kandidāta pārbaude 2026-09-30 pēc izvietošanas: aktīvā 100% versija `fe2086c6`; Worker Metrics pēdējās 24 h rādīja 178 invokācijas un 0 kļūdu. Kandidātam joprojām ir tikai `workers.dev` hostname, `Custom domains` un `Routes` ir tukši. Metrikas ir veselības signāls, nevis konta vai foto plūsmas tests.
+
 Production Auth drošības paziņojumu veidnes 2026-09-30: Supabase paziņojumi `Password changed` un `Email address changed` abiem ir ieslēgti, un to priekšskatījumos ir Lumiq zīmols, LV/EN teksts un drošības norādījumi. Abiem `Subject` lauki bija tukši; iestatīju `Lumiq paroles maiņa / Your Lumiq password changed` un `Lumiq e-pasta adrese nomainīta / Your Lumiq email address changed`, saglabāju un pēc lapas pārlādes vizuāli apstiprināju. Paziņojumu slēdžus un HTML saturu nemainīju; reālas vēstules netika izsūtītas.
