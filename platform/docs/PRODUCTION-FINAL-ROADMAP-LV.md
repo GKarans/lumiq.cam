@@ -1,4 +1,4 @@
-# Lumiq Production pabeigšanas ceļvedis
+# Lumiq Production pabeigšanas saraksts
 
 Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `lumiq.cam` maršruta pārslēgšanas. Kandidāts paliek aiz Cloudflare Access ar atļauju tikai īpašniekam. `app-images` un `event-photo-media` ir neaizskarami. Šis ir jaunais darba saraksts; statusu atzīmē tikai pēc norādītā pierādījuma.
 
@@ -6,10 +6,23 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 
 **Darba princips:** kamēr TET izskata 2026-09-25 pieteikumu, pabeigt visus tālākos darbus kandidātā aiz Cloudflare Access. `lumiq.cam` DNS/Worker maršrutu neaiztikt. Kad pārējais gatavs, gaidīt TET atbloķēšanu; domēna pārslēgšana ir pēdējais solis.
 
+## Īsā izpildes secība
+
+1. [ ] Pabeigt e-pasta saņemšanu un piegādes pārbaudes; sakārtot Lumiq veidnes.
+2. [ ] Pēc atsevišķa apstiprinājuma atjaunināt kandidāta Worker, saglabājot Cloudflare Access un nemainot `lumiq.cam` maršrutu.
+3. [ ] Kandidātā aiz Access pārbaudīt konta/Auth plūsmas un visu foto ciklu ar QA datiem.
+4. [ ] Pārbaudīt divu organizatoru izolāciju, anonīmo piekļuvi, Queue/DLQ, rezerves kopijas, brīdinājumus un žurnālus.
+5. [ ] Pabeigt kandidāta pieņemšanas pārbaudi un gaidīt TET atbildi; ja līdz norunātajam termiņam tās nav, nosūtīt atgādinājumu.
+6. [ ] Tikai pēc TET atbloķēšanas pārbaudīt domēnu no Tet un cita tīkla, pievienot precīzos Auth callback URL un ar īpašnieka apstiprinājumu pārslēgt `lumiq.cam` uz Production.
+
+TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lumiq.cam` pieslēgšanu.
+
 ## A. Pabeigt tagad, kamēr TET izskata pieteikumu
 
 ### 1. E-pasta sūtīšana
 
+- [ ] **Lumiq dizaina standarts:** visām Auth un Worker transakciju vēstulēm lietot vienotu Lumiq tēmu, skaidru virsrakstu un darbības pogu, salasāmu mobilo izkārtojumu un teksta alternatīvu. Vēstulēs neiekļaut paroles vai tokenus.
+- [ ] Veidņu komplektā pārbaudīt reģistrācijas apstiprinājumu, uzaicinājumu, paroles atjaunošanu, e-pasta maiņu, drošības paziņojumus un produkta transakciju vēstules; `support@lumiq.cam` likt Reply-To tikai pēc ienākošā pasta pārbaudes.
 - [x] 2026-09-30 Supabase Production SMTP pārbaudīts pēc pārlādes: custom SMTP ieslēgts, `smtp.resend.com:465`, sūtītājs `Lumiq <noreply@lumiq.cam>`, lietotājvārds `resend`; saglabātā parole ir noslēpta un netika mainīta.
 - [ ] Nosūtīt kontrolētu Auth testa vēstuli uz savu testa pastkasti; pārbaudīt piegādi, saites un kļūdu žurnālus. Pirms īstas vēstules nosūtīšanas apstiprināt konkrēto testa sūtījumu.
 - [ ] Ar apstiprinātu testa vēstuli pārbaudīt piegādāto MIME: Auth ziņojumiem pārliecināties, ka ir salasāma `text/plain` alternatīva; ja tās nav, izvērtēt Supabase Send Email Hook ar Resend un multipart `text`/`html`, vispirms izveidojot integrācijas testus un atgriešanās plānu. Worker transakciju vēstulēm pārbaudīt abus variantus.
@@ -21,6 +34,8 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 ### 2. Lumiq e-pasta adreses
 
 - [x] Automātiskai sūtīšanai izmanto `noreply@lumiq.cam`; Production Supabase SMTP izmanto `Lumiq <noreply@lumiq.cam>` un Resend. Atsevišķa `noreplay@` adrese nav vajadzīga — pareizā rakstība ir `noreply@`.
+- [ ] **Sākuma adrešu komplekts:** `noreply@lumiq.cam` automatizētām vēstulēm un `support@lumiq.cam` klientu atbalstam. Sākumā pietiek ar vienu atbalsta pastkasti/galamērķi; `privacy@` un `billing@` var pievienot vēlāk kā aliasus, ja būs vajadzība.
+- [ ] Pirms ienākošā pasta DNS izmaiņām apstiprināt vienu adresi, uz kuru pāradresēt `support@lumiq.cam`, un pārbaudīt esošo MX/SPF ietekmi. Nameserverus nepārslēgt.
 - [x] 2026-09-30 Resend domēnu panelī tieši pārbaudīts, ka gan `send.lumiq.cam`, gan saknes `lumiq.cam` ir `Verified`; saknes konfigurācijai Return-Path ir `outbound`, saglabājot esošo sūtīšanas apakšdomēnu. Šajā pārbaudē domēnu vai DNS iestatījumus nemainīju.
 - [x] 2026-09-30 salīdzinātas un pēc pārlādes pārbaudītas sešas vajadzīgās Supabase Production Auth veidnes: apstiprinājums, uzaicinājums, paroles atjaunošana, e-pasta maiņa, paroles maiņas un e-pasta maiņas paziņojums. Piecām no tām izņemts Supabase noklusētais HTML fragments, kas iepriekš bija pielīmēts pirms Lumiq dokumenta.
 - [ ] Izvēlēties, kur saņemt `support@lumiq.cam` vēstules, un apstiprināt konkrēto galamērķa adresi. Šī ir cilvēka atbalsta adrese; sākumā pietiek ar vienu pastkasti vai aliasu, nevis vairākām atsevišķām pastkastēm.
