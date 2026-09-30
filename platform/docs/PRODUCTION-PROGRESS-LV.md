@@ -12,6 +12,12 @@ Cloudflare Zero Trust → Access controls → Applications: `lumiq.cam` self-hos
 
 Repo saknē `npm run check` izturēja: drošības skeneris pārbaudīja 281 tracked/unignored failu, `npm audit` atrada 0 ievainojamību, Node testu kopa izpildīja 188/188 testus, build validēja 60 publiskos failus, un pārlūka pārbaude izturēja platumus 320–1440 px, galvenos organizatora/viesa foto, ielūguma, dizaina, cenu un pieejamības scenārijus. Pārlūka dati bija izolēti/sintētiski un netika izmantota Production sesija vai dati. Tas nepierāda Production DB grantus, Supabase Auth sinhronizāciju, īstu e-pastu, Access autorizētu darbību vai dzīvu Production foto glabāšanu; 403 un Production QA punkti paliek atvērti.
 
+## 2026-10-01 - Dzīvs Access pieteikšanās ekrāns
+
+Atverot `https://lumiq.cam/` bez Access sesijas, pārlūks tika novirzīts uz `lumiq-closed-test.cloudflareaccess.com` pieteikšanās lapu, kuras virsraksts tagad ir `Log in to Lumiq Production - lumiq.cam`; redzamas Cloudflare un e-pasta vienreizējā koda opcijas. Koda nosūtīšana vai pieteikšanās netika veikta. Tas apstiprina anonīmo owner-gate un jauno redzamo nosaukumu, nevis to, ka atļautais īpašnieks jau ir autentificēts vai ka aiz Access atveras lietotne.
+
+2026-10-01 Gmail `SU-490545` sarunā atrasta tikai Supabase automātiskā kvīts no `support@supabase.com`: tā atkārto 1–2 darba dienu atbildes mērķi un brīdina par iespējamu kavēšanos. Tehniskas atbildes par Production `auth` shēmas `USAGE` tiesībām nav. Migrācija 047 nav piemērota, un Production paroles/login plūsma nav testēta atkārtoti.
+
 ## 2026-10-01 - Atklāta kandidāta piesaiste Production resursiem
 
 Cloudflare `lumiq-production-candidate` Settings pārbaudīti tikai lasīšanai. Tajā norādīts Supabase Production projekta ref `baqebydtinysosueksgr`, `HYPERDRIVE` binding uz `lumiq-production`, `LUMIQ_JOBS_QUEUE` uz `lumiq-production-jobs`, `R2_PHOTOS` uz EU `lumiq-production-photos`, kā arī `PLATFORM_MODE=production`, `PLATFORM_RELEASE_APPROVED=production` un `PLATFORM_SERVICE_NAME=lumiq-production-candidate`. Kandidāts joprojām ir pieejams savā `workers.dev` hostname; tobrīd Workers sarakstā redzami 143 pieprasījumi pēdējā saraksta intervālā. Secret vērtības netika atvērtas vai salīdzinātas.
