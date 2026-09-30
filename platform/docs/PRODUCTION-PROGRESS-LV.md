@@ -153,7 +153,7 @@ negarantē nepārtrauktu darbību bez papildu compute izmaksām.
 
 - Closed-test resursi netiek izmantoti Production.
 - Paroles/tokeni netiek izvadīti čatā, ierakstīti repozitorijā vai `vars`; izmanto DPAPI un Cloudflare secrets.
-- Production Worker paliek `NOT_APPROVED`; custom domain netiek piesaistīts pirms izolētiem testiem.
+- Production Wrangler šablons ir `NOT_APPROVED`, bet dzīvais `lumiq-production-candidate` 2026-09-30 pārbaudītajos iestatījumos bija `PLATFORM_RELEASE_APPROVED=production` un aiz owner-only Access. Šīs ir atšķirīgas vides; neizvietot šablona `NOT_APPROVED` vērtību dzīvajam kandidātam, jo tā bloķētu lietotni. Kandidāta maršrutu un Access nemainīt; `lumiq.cam` paliek uz Closed Test līdz E2E vārtejām un TET atbloķēšanai.
 - Cloudflare Access/PIN paliek ieslēgts; neizveidot publisku atļaušanas politiku.
 - Production migrācijas 001–046 ir piemērotas pēc verificēta Recovery restore un auditētas.
 - Restore Drill paliek aktīvs pēc īpašnieka lēmuma; nevienu Supabase projektu nepauzēt vai nedzēst bez jauna īpašnieka lēmuma.
