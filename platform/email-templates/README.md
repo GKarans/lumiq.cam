@@ -15,7 +15,7 @@ Templates**:
 | Invite user | `supabase-invite.html` | `Uzaicinājums uz Lumiq / Invitation to Lumiq` |
 | Magic link or OTP | `supabase-magic-link.html` | `Pieraksties Lumiq / Sign in to Lumiq` |
 | Reset password | `supabase-reset-password.html` | `Atjauno Lumiq paroli / Reset your Lumiq password` |
-| Reauthentication | `supabase-reauthentication.html` | `{{ .Token }} ir tavs Lumiq kods / {{ .Token }} is your Lumiq code` |
+| Reauthentication | `supabase-reauthentication.html` | `{{ if eq .Data.locale "lv" }}Lumiq drošības kods{{ else }}Lumiq verification code{{ end }}` |
 | Change email address | `supabase-change-email.html` | `Apstiprini jauno Lumiq e-pastu / Confirm your new Lumiq email` |
 | Password changed notification | `supabase-password-changed.html` | `Lumiq konta paroles drošības paziņojums / Lumiq password security notice` |
 | Email address changed notification | `supabase-email-changed.html` | `Lumiq konta e-pasts nomainīts / Lumiq email address changed` |
