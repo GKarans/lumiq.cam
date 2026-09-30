@@ -1,5 +1,9 @@
 # Lumiq production migrācijas progress
 
+## 2026-10-01 - Publiskās DNS un anonīmās piekļuves atkārtota pārbaude
+
+Neatkarīgie DNS resolveri `1.1.1.1` un `8.8.8.8` atgrieza Cloudflare A ierakstus `lumiq.cam`. Bez sesijas `https://lumiq.cam/` un `/healthz` atgrieza Access `302`; `www.lumiq.cam/healthz` atgrieza `301` uz saknes hostu; `lumiq-production.gkarans-events.workers.dev/healthz` atgrieza `404`, bet kandidāta URL atgrieza Access `302`. Tas apstiprina publisko DNS un anonīmās piekļuves barjeru, bet ne īpašnieka Access politikas pilnu pārbaudi vai autorizētu produkta lietošanu. Kandidāta Worker joprojām eksistē un jāatstāj līdz pilnam Production QA/atkarību auditam. Supabase ticket `SU-490545` Gmail meklējumā joprojām ir tikai 2026-09-30 saņemšanas kvīts; tehniskas atbildes nav. DB/Auth konfigurācija un mākoņresursi šajā pārbaudē netika mainīti.
+
 ## 2026-10-01 - Izolētā Restore Drill palaišanas aizsargs
 
 Pārbaudot manuālo lokālo restore wrapperi, atradu novecojušus noklusētos mērķus: esošo `sprzlvywzpeyuzbsyplz` projektu un `lumiq-restore-drill-20260925` bucket. Tie ir aizsargāti un nedrīkst būt restore mērķis. Wrapperis pārveidots tā, lai pieprasītu verificētas Production kopijas precīzu ceļu, jaunu Supabase projekta ref un jaunu unikāli nosauktu drill bucket; zināmie Production, Recovery, iepriekšējā drill un pauzētā testa projekti, kā arī `app-images`, `event-photo-media` un esošie Production/vecā drill bucket tiek noraidīti. Pirms izpildes jāievada precīzs projekta un bucket nosaukums. Negatīvs tests pārbauda šo aizsardzību. Šī izmaiņa tikai sagatavo drošu izpildes ceļu: nekādi mākoņresursi nav izveidoti, DB/R2 nav mainīts, restore nav palaists. Pilnās pārbaudes un publicēšanas statuss sekos pēc testiem.
