@@ -26,7 +26,7 @@
 ## 3. Datubāze, Auth un noslēpumi
 
 - [x] Jaunākās privātās Production rezerves kopijas pārbaude 2026-09-30 uzrādīja 21 tabulu, migrācijas `001–046`, derīgas kontrolsummas un tobrīd 0 foto objektu. Tas nepierāda pilnu restore.
-- [ ] Atkārtoti pārbaudīt Production migrāciju kontrolsummas, RLS, `NOBYPASSRLS` runtime lomu, minimālās grants un Supabase Auth projekta identitāti. Nekādas lietotnes saites uz Closed Test vai Restore Drill DB.
+- [x] 2026-09-30 read-only Production runtime pārbaude: Supabase projekts `baqebydtinysosueksgr`, DB `postgres`, loma `lumiq_production_runtime` ar `LOGIN`, `NOINHERIT`, `NOBYPASSRLS`, bez superuser/DB/role/replication privilēģijām; migrācijas `001–046`; 19 publiskās tabulas visas ar RLS; `anon` un `authenticated` bez tiešas SELECT; runtime bez tiešas tabulu/kolonnu/sequence piekļuves, ar migration-ledger versijas nolasīšanu un tikai pārbaudīto `SECURITY DEFINER` RPC allowlist. Šī pārbaude apstiprina DB lomas un grants, nevis Auth URL vai dzīvu klienta plūsmu. Nekādas DB izmaiņas netika veiktas.
 - [ ] Supabase Auth `Site URL` un precīzos atļautos callback URL iestatīt uz `https://lumiq.cam` reģistrācijai, uzaicinājumam, paroles atjaunošanai, e-pasta maiņai un Google login, ja tas ir ieslēgts. Pārbaudīt katru saiti pēc faktiskas vēstules saņemšanas; nelietot wildcard redirect.
 - [ ] Pārbaudīt sesijas atjaunošanu, izrakstīšanos, CSRF, rate limitus, paroles politiku un to, ka kļūdas neizpauž tokenus vai paroles. Noslēpumi paliek Cloudflare/Supabase secret glabātuvēs un vietējā DPAPI, nevis Git.
 
