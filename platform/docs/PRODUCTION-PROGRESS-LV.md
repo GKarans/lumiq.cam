@@ -266,3 +266,5 @@ Auth Send Email Hook prototipa izolētā pārbaude 2026-09-30 izturēja `npx --y
 Cloudflare Billing Budget Alerts read-only pārbaude 2026-09-30: automātiskajam `$10` un papildu `$50` brīdinājumam katram ir viens saņēmējs (konta īpašnieks). Panelis rādīja `$0.00` par 2026. gada oktobri. Noteikumus nemainīju; testa brīdinājumu nesūtīju, tādēļ piegāde nav pierādīta.
 
 Cloudflare Queue metrikas read-only pārbaude 2026-09-30, `Last 24 hours` (GMT+3): `lumiq-production-jobs` un `lumiq-production-jobs-dlq` katrai ir 0 messages ingested, 0 retried, 0 backlog un 0 s consumer lag; DLQ statuss ir `Inactive`. Rindās testa ziņojumus nepievienoju; DLQ consumer/deploy nemainīju. Šie dati apstiprina tukšu sākuma stāvokli, nevis dzīvu kļūmes/retry/DLQ ceļu.
+
+Cloudflare kandidāta Worker Observability `Events` read-only skatā 2026-09-30 ap 05:25 GMT+3, periodā `Last 1 hour`, bija 15 `Success`, 0 `Errors`. Redzamie ieraksti bija GET `/api/config`, `/api/auth/session` un `/api/local/demo`; tādēļ tas neapstiprina reģistrācijas, Auth e-pasta vai foto plūsmas sekmes. Worker darbības izmaiņas neveicu.
