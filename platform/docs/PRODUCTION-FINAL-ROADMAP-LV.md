@@ -128,6 +128,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 
 - Pieteikums nosūtīts **2026-09-25**; TET solītais termiņš ir līdz piecām darbdienām, neieskaitot nedēļas nogali, aptuveni līdz **2026-10-02**.
 - Ja līdz termiņam nav atbildes, **2026-10-05** nosūtīt atkārtotu pieprasījumu ar sākotnējā STOP ekrāna attēlu un skenējumu rezultātiem.
+- [x] Sagatavots nesūtīts atkārtotā pieprasījuma melnraksts `platform/docs/TET-FOLLOWUP-DRAFT-LV.md`; 5. oktobrī vispirms pārbaudīt, vai sākotnējai vēstulei nav pienākusi atbilde, un pirms sūtīšanas pievienot STOP ekrānattēlu un svaigus skenējumu rezultātus.
 - [ ] Saņemt TET atbildi un skaidru apstiprinājumu par `lumiq.cam` atbloķēšanu. Ja līdz piecu darbdienu termiņam nav atbildes, sekot līdzi 2026-10-05.
 - [ ] Pēc apstiprinājuma pārbaudīt `lumiq.cam` no Tet tīkla un vēl viena neatkarīga tīkla; pārliecināties, ka STOP pāradresācija vairs nenotiek. Līdz šai pārbaudei domēna cutover nav atļauts.
 - [x] 2026-09-30 Cloudflare Access lietotņu panelī `Lumiq Closed Development - lumiq.cam` hostname ir tieši `lumiq.cam` ar tukšu Path lauku; piesaistītā `Lumiq closed test - owner` Allow politika ietver tikai `guntars.karans@gmail.com`. Tas pārbauda Access konfigurāciju, bet nepierāda, ka Tet tīkls vairs nerāda STOP lapu vai ka Worker maršruts ir pārslēgts.
