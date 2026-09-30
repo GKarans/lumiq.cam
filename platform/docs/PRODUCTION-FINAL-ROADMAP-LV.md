@@ -82,7 +82,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 
 - [ ] Ar diviem testa organizatoriem pārbaudīt savstarpēju pasākumu un galeriju izolāciju; ar anonīmu klientu pārbaudīt tiešos API un failu URL.
 - [ ] Pirms Queue DLQ patērētāja izvietošanas saņemt īpašnieka atsevišķu apstiprinājumu; kandidāts paliek aiz Access, `lumiq.cam` netiek mainīts.
-- [x] 2026-09-30 Wrangler read-only pārbaudē `lumiq-production-jobs` ir viens `lumiq-production-candidate` consumer (`batch=1`, `max_retries=10`, `max_concurrency=1`, DLQ `lumiq-production-jobs-dlq`); DLQ rindai nav consumer. Dzīvu kļūmes scenāriju neizraisīju, jo patvaļīga ziņojuma pievienošana ietekmētu Production consumer un DB.
+- [x] 2026-09-30 atkārtota Wrangler read-only pārbaude (`queues consumer list` un `queues info`) apstiprināja vienu `lumiq-production-candidate` consumer galvenajai `lumiq-production-jobs` rindai (`batch=1`, `max_retries=10`, `max_concurrency=1`, DLQ `lumiq-production-jobs-dlq`); DLQ ir 0 consumer. Dzīvu kļūmes scenāriju neizraisīju, jo patvaļīga ziņojuma pievienošana varētu iedarbināt Production DB darbu.
 - [x] 2026-09-30 lokālie Queue/Worker/reliability testi izturēja 63/63: sintezēta Queue nosūtīšanas kļūme un atkopšana, dead-letter apstrāde un manuāls retry, Worker starta kļūdas retry un ierobežota job apstrāde. Tas nav dzīvas Production Queue/DLQ pārbaudes pierādījums.
 - [ ] Pēc apstiprinātas izvietošanas pārbaudīt kontrolētu retry/DLQ scenāriju bez reālu klientu datu ietekmes.
 - [x] 2026-09-30 atkārtoti tikai-lasāmi pārbaudīta jaunākā Production rezerves kopija `production/2026-09-29T15-47-15-316Z`: 21 tabula, migrācijas `001–046`, kontrolsummas sakrīt, 0 foto objektu. Esošo Recovery projektu nepārrakstīt.
