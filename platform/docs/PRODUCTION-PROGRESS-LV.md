@@ -8,6 +8,10 @@ Cloudflare `lumiq-production-candidate` → Domains: izslēgts tikai `Production
 
 Cloudflare Zero Trust → Access controls → Applications: `lumiq.cam` self-hosted lietotnes redzamais nosaukums nomainīts no `Lumiq Closed Development - lumiq.cam` uz `Lumiq Production - lumiq.cam`. Tajā pašā saglabāšanas skatā galamērķis bija `lumiq.cam` bez ceļa ierobežojuma un piesaistītā Allow politika `Lumiq closed test - owner`; politikas nosacījums iepriekš pārbaudīts kā tikai `guntars.karans@gmail.com`. Netika mainīts hostname, politika vai 24h sesijas termiņš. Pēc saglabāšanas Applications saraksts rāda jauno nosaukumu pie `lumiq.cam` un to pašu owner politiku. Autorizēta pieteikšanās joprojām nav testēta.
 
+## 2026-10-01 - Pilnā lokālā regresijas un pārlūka pārbaude
+
+Repo saknē `npm run check` izturēja: drošības skeneris pārbaudīja 281 tracked/unignored failu, `npm audit` atrada 0 ievainojamību, Node testu kopa izpildīja 188/188 testus, build validēja 60 publiskos failus, un pārlūka pārbaude izturēja platumus 320–1440 px, galvenos organizatora/viesa foto, ielūguma, dizaina, cenu un pieejamības scenārijus. Pārlūka dati bija izolēti/sintētiski un netika izmantota Production sesija vai dati. Tas nepierāda Production DB grantus, Supabase Auth sinhronizāciju, īstu e-pastu, Access autorizētu darbību vai dzīvu Production foto glabāšanu; 403 un Production QA punkti paliek atvērti.
+
 ## 2026-10-01 - Atklāta kandidāta piesaiste Production resursiem
 
 Cloudflare `lumiq-production-candidate` Settings pārbaudīti tikai lasīšanai. Tajā norādīts Supabase Production projekta ref `baqebydtinysosueksgr`, `HYPERDRIVE` binding uz `lumiq-production`, `LUMIQ_JOBS_QUEUE` uz `lumiq-production-jobs`, `R2_PHOTOS` uz EU `lumiq-production-photos`, kā arī `PLATFORM_MODE=production`, `PLATFORM_RELEASE_APPROVED=production` un `PLATFORM_SERVICE_NAME=lumiq-production-candidate`. Kandidāts joprojām ir pieejams savā `workers.dev` hostname; tobrīd Workers sarakstā redzami 143 pieprasījumi pēdējā saraksta intervālā. Secret vērtības netika atvērtas vai salīdzinātas.
