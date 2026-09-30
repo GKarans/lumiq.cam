@@ -90,7 +90,7 @@ export function validateRemoteHyperdriveProject(config, expectedId, expectedProj
   return {id: config.id, host, projectRef, runtimeRole: expectedRuntimeRole};
 }
 
-function getRemoteHyperdriveConfig(id) {
+export function getRemoteHyperdriveConfig(id) {
   const wrangler = path.join(root, "node_modules/wrangler/bin/wrangler.js");
   let output;
   try {

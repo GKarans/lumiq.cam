@@ -26,6 +26,7 @@
     "cloudflare:dev": "node platform/scripts/block-deploy.mjs --dev",
     "cloudflare:deploy": "node platform/scripts/block-deploy.mjs",
     "production:preflight": "node platform/scripts/production-preflight.mjs",
+    "production:candidate:deploy": "node platform/scripts/deploy-production-candidate.mjs",
     "check": "npm run security && npm run verify && npm run browser"
   },
   "dependencies": {
