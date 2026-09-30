@@ -16,7 +16,7 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 
 ## Īsā izpildes secība
 
-1. [x] Iestatīt un ar testa vēstuli pārbaudīt `support@lumiq.cam` saņemšanu; `noreply@lumiq.cam` piegādes un Lumiq veidnes pārbaudes turpinās atsevišķi.
+1. [x] Iestatīt un ar testa vēstuli pārbaudīt `support@lumiq.cam` saņemšanu; 2026-09-30 Cloudflare Routing Rules read-only pārbaudē noteikums ir `Active`, galamērķis `guntars.karans@gmail.com` ir `Verified`, un Activity Log pēdējās 24 stundās uzrāda divas ārējās testa vēstules ar rezultātu `Forwarded` (no `g.karans@inbox.lv` un Gmail testa). `noreply@lumiq.cam` piegādes un Lumiq veidnes pārbaudes turpinās atsevišķi.
 2. [x] 2026-09-30 pievienots un publiski pārbaudīts DMARC monitoringa DNS ieraksts `_dmarc.lumiq.cam` (`p=none`, apkopojumu galamērķis `support@lumiq.cam`). Tas nemaina MX, SPF, DKIM vai Worker maršrutu; jāapstiprina DMARC apkopojumu saņemšanas atbalsts.
 3. [x] 2026-09-30 ar īpašnieka iepriekšēju apstiprinājumu atjaunināts tikai `workers.dev` kandidāts, skaidri norādot Production Supabase/R2 izmantošanu, sintētisku testa datu prasību un simulētus maksājumus; `support@` kontaktinformācija izlabota. Cloudflare Access un DLQ consumer saglabāts, `lumiq.cam` maršruts nav mainīts.
 4. [ ] Kandidātā aiz Access pārbaudīt konta/Auth plūsmas un visu foto ciklu ar QA datiem.
