@@ -41,6 +41,7 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 ## 5. Drošība un izolācija
 
 - [x] Kandidāta anonīmie pieprasījumi novirzās uz Access; `lumiq.cam` maršruts joprojām paliek Closed Test.
+- [x] 2026-09-30 Cloudflare Workers saraksta pārbaude: `lumiq.cam` un vēl viens hostname ir pie `lumiq-closed-test`; `lumiq-production-candidate` ir tikai savā `workers.dev` hostname. DNS zonas Worker Routes sadaļā nav route ierakstu, tāpēc `lumiq.cam` piesaiste ir Worker hostname konfigurācija. Nekas netika mainīts.
 - [x] 2026-09-30 Cloudflare Zero Trust politikā `Lumiq closed test - owner` tieši pārbaudīts `Allow` un viens `Include` noteikums ar īpašnieka konta e-pastu. Lietotņu sarakstā šī politika piesaistīta gan kandidāta hostname, gan `lumiq.cam`; adrese nav ierakstīta repozitorijā.
 - [ ] Ar diviem atsevišķiem testa organizatoriem pierādīt pasākumu un galeriju savstarpēju izolāciju; apstiprināt, ka anonīmi lietotāji nevar atvērt organizatora sadaļas.
 
