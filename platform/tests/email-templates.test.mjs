@@ -8,7 +8,9 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../email-t
 const templates=[
  ['supabase-confirm-signup.html','{{ .ConfirmationURL }}'],
  ['supabase-invite.html','{{ .ConfirmationURL }}'],
+ ['supabase-magic-link.html','{{ .ConfirmationURL }}'],
  ['supabase-reset-password.html','{{ .ConfirmationURL }}'],
+ ['supabase-reauthentication.html','{{ .Token }}'],
  ['supabase-change-email.html','{{ .ConfirmationURL }}'],
  ['supabase-password-changed.html',null],
  ['supabase-email-changed.html',null]

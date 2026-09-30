@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Lumiq verification code</title></head>
+<body style="margin:0;background:#f3f6f2;padding:24px 12px;color:#17241f;font-family:Arial,Helvetica,sans-serif">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0">A verification code was requested for your Lumiq account.</div>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;margin:0 auto">
+    <tr><td style="padding:12px 8px 20px"><table role="presentation" cellspacing="0" cellpadding="0"><tr><td style="width:36px;height:36px;border-radius:50%;background:#153e32;color:#fff;text-align:center;vertical-align:middle;font:bold 18px Arial">L</td><td style="padding-left:10px;color:#153e32;font:bold 20px Arial">Lumiq</td></tr></table></td></tr>
+    <tr><td style="background:#fff;border:1px solid #dce3dd;border-radius:8px;padding:32px 28px">
+      {{ if eq .Data.locale "lv" }}
+      <h1 style="margin:0 0 16px;font-size:24px;line-height:1.3">Apstiprini savu identitāti</h1><p style="font-size:16px;line-height:1.65;color:#46564d">Lai turpinātu drošu darbību savā Lumiq kontā, ievadi šo vienreizējo kodu:</p>
+      <p style="margin:24px 0;padding:16px;background:#f3f6f2;border-radius:6px;color:#153e32;text-align:center;font:bold 28px/1.3 Arial,Helvetica,sans-serif;letter-spacing:4px">{{ .Token }}</p>
+      <p style="font-size:13px;line-height:1.6;color:#627169">Ja šo pieprasījumu neveici, vari šo vēstuli ignorēt un sazināties ar atbalstu.</p>
+      {{ else }}
+      <h1 style="margin:0 0 16px;font-size:24px;line-height:1.3">Verify your identity</h1><p style="font-size:16px;line-height:1.65;color:#46564d">To continue a sensitive action in your Lumiq account, enter this one-time code:</p>
+      <p style="margin:24px 0;padding:16px;background:#f3f6f2;border-radius:6px;color:#153e32;text-align:center;font:bold 28px/1.3 Arial,Helvetica,sans-serif;letter-spacing:4px">{{ .Token }}</p>
+      <p style="font-size:13px;line-height:1.6;color:#627169">If you did not request this code, ignore this email and contact support.</p>
+      {{ end }}
+    </td></tr>
+    <tr><td style="padding:18px 8px;color:#627169;font-size:13px;line-height:1.6">Lumiq · Event photos, together.<br>Never share this one-time code with anyone.</td></tr>
+  </table>
+</body>
+</html>
