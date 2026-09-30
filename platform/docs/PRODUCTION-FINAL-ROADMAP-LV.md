@@ -50,7 +50,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 - [ ] Pārbaudīt beigušos/kļūdainu Auth saiti un saprotamu kļūdas paziņojumu.
 - [ ] Pēc testa izdzēst testa kontu un tā datus vai dokumentēt, kāpēc tas jāpatur.
 - [x] Kandidāta anonīmie pamatpieprasījumi ir aizsargāti ar Cloudflare Access.
-- [x] 2026-09-30 tiešie pieprasījumi bez pārlūka sesijas uz kandidāta `/`, `/login` un `/healthz` atgrieza `302`; autorizētajā pārlūkā vietne atveras ar esošo Access sesiju.
+- [x] 2026-09-30 anonīmi tiešie pieprasījumi uz kandidāta `/`, `/app`, `/api/auth/session`, `/api/events` un `/healthz` atgrieza `302` uz `lumiq-closed-test.cloudflareaccess.com`; Access joprojām aiztur lietotnes un API piekļuvi bez sesijas. Iepriekš autorizētā pārlūkā vietne atvērās ar Access sesiju; šī anonīmā pārbaude pati par sevi nepierāda autentificētas produkta plūsmas darbību.
 - [x] Access atļaujas politika pārbaudīta: `Allow` tikai īpašnieka e-pastam; `lumiq.cam` maršruts nav mainīts.
 
 ### 4. Produkta pilnais foto cikls
