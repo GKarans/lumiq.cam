@@ -13,6 +13,7 @@ Run from this directory:
 ```powershell
 npx --yes deno test --allow-net
 npx --yes deno check index.ts
+npx --yes deno audit
 ```
 
 Tests use synthetic addresses/tokens and a mocked Resend API. They do not send
