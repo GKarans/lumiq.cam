@@ -8,8 +8,8 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 - [x] Resend saknes `lumiq.cam` domēns verificēts ar pielāgoto Return-Path `outbound`, neskarot piecus Namecheap MX, Namecheap SPF un Worker DNS ierakstus.
 - [x] 2026-09-30 publiskā DNS pārbaude: pieci Namecheap MX un Namecheap SPF joprojām publicēti, Resend DKIM atrodams, `_dmarc.lumiq.cam` nav publicēts; pārbaude bija tikai lasāma un DNS netika mainīts.
 - [ ] Nosūtīt kontrolētu Auth testa vēstuli no `noreply@lumiq.cam` un pārbaudīt piegādi.
-- [ ] Izveidot `support@lumiq.cam` kā īstu ienākošo adresi vai pāradresāciju un pārbaudīt saņemšanu.
-- [ ] Apstiprināt pāradresācijas saņēmēja adresi.
+- [x] `support@lumiq.cam` pāradresācija uz `guntars.karans@gmail.com` pārbaudīta ar ārēju testa vēstuli; īpašnieka Gmail ekrānuzņēmumā tā redzama zem `Lumiq` iezīmes (2026-09-30).
+- [x] Pāradresācijas saņēmējs apstiprināts: `guntars.karans@gmail.com`.
 - [ ] Pirms Cloudflare Email Routing aktivizācijas atrisināt DNS konfliktu: publiskajā DNS šobrīd ir pieci `eforward*.registrar-servers.com` MX ieraksti un Namecheap SPF `include:spf.efwd.registrar-servers.com`. Cloudflare vednis piedāvā tos aizstāt ar saviem trim MX un SPF. Nekādas izmaiņas neveikt, kamēr nav izvēlēts, vai pārņemt ienākošā pasta maršrutēšanu un saglabāts vajadzīgais esošais pasts.
 - Namecheap konta `Redirect Email` panelis prasa pārslēgt nameserverus uz Namecheap noklusējumu. To nedarīt, jo `lumiq.cam` DNS pašlaik apkalpo Cloudflare; pārbaudīts 2026-09-30.
 - [ ] Nākamajā apstiprinātajā kandidāta izvietošanā pievienot Worker `PLATFORM_EMAIL_FROM=Lumiq <noreply@lumiq.cam>`; pašreizējā Production Runtime variables panelī tas nav iestatīts. Pēc tam kontrolēti pārbaudīt Worker transakciju e-pasta piegādi.
@@ -22,7 +22,7 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 - [x] 2026-09-30 Production Supabase Auth `Invite user` veidnei iestatīta tukšā tēma `Uzaicinājums uz Lumiq / Invitation to Lumiq`; pēc saglabāšanas un pārlādes tā joprojām redzama, HTML saturs nav mainīts.
 - [x] 2026-09-30 lokāli pārbaudīta e-pasta funkcionalitāte: `npm test` (171/171), Auth Edge Function testi (8/8), `deno check` un `deno audit` bez atrastām ievainojamībām. Tie nesūta īstu vēstuli un neaizstāj piegādes pārbaudi.
 - [ ] Nosūtīt kontrolētu Auth testa vēstuli un pārbaudīt reālu piegādi, saites un kļūdu žurnālus.
-- [ ] Pēc `support@` saņemšanas konfigurēt un notestēt Reply-To.
+- [ ] Konfigurēt un notestēt Reply-To atsevišķi; ienākošā pāradresācija pati par sevi nepierāda atbildes plūsmu.
 - [ ] Saņemt vēstules Gmail un vēl vienā pasta klientā; pārbaudīt abas valodas, saites, derīguma termiņu un mobilo izkārtojumu. Auth veidņu redaktorā nav atsevišķa `text/plain` lauka; Worker vēstulēm teksta alternatīva jau ir.
 
 ## 3. Production konta plūsma aiz Access

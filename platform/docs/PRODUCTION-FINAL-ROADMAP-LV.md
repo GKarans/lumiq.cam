@@ -6,7 +6,7 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 
 **Darba princips:** kamēr TET izskata 2026-09-25 pieteikumu, pabeigt visus pārējos darbus kandidātā aiz Cloudflare Access. `lumiq.cam` DNS/Worker maršrutu neaiztikt. TET atbilde un bloķējuma noņemšana ir ārējs priekšnoteikums, nevis iemesls apturēt pārējo darbu; domēna pārslēgšana ir pēdējais solis.
 
-**E-pasta sākuma komplekts:** `noreply@lumiq.cam` automatizētai sūtīšanai un `support@lumiq.cam` klientu atbalstam. `privacy@`, `billing@` un citas adreses pagaidām neveidot kā atsevišķas pastkastes; vajadzības gadījumā tās vēlāk var pievienot kā aliasus. Veidnēm jābūt Lumiq vizuālajā stilā, salasāmām telefonā un ar teksta alternatīvu. Ienākošā pasta DNS aktivizēšana gaida apstiprinātu galamērķi un esošo MX/SPF ierakstu migrācijas plānu.
+**E-pasta sākuma komplekts:** `noreply@lumiq.cam` automatizētai sūtīšanai un `support@lumiq.cam` klientu atbalstam. `support@` pāradresācija uz īpašnieka `guntars.karans@gmail.com` pārbaudīta ar ārēju testa vēstuli; Gmail ekrānuzņēmumā tā redzama zem `Lumiq` iezīmes. `privacy@`, `billing@` un citas adreses pagaidām neveidot kā atsevišķas pastkastes; vajadzības gadījumā tās vēlāk var pievienot kā aliasus. Veidnēm jābūt Lumiq vizuālajā stilā, salasāmām telefonā un ar teksta alternatīvu. Atbilžu plūsma un Reply-To vēl jāpārbauda atsevišķi.
 
 ## Īsā izpildes secība
 
@@ -40,16 +40,17 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 ### 2. Lumiq e-pasta adreses
 
 - [x] Automātiskai sūtīšanai izmanto `noreply@lumiq.cam`; Production Supabase SMTP izmanto `Lumiq <noreply@lumiq.cam>` un Resend. Atsevišķa `noreplay@` adrese nav vajadzīga — pareizā rakstība ir `noreply@`.
-- [ ] **Sākuma adrešu komplekts:** `noreply@lumiq.cam` automatizētām vēstulēm un `support@lumiq.cam` klientu atbalstam. Sākumā pietiek ar vienu atbalsta pastkasti/galamērķi; `privacy@` un `billing@` var pievienot vēlāk kā aliasus, ja būs vajadzība.
+- [x] **Sākuma adrešu komplekts:** `noreply@lumiq.cam` automatizētām vēstulēm un `support@lumiq.cam` klientu atbalstam. Sākumā pietiek ar vienu atbalsta pastkasti/galamērķi; `privacy@` un `billing@` var pievienot vēlāk kā aliasus, ja būs vajadzība.
 - [ ] Pirms ienākošā pasta DNS izmaiņām apstiprināt vienu adresi, uz kuru pāradresēt `support@lumiq.cam`, un pārbaudīt esošo MX/SPF ietekmi. Nameserverus nepārslēgt.
 - [x] 2026-09-30 tikai-lasāma publiskā DNS pārbaude apstiprināja esošos Namecheap `eforward1–5.registrar-servers.com` MX un SPF `include:spf.efwd.registrar-servers.com`. Cloudflare Email Routing vednis piedāvā aizstāt šos MX ar trim Cloudflare MX un saknes SPF ar `include:_spf.mx.cloudflare.net`; aktivizācija var pārtraukt pašreizējo e-pasta pāradresāciju. Vedni neaktivizēju; vispirms vajadzīgs saņemšanas galamērķis un migrācijas plāns, kas saglabā esošo sūtīšanu/saņemšanu.
 - [x] 2026-09-30 Resend domēnu panelī tieši pārbaudīts, ka gan `send.lumiq.cam`, gan saknes `lumiq.cam` ir `Verified`; saknes konfigurācijai Return-Path ir `outbound`, saglabājot esošo sūtīšanas apakšdomēnu. Šajā pārbaudē domēnu vai DNS iestatījumus nemainīju.
 - [x] 2026-09-30 salīdzinātas un pēc pārlādes pārbaudītas sešas vajadzīgās Supabase Production Auth veidnes: apstiprinājums, uzaicinājums, paroles atjaunošana, e-pasta maiņa, paroles maiņas un e-pasta maiņas paziņojums. Piecām no tām izņemts Supabase noklusētais HTML fragments, kas iepriekš bija pielīmēts pirms Lumiq dokumenta.
-- [ ] Izvēlēties, kur saņemt `support@lumiq.cam` vēstules, un apstiprināt konkrēto galamērķa adresi. Šī ir cilvēka atbalsta adrese; sākumā pietiek ar vienu pastkasti vai aliasu, nevis vairākām atsevišķām pastkastēm.
+- [x] Īpašnieks izvēlējās `guntars.karans@gmail.com` kā `support@lumiq.cam` saņemšanas galamērķi; sākumā pietiek ar vienu pastkasti/galamērķi.
 - [x] 2026-09-30 Namecheap `lumiq.cam` panelī pārbaudīts `Custom DNS` ar Cloudflare nameserveriem; `Redirect Email` panelis paziņo, ka pāradresāciju var pārvaldīt tikai pēc nameserveru pārslēgšanas uz Namecheap. Nameserverus nepārslēgt. Namecheap bezmaksas pāradresācija paredzēta tikai Namecheap DNS zonām ([prasības](https://www.namecheap.com/support/knowledgebase/article.aspx/308/2214/how-to-set-up-free-email-forwarding/)).
 - [x] 2026-09-30 Cloudflare Email Routing ir piemērotākais ienākošā `support@` variants bez nameserveru maiņas, bet tam vajadzīgs Cloudflare MX kopums. Pirms aktivizācijas jānoskaidro un jāpārceļ visas vajadzīgās esošās pāradresācijas; esošais SPF jāsavieno ar Cloudflare SPF, nevis jāpārraksta ([Cloudflare DNS prasības](https://developers.cloudflare.com/email-service/configuration/domains/)). Aktivizāciju neveicu, jo trūkst apstiprināta saņemšanas galamērķa un esošo aliasu saraksta.
 - [x] 2026-09-30 Cloudflare Email Routing vednis tikai-lasīšanas režīmā parāda 3 saknes `lumiq.cam` MX ierakstus, DKIM TXT un SPF TXT, ko pievienotu aktivizējot. Vednī ir `Activate` darbība; to nenospiedu, jo tā ir DNS maiņa un vēl nav apstiprināts `support@` galamērķis/esošo aliasu saglabāšana. DNS netika mainīts.
-- [ ] Pēc `support@` saņemšanas pārbaudīt ienākošu vēstuli un atbildes plūsmu; iestatīt `support@lumiq.cam` kā Reply-To, kur tas ir atbalstīts, un pārbaudīt Worker `PLATFORM_EMAIL_REPLY_TO` un Supabase Auth Reply-To atsevišķi.
+- [x] 2026-09-30 īpašnieka ārējais tests apstiprināja, ka uz `support@lumiq.cam` nosūtīta vēstule nonāk `guntars.karans@gmail.com`; Gmail ekrānuzņēmumā redzama testa vēstule zem `Lumiq` iezīmes. Tas apstiprina ienākošo pāradresāciju, nevis atbildes plūsmu.
+- [ ] Pārbaudīt atbildes plūsmu; iestatīt `support@lumiq.cam` kā Reply-To, kur tas ir atbalstīts, un pārbaudīt Worker `PLATFORM_EMAIL_REPLY_TO` un Supabase Auth Reply-To atsevišķi.
 - [ ] Vēlāk vajadzīgās adreses, piemēram, `privacy@` vai `billing@`, sākumā veidot kā aliasus uz apstiprināto atbalsta galamērķi; šobrīd tās nav Production palaišanas priekšnoteikums.
 
 ### 3. Production konta un piekļuves plūsma
