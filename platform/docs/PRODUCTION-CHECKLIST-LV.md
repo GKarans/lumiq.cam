@@ -38,6 +38,7 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 - [ ] Pārbaudīt foto dzēšanu, R2 objekta izņemšanu un ZIP lejupielādi.
 - [ ] Pārbaudīt saprotamas kļūdas un lēna tīkla uzvedību.
 - [x] Izolētā lokālā browser suite izturēja 7 scenārijus, ieskaitot sintētisko foto ceļu; tas nav Production plūsmas pierādījums.
+- [x] 2026-09-30 `npm run browser` izolētais UI/E2E tests izturēja 320–1440 px platumus, reģistrācijas/pasākuma/foto ceļu, uzaicinājuma callback, QR/cover redaktoru, norēķinu ekrānus un axe/keyboard/reduced-motion/200% zoom pārbaudes. Pārlūks neveica ārējus pieprasījumus; tas nav Production E2E pierādījums.
 
 ## 5. Drošība un izolācija
 
@@ -45,6 +46,7 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 - [x] 2026-09-30 Cloudflare Workers saraksta pārbaude: `lumiq.cam` un vēl viens hostname ir pie `lumiq-closed-test`; `lumiq-production-candidate` ir tikai savā `workers.dev` hostname. DNS zonas Worker Routes sadaļā nav route ierakstu, tāpēc `lumiq.cam` piesaiste ir Worker hostname konfigurācija. Nekas netika mainīts.
 - [x] 2026-09-30 Cloudflare Zero Trust politikā `Lumiq closed test - owner` tieši pārbaudīts `Allow` un viens `Include` noteikums ar īpašnieka konta e-pastu. Lietotņu sarakstā šī politika piesaistīta gan kandidāta hostname, gan `lumiq.cam`; adrese nav ierakstīta repozitorijā.
 - [ ] Ar diviem atsevišķiem testa organizatoriem pierādīt pasākumu un galeriju savstarpēju izolāciju; apstiprināt, ka anonīmi lietotāji nevar atvērt organizatora sadaļas.
+- [x] 2026-09-30 `npm run security` izturēja: noslēpumu skeneris pārbaudīja 271 tracked/unignored failu, `npm audit --audit-level=high` atrada 0 ievainojamību; tas neaizstāj dzīvu Production piekļuves testu.
 
 ## 6. Fona darbi, rezerves kopijas un uzraudzība
 
