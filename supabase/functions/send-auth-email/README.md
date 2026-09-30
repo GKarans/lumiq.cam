@@ -30,5 +30,8 @@ the hook instead of SMTP while the hook is enabled.
 
 Required runtime secrets are `SEND_EMAIL_HOOK_SECRET` and `RESEND_API_KEY`.
 `SUPABASE_URL` is supplied by Supabase Functions. `LUMIQ_EMAIL_FROM` is a
-non-secret verified sender setting. `LUMIQ_SUPPORT_REPLY_TO` is optional and
-must remain unset until `support@lumiq.cam` receives mail successfully.
+non-secret verified sender setting. `support@lumiq.cam` now forwards to the
+verified Gmail destination, so an activated, separately tested Hook may set
+`LUMIQ_SUPPORT_REPLY_TO=support@lumiq.cam`. This prototype is not deployed or
+enabled; Production SMTP remains active until isolated integration testing and
+explicit owner approval are complete.

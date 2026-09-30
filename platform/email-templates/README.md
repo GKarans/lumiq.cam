@@ -18,20 +18,22 @@ Templates**:
 | Password changed notification | `supabase-password-changed.html` | `Lumiq konta paroles drošības paziņojums / Lumiq password security notice` |
 | Email address changed notification | `supabase-email-changed.html` | `Lumiq konta e-pasts nomainīts / Lumiq email address changed` |
 
-Resend has verified both `send.lumiq.cam` and the root `lumiq.cam` domain. The
-Both `lumiq.cam` and `send.lumiq.cam` are currently verified in Resend. The
-Production Supabase Auth sender and the prepared Cloudflare Worker release
-configuration use `Lumiq <noreply@lumiq.cam>`. The root domain uses its
-separate `outbound` Return-Path. Existing root MX and SPF records must remain
-unchanged unless an approved receiving-mail migration requires a coordinated
-change. The Worker sender must still be added to the candidate and tested after
-an explicitly approved candidate deployment.
+Resend currently verifies both `send.lumiq.cam` and the root `lumiq.cam`
+domain. Production Supabase Auth and the deployed Cloudflare candidate use
+`Lumiq <noreply@lumiq.cam>`; the root sending domain has the separate
+`outbound` Return-Path. Cloudflare Email Routing owns the root MX records and
+root SPF (`v=spf1 include:_spf.mx.cloudflare.net ~all`); Resend's `outbound`
+records and DKIM remain separate. Do not change these records without a
+coordinated mail-routing review.
 
-`support@lumiq.cam` is not yet a verified receiving mailbox. Do not set it as
-the `Reply-To` address until incoming mail has been configured and a message
-to that address has been received successfully. Worker transactional messages
-accept `PLATFORM_EMAIL_REPLY_TO` for this purpose; it is intentionally
-optional.
+`support@lumiq.cam` is an active Cloudflare Email Routing forward to the
+verified `guntars.karans@gmail.com` destination; an externally sent test was
+received in Gmail. This is forwarding, not a separate hosted mailbox. The
+candidate Worker is configured with `PLATFORM_EMAIL_REPLY_TO=support@lumiq.cam`.
+Verify a real Worker message's delivered `Reply-To` header before declaring
+outbound reply handling tested. Supabase hosted Auth SMTP has no documented
+Reply-To field; the optional Auth Hook setting is separate and the Hook remains
+disabled pending isolated testing and owner approval.
 
 Supabase's hosted Auth template editor exposes HTML template content; it does
 not provide a separate plain-text alternative field. The HTML templates include
@@ -42,7 +44,7 @@ Do not claim a plain-text fallback for Auth mail until the actual delivered MIME
 message has been inspected. Worker transactional notifications already send
 both `text` and `html` through Resend.
 
-After saving, send test messages to a Gmail account and a second mailbox.
+After saving, send approved test messages to a Gmail account and a second mailbox.
 Check both languages, mobile width, link destinations, expired-link behavior,
 and the delivered MIME types before treating the Production templates as live.
 If a real text alternative is required for Supabase Auth, evaluate a supported
