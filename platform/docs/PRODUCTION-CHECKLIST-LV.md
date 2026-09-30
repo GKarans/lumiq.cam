@@ -29,6 +29,7 @@ Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu t
 - [ ] Ar skaidri identificētu testa kontu pārbaudīt reģistrāciju vai uzaicinājumu, apstiprināšanu, pieslēgšanos, paroles atiestatīšanu un izrakstīšanos.
 - [ ] Pēc testa izdzēst vai skaidri atzīmēt testa kontu un tā datus.
 - [x] Kandidāta anonīmie `/`, `/login` un `/healthz` pieprasījumi atgrieza Cloudflare Access `302`; autorizētā pārlūkā kandidāts ir atverams.
+- [x] 2026-09-30 anonīms HTTP `GET /app` uz Production kandidātu atgrieza Cloudflare Access `302`; pārbaude neizpildīja pāradresāciju un neizmantoja autentifikācijas datus.
 
 ## 4. Pasākuma un foto pilnais cikls
 
