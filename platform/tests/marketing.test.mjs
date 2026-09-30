@@ -27,3 +27,8 @@ test('public guest-flow links never point at the local-only demo route', async (
   assert.match(latvian, /'Guest experience':'Viesa plūsma'/);
   assert.match(latvian, /'Create an event':'Izveidot pasākumu'/);
 });
+
+test('password reset feedback frontend uses a fresh cache-busted entry module', async () => {
+  const html = await readFile(path.join(root, 'index.html'), 'utf8');
+  assert.match(html, /\/app\.js\?v=auth-reset-feedback-20260930-1/);
+});
