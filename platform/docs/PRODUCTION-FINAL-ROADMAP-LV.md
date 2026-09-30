@@ -2,17 +2,19 @@
 
 Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `lumiq.cam` maršruta pārslēgšanas. Kandidāts paliek aiz Cloudflare Access ar atļauju tikai īpašniekam. `app-images` un `event-photo-media` ir neaizskarami. Šis ir jaunais darba saraksts; statusu atzīmē tikai pēc norādītā pierādījuma.
 
-**Pēdējā pārskatīšana:** 2026-09-30. Šis saraksts neaizstāj pienākumu pārbaudīt katru dzīvo plūsmu; lokāli testi nav Production pierādījums.
+**Pēdējā pārskatīšana:** 2026-09-30. Pievienots gala e-pastu adrešu un TET gaidīšanas plāns. Šis saraksts neaizstāj pienākumu pārbaudīt katru dzīvo plūsmu; lokāli testi nav Production pierādījums.
 
-**Darba princips:** kamēr TET izskata 2026-09-25 pieteikumu, pabeigt visus tālākos darbus kandidātā aiz Cloudflare Access. `lumiq.cam` DNS/Worker maršrutu neaiztikt. Kad pārējais gatavs, gaidīt TET atbloķēšanu; domēna pārslēgšana ir pēdējais solis.
+**Darba princips:** kamēr TET izskata 2026-09-25 pieteikumu, pabeigt visus pārējos darbus kandidātā aiz Cloudflare Access. `lumiq.cam` DNS/Worker maršrutu neaiztikt. TET atbilde un bloķējuma noņemšana ir ārējs priekšnoteikums, nevis iemesls apturēt pārējo darbu; domēna pārslēgšana ir pēdējais solis.
+
+**E-pasta sākuma komplekts:** `noreply@lumiq.cam` automatizētai sūtīšanai un `support@lumiq.cam` klientu atbalstam. `privacy@`, `billing@` un citas adreses pagaidām neveidot kā atsevišķas pastkastes; vajadzības gadījumā tās vēlāk var pievienot kā aliasus. Veidnēm jābūt Lumiq vizuālajā stilā, salasāmām telefonā un ar teksta alternatīvu. Ienākošā pasta DNS aktivizēšana gaida apstiprinātu galamērķi un esošo MX/SPF ierakstu migrācijas plānu.
 
 ## Īsā izpildes secība
 
-1. [ ] Pabeigt e-pasta saņemšanu un piegādes pārbaudes; sakārtot Lumiq veidnes.
+1. [ ] Pabeigt `support@lumiq.cam` saņemšanu, `noreply@lumiq.cam` piegādes pārbaudes un Lumiq veidnes; pirms DNS maiņas apstiprināt atbalsta vēstuļu galamērķi un saglabāt esošās pāradresācijas.
 2. [ ] Pēc atsevišķa apstiprinājuma atjaunināt kandidāta Worker, saglabājot Cloudflare Access un nemainot `lumiq.cam` maršrutu.
 3. [ ] Kandidātā aiz Access pārbaudīt konta/Auth plūsmas un visu foto ciklu ar QA datiem.
 4. [ ] Pārbaudīt divu organizatoru izolāciju, anonīmo piekļuvi, Queue/DLQ, rezerves kopijas, brīdinājumus un žurnālus.
-5. [ ] Pabeigt kandidāta pieņemšanas pārbaudi un gaidīt TET atbildi; ja līdz norunātajam termiņam tās nav, nosūtīt atgādinājumu.
+5. [ ] Pabeigt kandidāta pieņemšanas pārbaudi un gaidīt TET atbildi. Atbilde gaidāma līdz 2026-10-02; ja tās nav, 2026-10-05 nosūtīt atgādinājumu.
 6. [ ] Tikai pēc TET atbloķēšanas pārbaudīt domēnu no Tet un cita tīkla, pievienot precīzos Auth callback URL un ar īpašnieka apstiprinājumu pārslēgt `lumiq.cam` uz Production.
 
 TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lumiq.cam` pieslēgšanu.
