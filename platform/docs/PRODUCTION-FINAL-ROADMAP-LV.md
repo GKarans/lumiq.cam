@@ -61,6 +61,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 
 ### 3. Production konta un piekļuves plūsma
 
+- [x] 2026-09-30 Supabase Production Auth Users panelī pēc precīzas iepriekš saskaņotā sintētiskā QA e-pasta `guntars.karans+prodtest-20260930@gmail.com` meklēšanas rādīts `No users found`. Kontu neizveidoju un uzaicinājumu nesūtīju; vajadzīga īpašnieka konta izveide un Production noteikumu pieņemšana.
 - [ ] Ar skaidri marķētu testa kontu kandidātā pārbaudīt uzaicinājumu vai reģistrāciju, verifikāciju, pieteikšanos, paroles atjaunošanu, izrakstīšanos un sesijas atjaunošanu pēc lapas pārlādes.
 - [ ] Pārbaudīt beigušos/kļūdainu Auth saiti un saprotamu kļūdas paziņojumu.
 - [ ] Pēc testa izdzēst testa kontu un tā datus vai dokumentēt, kāpēc tas jāpatur.
