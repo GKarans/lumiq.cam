@@ -65,7 +65,7 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 - [x] Jaunākā Production backup read-back un checksum pārbaude izturēja 2026-09-30.
 - [x] Pilns Production backup restore ir veikts jaunajā izolētajā Recovery projektā; backup datu inventārs sakrita un migrācijas `001–046` pārbaudītas 2026-09-29. Esošo Recovery datubāzi atkārtoti nepārrakstīt.
 - [ ] Pārbaudīt aktuālos Production Worker kļūdu žurnālus un Queue/DLQ metriku, tostarp sintētisku kļūmes scenāriju bez reālu klientu datu ietekmes.
-- [ ] Pievienot Cloudflare `$10`/`$50` budžeta brīdinājumu saņēmēju pēc adreses apstiprināšanas; pašlaik saņēmēju lauki ir tukši.
+- [x] 2026-09-30 Cloudflare Budget Alerts pārbaudē gan automātiskajam `$10`, gan `$50` brīdinājumam bija pa vienam saņēmējam (konta īpašnieks). Panelis rādīja `$0.00` par 2026. gada oktobri; brīdinājumu faktiskā piegāde nav testēta.
 - [x] Pārbaudīt Cloudflare Production Worker Observability žurnālu “Last 1 hour” skatā 2026-09-30: 10 success, 0 errors; pēdējie redzamie notikumi ir `/api/config` un `/api/auth/session`. Tas nav pilnas lietotnes plūsmas pierādījums.
 - [ ] Pārskatīt izmaksas un resursu atkarības; resursus nedzēst bez pierādītas neatkarības un īpašnieka apstiprinājuma. `app-images` un `event-photo-media` neaiztikt — STOP.
 
