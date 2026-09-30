@@ -167,4 +167,12 @@ test('queue consumer runs only valid targeted jobs, closes DB and retries startu
  const unavailable=makeMessage({jobId:id}),original=console.error;console.error=()=>{};
  try{await createQueueConsumer(async()=>{throw new Error('offline');})({messages:[unavailable]},{PLATFORM_MODE:'staging',PLATFORM_RELEASE_APPROVED:'staging'});}finally{console.error=original;}
  assert.deepEqual(unavailable.retried,{delaySeconds:60});
+ const failedDlq=makeMessage({jobId:id}),closedAfterDlqFailure=[];console.error=()=>{};
+ try{
+  await createQueueConsumer(async()=>({jobs:{deadLetter:async()=>{throw new Error('database unavailable');}},db:{close:async()=>closedAfterDlqFailure.push(true)}}))(
+   {queue:'test-jobs-dlq',messages:[failedDlq]},
+   {PLATFORM_MODE:'staging',PLATFORM_RELEASE_APPROVED:'staging',LUMIQ_JOBS_DLQ_NAME:'test-jobs-dlq'}
+  );
+ }finally{console.error=original;}
+ assert.equal(failedDlq.acked,false);assert.deepEqual(failedDlq.retried,{delaySeconds:60});assert.deepEqual(closedAfterDlqFailure,[true]);
 });
