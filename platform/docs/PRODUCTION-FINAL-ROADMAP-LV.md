@@ -61,6 +61,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 - [x] 2026-09-30 bezsesijas `curl` atkārtojums uz tiem pašiem pieciem ceļiem atkal atgrieza tikai HTTP `302`; `Location` URL un īslaicīgos Access metadatus neiekļāvu žurnālos.
 - [x] Access atļaujas politika pārbaudīta: `Allow` tikai īpašnieka e-pastam; `lumiq.cam` maršruts nav mainīts.
 - [x] 2026-09-30 īpašnieka Access sesijā kandidātā ielādējās `/login`, `/register` un `/reset` formas. Neiesniedzu nevienu formu; konts netika izveidots un e-pasts netika nosūtīts. Auth piegāde un pilnā konta plūsma vēl nav verificēta.
+- [x] 2026-09-30 kandidāta `/app` ar derīgu Cloudflare Access, bet bez Lumiq lietotnes sesijas, novirzīja uz `/login`; tas tieši apstiprina app līmeņa auth prasību, nevis testa konta pilno plūsmu vai divu organizatoru datu izolāciju.
 
 ### 4. Produkta pilnais foto cikls
 
