@@ -21,7 +21,7 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 ### 2. Lumiq e-pasta adreses
 
 - [x] Automātiskai sūtīšanai izmanto `noreply@lumiq.cam`; Production Supabase SMTP izmanto `Lumiq <noreply@lumiq.cam>` un Resend. Atsevišķa `noreplay@` adrese nav vajadzīga — pareizā rakstība ir `noreply@`.
-- [x] Resend verificējis `send.lumiq.cam` un saknes `lumiq.cam`; saknes konfigurācijai Return-Path ir `outbound`, saglabājot esošo sūtīšanas apakšdomēnu.
+- [x] 2026-09-30 Resend domēnu panelī tieši pārbaudīts, ka gan `send.lumiq.cam`, gan saknes `lumiq.cam` ir `Verified`; saknes konfigurācijai Return-Path ir `outbound`, saglabājot esošo sūtīšanas apakšdomēnu. Šajā pārbaudē domēnu vai DNS iestatījumus nemainīju.
 - [x] 2026-09-30 salīdzinātas un pēc pārlādes pārbaudītas sešas vajadzīgās Supabase Production Auth veidnes: apstiprinājums, uzaicinājums, paroles atjaunošana, e-pasta maiņa, paroles maiņas un e-pasta maiņas paziņojums. Piecām no tām izņemts Supabase noklusētais HTML fragments, kas iepriekš bija pielīmēts pirms Lumiq dokumenta.
 - [ ] Izvēlēties, kur saņemt `support@lumiq.cam` vēstules, un apstiprināt konkrēto galamērķa adresi. Šī ir cilvēka atbalsta adrese; sākumā pietiek ar vienu pastkasti vai aliasu, nevis vairākām atsevišķām pastkastēm.
 - [ ] Tikai pēc galamērķa un pasta pakalpojuma izvēles izveidot `support@lumiq.cam` saņemšanu/pāradresāciju un pārbaudīt ienākošo vēstuli. Namecheap panelis prasa Namecheap nameserverus, bet domēna DNS ir Cloudflare; nameserverus nemainīt. Cloudflare Email Routing aktivizēšanai saskaņot esošo MX/SPF migrāciju un tās ietekmi uz esošajām pāradresācijām; ierakstus neaizstāt bez apstiprināta pasta plāna.
