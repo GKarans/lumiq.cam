@@ -41,6 +41,7 @@
 ## 4. E-pasta servisi un dizains
 
 - [x] Resend sūtīšanas domēni `lumiq.cam` un `send.lumiq.cam` bija verificēti; Production Supabase SMTP bija ieslēgts ar `Lumiq <noreply@lumiq.cam>`. Publicēti Resend DKIM, Return-Path, Cloudflare MX/SPF un DMARC monitoringa ieraksti.
+- [x] Gmail ziņojumu sarakstā 2026-09-30 saņemta Production sūtītāja `noreply@lumiq.cam` reģistrācijas apstiprinājuma vēstule uz īpašnieka Gmail. Apstiprināts tikai piegādes fakts; saites atvēršana, Auth tokena apmaiņa un login no šīs vēstules vēl nav pārbaudīti.
 - [x] `support@lumiq.cam` Cloudflare Email Routing noteikums pārsūtīja ārēju testa vēstuli uz `guntars.karans@gmail.com`, un Gmail `Lumiq` iezīme to parādīja. `noreply@` ir sūtītāja adrese; tai nav vajadzīga atsevišķa saņemšanas pastkaste.
 - [x] Lumiq tēmas Auth HTML veidnes un Worker HTML/teksta veidnes ir sagatavotas; lokālie testi ir izturēti. Tas nepierāda visu reālo vēstuļu piegādi.
 - [ ] Pārbaudīt reālu Production sūtījumu no `noreply@lumiq.cam`: reģistrācija, ielūgums, paroles atiestatīšana, e-pasta maiņa, paroles maiņas paziņojums un būtiskie produkta paziņojumi. Salīdzināt Supabase Auth, Resend un saņēmēja žurnālus.

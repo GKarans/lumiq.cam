@@ -18,6 +18,8 @@ Paplašināts tikai-lasāmais Production Auth grant audits 2026-10-01: izsaukts 
 
 ## Jaunākais Auth/Supabase Support turpinājums (2026-10-01)
 
+Gmail meklēšanā atrasta `noreply@lumiq.cam` vēstule “Apstiprini Lumiq e-pastu / Confirm your Lumiq email”, saņemta 2026-09-30 uz īpašnieka Gmail. Tas apstiprina vienas Production reģistrācijas vēstules piegādi; saites atvēršana, apstiprinājuma callback un login vēl nav pierādīti. Saites/token saturs netika atvērts vai saglabāts.
+
 Gmail saņemšanas kvīts apstiprina Supabase Support follow-up ar ID `SU-490545`; tas ir automātisks apliecinājums, nevis tehniska atbilde. Pieprasījumā minēta tikai `USAGE ON SCHEMA auth` sešām iepriekš apstiprinātām RPC owner lomām vai atbalstīta izpildes metode. Supabase kvīts norāda 1–2 darba dienu mērķi un pašreizēja kavējuma iespēju. Atbalsta piekļuve projektam tika izslēgta pirms pieprasījuma nosūtīšanas.
 
 Atkārtotais `run-safe-runtime-check` 2026-10-01 apstājās pie `Auth RPC owner privileges check (CHECK_FAILED)` un paziņoja, ka DB izmaiņas nav veiktas. Tādēļ šis mēģinājums nepabeidza pilnu runtime/RLS auditu; 047 joprojām nav pielietota.
