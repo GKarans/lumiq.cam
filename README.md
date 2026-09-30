@@ -34,6 +34,7 @@ Komanda izpilda backend testus, publisko failu build un izolētu Chromium gala p
 
 ## Dokumentacija
 
+- [Production goal un darbu saraksts](platform/docs/PRODUCTION-GOAL-LV.md)
 - [Arhitektura](platform/docs/ARCHITECTURE.md)
 - [Paveiktais un atlikusais](platform/docs/PROGRESS.md)
 - [Produkta roadmap](platform/docs/PRODUCT-ROADMAP.md)
