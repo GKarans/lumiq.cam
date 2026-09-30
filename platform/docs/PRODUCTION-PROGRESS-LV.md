@@ -1,5 +1,9 @@
 # Lumiq production migrācijas progress
 
+## 2026-10-01 - Kandidāta publiskā hostname izslēgšana
+
+Cloudflare `lumiq-production-candidate` → Domains: izslēgts tikai `Production Worker URL` (`lumiq-production-candidate.gkarans-events.workers.dev`); Preview URL jau bija izslēgts un paliek izslēgts. Panelī pēc saglabāšanas abi pārslēgi ir `off`. Neizdzēsu Worker, nemainīju tā Production DB/Hyperdrive/Queue/R2 bindings, noslēpumus vai `lumiq.cam` Custom Domain/Access konfigurāciju. Svaigs anonīms GET uz kandidāta `/healthz` tagad atgriež HTTP `404`; `https://lumiq.cam/healthz` turpina atgriezt Cloudflare Access HTTP `302`. Tas samazina nejaušu tiešu piekļuvi kandidātam, taču nepierāda, ka Worker vai visi tā trigeri ir izņemti; jāpabeidz pilnā atkarību/backup pārbaude un tikai tad jāizlemj par resursa dzēšanu.
+
 ## 2026-10-01 - Atklāta kandidāta piesaiste Production resursiem
 
 Cloudflare `lumiq-production-candidate` Settings pārbaudīti tikai lasīšanai. Tajā norādīts Supabase Production projekta ref `baqebydtinysosueksgr`, `HYPERDRIVE` binding uz `lumiq-production`, `LUMIQ_JOBS_QUEUE` uz `lumiq-production-jobs`, `R2_PHOTOS` uz EU `lumiq-production-photos`, kā arī `PLATFORM_MODE=production`, `PLATFORM_RELEASE_APPROVED=production` un `PLATFORM_SERVICE_NAME=lumiq-production-candidate`. Kandidāts joprojām ir pieejams savā `workers.dev` hostname; tobrīd Workers sarakstā redzami 143 pieprasījumi pēdējā saraksta intervālā. Secret vērtības netika atvērtas vai salīdzinātas.
