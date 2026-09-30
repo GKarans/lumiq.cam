@@ -59,7 +59,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 - [x] Kandidāta anonīmie pamatpieprasījumi ir aizsargāti ar Cloudflare Access.
 - [x] 2026-09-30 atkārtoti anonīmi pārbaudīti kandidāta `/`, `/app`, `/api/auth/session`, `/api/events` un `/healthz`: visi atgrieza `302` uz `lumiq-closed-test.cloudflareaccess.com`. Tas pierāda Access vārtus bez sesijas, nevis to, ka atļaujas politika joprojām ir tikai īpašnieka e-pastam vai ka autentificētā plūsma darbojas.
 - [x] 2026-09-30 bezsesijas `curl` atkārtojums uz tiem pašiem pieciem ceļiem atkal atgrieza tikai HTTP `302`; `Location` URL un īslaicīgos Access metadatus neiekļāvu žurnālos.
-- [x] Access atļaujas politika pārbaudīta: `Allow` tikai īpašnieka e-pastam; `lumiq.cam` maršruts nav mainīts.
+- [x] 2026-09-30 Cloudflare Worker `Access` avota skatā pārbaudīts, ka kandidāta `lumiq-production-candidate.gkarans-events.workers.dev` hostname politika ir `Lumiq closed test - owner` ar `Allow` tikai `guntars.karans@gmail.com`. Tas pierāda kandidāta hostname politiku; `lumiq.cam` maršruts nav mainīts un tā politika jāpārbauda cutover posmā.
 - [x] 2026-09-30 īpašnieka Access sesijā kandidātā ielādējās `/login`, `/register` un `/reset` formas. Neiesniedzu nevienu formu; konts netika izveidots un e-pasts netika nosūtīts. Auth piegāde un pilnā konta plūsma vēl nav verificēta.
 - [x] 2026-09-30 kandidāta `/app` ar derīgu Cloudflare Access, bet bez Lumiq lietotnes sesijas, novirzīja uz `/login`; tas tieši apstiprina app līmeņa auth prasību, nevis testa konta pilno plūsmu vai divu organizatoru datu izolāciju.
 
