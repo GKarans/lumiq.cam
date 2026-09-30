@@ -33,6 +33,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 - [x] Sagatavotas sešas Lumiq tēmas Supabase Auth HTML veidnes: reģistrācija, uzaicinājums, paroles atjaunošana, e-pasta maiņa un drošības paziņojumi.
 - [x] Worker transakciju vēstules veidnes atbalsta HTML un teksta variantu; lokālie e-pasta testi izturēti.
 - [x] 2026-09-30 atkārtoti palaisti `email-templates.test.mjs`, `auth-callback.test.mjs` un `operations.test.mjs`: 11/11 izturēti. Tie nepārbauda SMTP piegādi no Production.
+- [x] 2026-09-30 visas sešas Auth HTML veidnes lokāli vizuāli renderētas latviešu un angļu valodā 390 px mobilajā platumā ar sintētiskiem datiem; 12/12 renderējumi saturēja vēstules saturu un nepārsniedza pieejamo platumu. Pārbaude neizmantoja SMTP un neaizstāj īstu Gmail un otra pasta klienta pārbaudi.
 
 ### 2. Lumiq e-pasta adreses
 
