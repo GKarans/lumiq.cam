@@ -40,7 +40,7 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 
 ### 4. Produkta pilnais foto cikls
 
-- 2026-09-30 kandidāta sākumlapa aiz Access joprojām rāda veco `/demo` saiti, un `/demo` atgriež `Not found`. Reģistrācijas forma atveras, bet konta izveide nav iesniegta; tā prasītu noteikumu pieņemšanu un izsūtītu Auth vēstuli. Repozitorija saites labojums ir vēlāk par dzīvo izvietojumu; pirms Production foto cikla jāizvērtē release gate un atsevišķi jāapstiprina tikai Access aizsargāta kandidāta izvietošana.
+- 2026-09-30 atkārtotā kandidāta pārbaudē sākumlapa aiz Access joprojām rāda veco `/demo` saiti, un `/demo` atgriež `Not found`. Wrangler tikai-lasāmā deploy vēsture rāda aktīvo versiju `37314545-a149-416a-837b-ea5efbb8f6b0`, kas izveidota 2026-09-29 19:19 UTC; tā nav sasaistīta ar pašreizējo repozitorija commit. Pašreizējā ignorētā Production konfigurācija norāda `PLATFORM_RELEASE_APPROVED=production`, bet `production:preflight` atsaka deploy, jo prasa `NOT_APPROVED`. Neizvietoju un guard neapgāju; jāsaņem atsevišķs īpašnieka lēmums par tikai Access aizsargātā kandidāta atjaunināšanu. Reģistrācijas forma atveras, bet konta izveide nav iesniegta; tā prasītu noteikumu pieņemšanu un izsūtītu Auth vēstuli.
 - [ ] Pēc atsevišķa apstiprinājuma izvietot pašreizējo kandidāta konfigurāciju, kas ietver galveno Queue un DLQ patērētāju; saglabāt `workers.dev` kandidāta hostname un Cloudflare Access, `lumiq.cam` maršrutu neaiztikt. Pēc izvietošanas atkārtoti pārbaudīt sākumlapas saites un DLQ darbību.
 - [ ] Kandidātā izveidot marķētu QA pasākumu un QR kodu.
 - [ ] Ar telefonu atvērt viesa saiti, ievadīt vārdu, uzņemt foto, augšupielādēt to un pārbaudīt galeriju/sīktēlus.
