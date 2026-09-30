@@ -81,6 +81,7 @@
 
 ## 8. Rindas, eksports un datu atjaunošana
 
+- [x] 2026-10-01 23:41 UTC `production-secrets.ps1 check-production-backup` no jauna nolasīja jaunāko privāto kopu un pārbaudīja `production/2026-09-30T23-32-07-795Z`: 21 tabula, 46 migrācijas, 0 foto objekti; DB/Auth dumps un R2 objekti izturēja lokālo manifestu/kontrolsummu pārbaudi. Verifikators pēc darba dzēš pagaidu failus. Šī pārbaude tikai lasa R2 kopiju, neraksta Production datubāzē vai bucket.
 - [x] Izolētā Cloudflare Queue vingrinājumā sintētiska ziņa tika atkārtota trīs reizes un apstiprināta DLQ; pagaidu resursi izņemti. Tas nepierāda Production darbu patērētāja kļūmju uzvedību.
 - [ ] Pārbaudīt Production galvenās Queue un DLQ binding, patērētāju, backlog, retry, kļūdu paziņošanu un drošu operatora atkārtojumu bez klienta datu zuduma. Neievietot destruktīvu kļūmju testu īstā klienta darbā.
 - [x] 2026-10-01 izveidota Production DB/Auth un R2 foto kopija `production/2026-09-30T23-32-07-795Z` privātajā EU `lumiq-production-backups` bucket; backup pēc tam attālināti verificēts: 21 tabula, 46 migrācijas, 0 foto objektu. 30 dienu retention process atrada pilnu jaunāko kopu, bija neblokēts un dzēsa `0` veco kopiju. Tieši no ieplānotā Task Scheduler uzdevuma iepriekš izsaukts backup process (rezultāts `0`). Pagaidu lokālais saturs tiek dzēsts arī kļūmes gadījumā. Backup pieņem tikai secīgu migrāciju manifestu prefiksu ar katras esošās migrācijas pārbaudītu SHA-256; tas neprasa nepiemēroto 047 un nepārveido datubāzi.
