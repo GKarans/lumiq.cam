@@ -9,6 +9,7 @@ export const ACTION_PATHS = {
 
 type Action = keyof typeof ACTION_PATHS;
 type Locale = 'lv' | 'en';
+const PRODUCTION_SITE_ORIGIN = 'https://lumiq.cam';
 
 export type HookPayload = {
   user?: { email?: string; new_email?: string; user_metadata?: { locale?: string } };
@@ -126,10 +127,10 @@ export function buildAuthMessages(
   }
 
   const site = new URL(email.site_url);
-  if (site.protocol !== 'https:' && site.hostname !== 'localhost') throw new Error('Invalid Auth site URL.');
+  if (site.origin !== PRODUCTION_SITE_ORIGIN) throw new Error('Auth site URL must use the Lumiq Production origin.');
   const redirectTo = email.redirect_to || site.origin;
   const redirect = new URL(redirectTo);
-  if (redirect.origin !== site.origin) throw new Error('Auth redirect must use the configured site origin.');
+  if (redirect.origin !== PRODUCTION_SITE_ORIGIN) throw new Error('Auth redirect must use the Lumiq Production origin.');
 
   const locale: Locale = user.user_metadata?.locale === 'lv' ? 'lv' : 'en';
   const type = action as Action;

@@ -5,6 +5,8 @@ Send Email Hook requests and sends localized `text/plain` plus Lumiq HTML
 through the Resend Email API. It handles signup confirmation, invite, magic link,
 reauthentication, recovery, and email-change actions. Email-change token hashes
 follow Supabase's documented mapping for secure two-address confirmation.
+Signed payloads are pinned to the canonical `https://lumiq.cam` origin; candidate
+and other hosts are rejected before any message is sent.
 
 ## Local checks
 

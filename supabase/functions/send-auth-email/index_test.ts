@@ -38,8 +38,8 @@ function payload(action: string, extra: Record<string, unknown> = {}) {
     email_data: {
       email_action_type: action,
       token_hash: 'a'.repeat(64),
-      site_url: 'https://lumiq-production-candidate.gkarans-events.workers.dev',
-      redirect_to: 'https://lumiq-production-candidate.gkarans-events.workers.dev',
+      site_url: 'https://lumiq.cam',
+      redirect_to: 'https://lumiq.cam',
       ...extra,
     },
   };
@@ -62,7 +62,7 @@ Deno.test('signed signup sends both MIME parts with the exact Lumiq callback', a
   assertEquals(link.origin, 'https://project.supabase.co');
   assertEquals(link.pathname, '/auth/v1/verify');
   assertEquals(link.searchParams.get('type'), 'signup');
-  assertEquals(link.searchParams.get('redirect_to'), 'https://lumiq-production-candidate.gkarans-events.workers.dev/auth/verify');
+  assertEquals(link.searchParams.get('redirect_to'), 'https://lumiq.cam/auth/verify');
 });
 
 Deno.test('email change sends both securely mapped recipient messages', async () => {
@@ -158,6 +158,21 @@ Deno.test('auth callback refuses a redirect outside the signed site origin', () 
     rejected = true;
   }
   assertEquals(rejected, true);
+});
+
+Deno.test('auth email hook rejects candidate hosts even when supplied in a signed payload', () => {
+  for (const extra of [
+    { site_url: 'https://lumiq-production-candidate.gkarans-events.workers.dev' },
+    { redirect_to: 'https://lumiq-production-candidate.gkarans-events.workers.dev' },
+  ]) {
+    let rejected = false;
+    try {
+      buildAuthMessages(payload('signup', extra), { supabaseUrl: env.SUPABASE_URL });
+    } catch {
+      rejected = true;
+    }
+    assertEquals(rejected, true);
+  }
 });
 
 Deno.test('invalid webhook signatures never send email', async () => {

@@ -1,5 +1,9 @@
 # Lumiq production migrācijas progress
 
+## 2026-10-01 - Auth e-pasta prototipa Production hosta piesaiste
+
+Repo auditā `supabase/functions/send-auth-email` testu paraugi vēl būvēja pozitīvas saites uz `lumiq-production-candidate.gkarans-events.workers.dev`. Production-only mērķim Auth e-pastu veidotājs tagad pieņem tikai `https://lumiq.cam` `site_url` un `redirect_to`; kandidāta hosta pozitīvie paraugi aizstāti ar Production, pievienoti negatīvie testi abām vietām, un README skaidri fiksē origin ierobežojumu. Deno `test` izturēja 10/10, `deno check index.ts` un `deno audit` izturēja bez zināmiem ievainojamības atradumiem. Hook ir prototips un paliek neizvietots/neieslēgts; Production SMTP un dzīvais Worker netika mainīti.
+
 ## 2026-10-01 - Resend Production Auth sūtījumu žurnāls
 
 Resend `Emails → Sending` (filtrs: pēdējās 15 dienas) rāda vairākas QA konta paroles atjaunošanas vēstules un paroles maiņas paziņojumus ar statusu `Delivered`. Atvērts paroles maiņas paziņojuma ieraksts apstiprināja `FROM "Lumiq" <noreply@lumiq.cam>`, saņēmēju `dev.guntars.karans@gmail.com` un tekstu, ka konta parole nupat nomainīta. Vēstules tokena saturs netika atvērts vai kopēts. Tas ir stiprāks pierādījums par sūtītāju/piegādes statusu un paroles maiņas notikuma e-pasta ģenerēšanu, bet ne par lietotāja gala pastkastes saņemšanu vai veiksmīgu login. Supabase ticket `SU-490545` meklējumā joprojām ir tikai automātiskā saņemšanas kvīts; Auth callback/login defekts nav atrisināts.
