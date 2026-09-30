@@ -64,7 +64,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 
 - [x] 2026-09-30 Supabase publiskajā statusa panelī `Auth` un `eu-central-1` norādīti kā `Operational`; atvērtais latentuma incidents skar ASV austrumu reģionu. Nākamo Auth pārbaužu kļūdas vērtēt kopā ar [statusa lapu](https://status.supabase.com/); statuss viens pats neapstiprina mūsu projekta Auth piegādi.
 - [x] 2026-09-30 Supabase Production `Sign In / Providers` tikai-lasāmajā pārbaudē: e-pasta provider un jaunu kontu reģistrācija ieslēgta, e-pasta apstiprināšana obligāta, anonīmā pierakstīšanās izslēgta. Google provider ir izslēgts, tādēļ QA plūsma jāveic ar e-pastu/paroli, nevis Google OAuth.
-- [x] 2026-09-30 atkārtotā Supabase Production Auth Users paneļa pārbaudē rādīts `No users in your project`. QA lietotājs nav izveidots; kontu neizveidoju un uzaicinājumu nesūtīju. Vajadzīga īpašnieka QA konta izveide un jebkādu Production noteikumu pieņemšana.
+- [x] 2026-09-30 Supabase Production apstiprināts ar read-only `select count(*) as total_auth_users from auth.users`: rezultāts `0`. Auth Users panelī bija vispārīgs tehniskās problēmas paziņojums, tādēļ tas netika izmantots kā vienīgais pierādījums. QA kontu neizveidoju un uzaicinājumu nesūtīju; vajadzīga īpašnieka QA konta izveide un jebkādu Production noteikumu pieņemšana.
 - [ ] Ar skaidri marķētu testa kontu kandidātā pārbaudīt uzaicinājumu vai reģistrāciju, verifikāciju, pieteikšanos, paroles atjaunošanu, izrakstīšanos un sesijas atjaunošanu pēc lapas pārlādes.
 - [ ] Pārbaudīt beigušos/kļūdainu Auth saiti un saprotamu kļūdas paziņojumu.
 - [ ] Pēc testa izdzēst testa kontu un tā datus vai dokumentēt, kāpēc tas jāpatur.
