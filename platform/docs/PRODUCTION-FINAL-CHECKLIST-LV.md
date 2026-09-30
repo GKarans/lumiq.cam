@@ -36,6 +36,7 @@ Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nema
 ## 3. Production konta plūsma aiz Access
 
 - [x] Lokālajā izolētajā pārlūka testā izieta reģistrācija, e-pasta verifikācija, pieslēgšanās, paroles atjaunošanas saite un jauna parole; uzaicinājuma callback tests izturēja. Sintētiski dati, nevis Production.
+- [x] 2026-09-30 Supabase Production Auth žurnāli apstiprināja dzīvās paroles atjaunošanas saites `/verify` (`303`), sekojošu `Login` notikumu un autorizētu `/user` pieprasījumu testa kontam. Izrakstīšanās, sesijas atjaunošana un konta sakopšana vēl nav pārbaudīta.
 - [ ] Ar atsevišķu testa kontu pārbaudīt reģistrāciju vai uzaicinājumu, apstiprinājuma saiti, pieslēgšanos, paroles atjaunošanu un izrakstīšanos.
 - [ ] Pārbaudīt sesijas atkārtotu ielādi un kļūdainas/expired saites saprotamu apstrādi.
 - [ ] Skaidri marķēt testa kontu, un pēc pārbaudes dzēst testa lietotāju un saistītos datus.
