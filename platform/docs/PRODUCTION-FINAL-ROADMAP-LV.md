@@ -74,7 +74,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 - [x] Production rezerves kopija pārbaudīta: 21 tabula, migrācijas `001–046`, kontrolsummas sakrīt. Esošo Recovery projektu nepārrakstīt.
 - [x] Recovery atjaunošanas pārbaude un migrāciju ķēde izieta.
 - [ ] 2026-09-30 Cloudflare Alerts panelī tieši pārbaudīti abi aktīvie Billing Budget Alert noteikumi (`$10` automātiskais un `$50`); abiem `Notification email` lauks ir tukšs. Adresāta pievienošana gaida īpašnieka apstiprinājumu; pēc saglabāšanas jāpārbauda testa paziņojuma saņemšana.
-- [x] Production Worker Observability pēdējā pārbaudē rādīja veiksmīgus notikumus un 0 kļūdu; turpināt uzraudzību pēc izvietošanas.
+- [ ] Production Worker Observability 2026-09-30 pēdējā 7 dienu pārbaudē rādīja 4 vēsturiskus HTTP 503 kļūdu notikumus (29. septembrī); redzamajos datos nav stack/startup cēloņa. Tie nav uzskatāmi par novērstiem. Pēc kandidāta atjaunināšanas vai trace/startup žurnālu pieejamības pārbaudīt kļūdu cēloni un atkārtot smoke testu.
 - [x] 2026-09-30 pilnais `npm test` izturēja 171/171 testu; `npm run build` validēja 60 publiskos failus. Būvējums neveica izvietošanu un neaizstāj Production integrācijas pārbaudi.
 - [ ] Pārskatīt resursu lietojumu un atkarības. Nekādu R2, Worker, Hyperdrive vai Supabase projektu nedzēst, kamēr nav pierādīts, ka tie nav vajadzīgi un nav atsevišķa īpašnieka apstiprinājuma.
 
