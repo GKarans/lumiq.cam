@@ -34,6 +34,8 @@ Verifikācija pēc koda izmaiņām: pilnais `npm run verify` `185/185` testi un 
 | `lumiq.cam` | CLOSED TEST; TET TĪKLA VAIROGA DNS BLOĶĒJUMS | 2026-09-29 atkārtoti: datora noklusētais DNS atgriež TET STOP IP `81.198.92.113`, un parasts HTTPS pieprasījums nonāk TET STOP lapā. Pieprasījums, piesaistot Cloudflare edge IP un saglabājot TLS pārbaudi, sasniedz esošo Access `302`. Tas norāda uz TET tīkla/DNS filtru, nevis Lumiq Worker kļūdu. Pārbaudīt Tīkla Vairoga atļauto sarakstu Mans Tet vai lūgt TET pārskatīt kļūdainu bloķējumu; neizslēgt Access. Domēna maršruts joprojām ir Closed Test. |
 | Publiska palaišana | BLOĶĒTA | PVN numurs iepriekš atzīts par izdomātu. Vajadzīgi īsti uzņēmuma dati, apstiprinātas cenas/atmaksas/juridiskie teksti un maksājumu konfigurācija, kā arī īpašnieka palaišanas apstiprinājums. |
 
+2026-10-01 dzīvā anonīmā domēna pārbaude: `https://www.lumiq.cam/healthz?goal_probe=20261001` atgrieza `301` uz saknes hostu, saglabājot ceļu un query. `https://lumiq.cam/healthz` atgrieza Cloudflare Access `302`, un publiskais `1.1.1.1` DNS resolveris atgrieza abas Cloudflare A adreses. Tas pārbauda tikai anonīmo robežu un šo pieprasījumu izpildes vidi; tas nepierāda autorizētu lietotnes plūsmu vai TET problēmas atrisinājumu.
+
 ## Cloudflare un Supabase resursu inventārs (2026-09-30, tikai lasāms)
 
 | Resurss | Dzīvajā panelī novērotais | Drošs lēmums / vēl trūkst |
