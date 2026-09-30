@@ -231,6 +231,8 @@ Production backup un runtime drošības atkārtota pārbaude 2026-09-30, izmanto
 
 Cloudflare Worker Observability `Invocations` read-only skatā 2026-09-30 pēdējās stundas jaunākie redzamie pieprasījumi uz kandidāta `/healthz` un `/api/auth/session` atgrieza HTTP 200; `/api/local/demo` atgrieza HTTP 404 ar Worker `outcome=ok`. Skatā nebija redzamu error invokāciju, taču tas nepierāda, ka vēsturisko 503 cēlonis ir atrisināts. Worker, Access un dati netika mainīti.
 
+Cloudflare Access anonīmās robežas bezsesijas `curl` pārbaude 2026-09-30: `GET /`, `/app`, `/api/auth/session`, `/api/events` un `/healthz` katrs atgrieza HTTP `302` uz Access. Atbildes `Location` vērtības un tajās esošie īslaicīgie parakstītie metadati netika saglabāti; pieprasījumi nesūtīja sesijas sīkdatnes un nekādus datus nemainīja.
+
 Cloudflare Production Worker Settings atkārtoti apskatīti 2026-09-30: `PLATFORM_MODE=production`, `PLATFORM_RELEASE_APPROVED=production`, `PLATFORM_EMAIL_KEY` ir šifrēts noslēpums, bet `PLATFORM_EMAIL_FROM` Runtime mainīgais nav iestatīts. Repozitorija preflight prasa precīzi `Lumiq <noreply@send.lumiq.cam>`; to nepievienoju, jo tas var aktivizēt dzīvu transakciju sūtīšanu, pirms ir apstiprināts kontrolēts tests. Observability Logs, Invocation logs un persistētie Worker žurnāli ir ieslēgti ar 100% sampling; Traces un ārējie logu eksporta galamērķi nav ieslēgti. Worker iestatījumus nemainīju.
 
 Cloudflare Production Worker Observability Events skatā 2026-09-30 pēdējās stundas filtrs rādīja 7 `Success` un 0 `Errors`. Tabulā bija tikai GET izsaukumi uz konfigurācijas, sesijas un lokālā demo API ceļiem. Tas ir ierobežots darbības signāls, nevis pierādījums Auth e-pastu piegādei vai foto augšupielādei; nekādus pieprasījumus no šī paneļa neizraisīju.
