@@ -1,10 +1,10 @@
 # Lumiq Production pabeigšanas saraksts
 
-**Jaunais autoritatīvais Production-only goal:** [PRODUCTION-GOAL-LV.md](PRODUCTION-GOAL-LV.md). Šis dokuments saglabā iepriekšējo darbu pierādījumu un vēsturisko plānu; agrākā prasība gaidīt TET pirms `lumiq.cam` maršruta maiņas ir aizstāta ar īpašnieka 2026-09-30 lēmumu veidot Production tieši uz `lumiq.cam` aiz Access. Pirms maršruta maiņas jāpārbauda pašreizējais DNS un Access.
+**Autoritatīvais Production-only goal:** [PRODUCTION-GOAL-LV.md](PRODUCTION-GOAL-LV.md). Šis dokuments saglabā vēsturiskos pierādījumus; 2026-09-30 TET bloķējuma gaidīšanas/cutover plāns ir atcelts. Īpašnieks nolēma būvēt Production tieši uz `lumiq.cam` aiz Access, un 2026-10-01 `lumiq.cam` tika piesaistīts `lumiq-production`. Šo maršrutu vairs nepārslēgt starp testu un Production.
 
-Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `lumiq.cam` maršruta pārslēgšanas. Kandidāts paliek aiz Cloudflare Access ar atļauju tikai īpašniekam. `app-images` un `event-photo-media` ir neaizskarami. Šis ir jaunais darba saraksts; statusu atzīmē tikai pēc norādītā pierādījuma.
+Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu tieši Production vidē uz `lumiq.cam`. `lumiq.cam` paliek aiz Cloudflare Access ar atļauju tikai īpašniekam. Candidate Worker ir atslēgts no publiskajiem `workers.dev`/Preview hostname, bet vēl nav izdzēsts; nepārslēgt domēnu atpakaļ. `app-images` un `event-photo-media` ir neaizskarami. Statusu atzīmē tikai pēc norādītā pierādījuma.
 
-**Pēdējā pārskatīšana:** 2026-09-30. Īpašnieks apstiprināja testa vēstules piegādi no `support@lumiq.cam` uz Gmail ar `Lumiq` iezīmi. Cloudflare Worker resursa nosaukums joprojām ir `lumiq-production-candidate`, bet tas ir Production lietotnes izvietojums, nevis staging vide: `PLATFORM_MODE=production`, Production Supabase/Hyperdrive, `lumiq_production_runtime`, EU Production R2, Production Queue/DLQ un owner-only Cloudflare Access. Pēc cache-busting labojuma 2026-09-30 izvietota versija `0d69d676-8536-4784-be21-f91b4f461e13` ar 100% trafika. Deploy pārbaude atkārtoti apstiprināja Access vārtus, Production resursus un DLQ consumer; custom domēna maršruts nav pievienots. Agrākā reset pārbaude 19:19 GMT+3 bija sekmīga, taču īpašnieks pēc tam saņēma vispārīgu Auth kļūdu. Auth Logs iepriekš atgrieza `No data`, tādēļ atiestatīšanas plūsma vēl nav uzskatāma par pabeigtu; jaunajā Worker versijā Auth atteikumi žurnalē tikai drošu endpointa/statusa/koda/request-ID metadatu kopu. Izolētā Cloudflare Queue pārbaudē sintētiska ziņa veica trīs atkārtojumus un tika apstiprināta DLQ; pagaidu Worker un rindas pēc tam izdzēstas. Izrakstīšanās, sesijas atjaunošana un pilnā konta/foto plūsma vēl nav pārbaudīta. `lumiq.cam` maršruts nav mainīts.
+**Vēsturiskā pārskata datums:** 2026-09-30. Toreizējais Worker `lumiq-production-candidate` izmantoja Production resursus un Access, bet `lumiq.cam` vēl nebija piesaistīts. Pēc tam tika veikts `lumiq.cam` Production cutover (skatīt C sadaļu). Agrākā reset pārbaudei sekoja vispārīga Auth kļūda, tāpēc atiestatīšana nav uzskatāma par pabeigtu; pašreizējais šķērslis dokumentēts [PRODUCTION-GOAL-LV.md](PRODUCTION-GOAL-LV.md). Izolētā sintētiskā Queue ziņa toreiz veica trīs atkārtojumus un tika apstiprināta DLQ. Izrakstīšanās, sesijas atjaunošana un pilnā konta/foto plūsma paliek Production QA prasības.
 
 **2026-09-30 turpinājuma pārbaudes:** atkārtotais anonīmais `GET` uz kandidāta `/healthz` saņēma `302` uz Cloudflare Access ar `WWW-Authenticate: Cloudflare-Access`. `npm test` izturēja 182/182 testus, ieskaitot jauno drošas Auth diagnostikas testu; `npm run build` validēja 60 publiskos failus. `npm run browser` iepriekš izturēja izolētās pārlūka pārbaudes 320–1440 px, sintētisku reģistrācijas/galerijas ceļu, uzaicinājuma callback, redaktoru, norēķinu skatus un pieejamību. Šie lokālie testi neapliecina dzīvu Production konta/foto plūsmu. `production-secrets.ps1 check-production-backup` 20:57 GMT+3 atkārtoti verificēja jaunāko privāto Production rezerves kopiju `production/2026-09-30T17-37-35-794Z`: 21 tabula, 46 migrācijas, derīgas kontrolsummas un 0 foto objektu. `lumiq.cam` maršruts netika mainīts.
 
@@ -14,7 +14,7 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 
 **2026-09-30 ārējo servisu atkārtotā pārbaude:** Supabase Production `auth.users` joprojām ir 0. Cloudflare Email Routing panelī `support@lumiq.cam` ir `Active` ar galamērķi `guntars.karans@gmail.com`, bet catch-all ir `Disabled`; īpašnieks apstiprināja testa vēstules saņemšanu Gmail mapē/iezīmē `Lumiq`. Publiskais DNS caur `1.1.1.1` atgrieza Cloudflare MX, saknes SPF, Resend DKIM gan saknei, gan `send.lumiq.cam`, un `outbound.lumiq.cam` CNAME uz `send.forge.rmta.net`. Šajā pārbaudē pievienots `_dmarc.lumiq.cam` TXT `v=DMARC1; p=none; rua=mailto:support@lumiq.cam`; Cloudflare autoritatīvais nameserver un publiskais DNS atgrieza šo vērtību. `p=none` ir tikai monitorēšanas politika, nevis ziņojumu noraidīšana/karantīna; jāpārbauda, vai Cloudflare maršrutēšanas adrese spēj saņemt DMARC apkopotos XML ziņojumus. Queue metrikas ap 17:50 GMT+3: galvenā Production Queue backlog `0`; DLQ pēdējās 24 h `1` ingest, `1` ack, `0` retry un pašreiz backlog `0` (aizture `5.69 s`). Ziņojuma saturs netika atvērts, tādēļ šī metrika viena pati nepierāda kontrolētu DLQ testu vai konkrētās ziņas iznākumu.
 
-**Darba princips:** kamēr TET izskata 2026-09-25 pieteikumu, pabeigt visus pārējos darbus kandidātā aiz Cloudflare Access. `lumiq.cam` DNS/Worker maršrutu neaiztikt. TET atbilde un bloķējuma noņemšana ir ārējs priekšnoteikums, nevis iemesls apturēt pārējo darbu; domēna pārslēgšana ir pēdējais solis.
+**Darba princips (atjaunināts 2026-10-01):** izstrādāt un pārbaudīt Production tieši uz `lumiq.cam` aiz owner-only Access. TET sūdzība ir atsevišķs tīkla/piekļuves izmeklēšanas punkts; tā nebloķē Production izstrādi un vairs nav domēna pārslēgšanas priekšnoteikums. No TET STOP/novirzījuma lapas neprasīt paroles vai konta datus.
 
 **E-pasta sākuma komplekts:** `noreply@lumiq.cam` automatizētai sūtīšanai un `support@lumiq.cam` klientu atbalstam. `support@` pāradresācija uz īpašnieka `guntars.karans@gmail.com` pārbaudīta ar ārēju testa vēstuli; Gmail ekrānuzņēmumā tā redzama zem `Lumiq` iezīmes. `privacy@`, `billing@` un citas adreses pagaidām neveidot kā atsevišķas pastkastes; vajadzības gadījumā tās vēlāk var pievienot kā aliasus. Veidnēm jābūt Lumiq vizuālajā stilā, salasāmām telefonā un ar teksta alternatīvu. Atbildes nosūtīšana no Gmail ar `support@` kā redzamo sūtītāju un Reply-To uzvedība vēl jāpārbauda atsevišķi.
 
@@ -23,14 +23,15 @@ Mērķis: pabeigt un pārbaudīt Lumiq kā privāti lietojamu produktu, pirms `l
 1. [x] Iestatīt un ar testa vēstuli pārbaudīt `support@lumiq.cam` saņemšanu; 2026-09-30 Cloudflare Routing Rules read-only pārbaudē noteikums ir `Active`, galamērķis `guntars.karans@gmail.com` ir `Verified`, un Activity Log pēdējās 24 stundās uzrāda divas ārējās testa vēstules ar rezultātu `Forwarded` (no `g.karans@inbox.lv` un Gmail testa). `noreply@lumiq.cam` piegādes un Lumiq veidnes pārbaudes turpinās atsevišķi.
 2. [x] 2026-09-30 pievienots un publiski pārbaudīts DMARC monitoringa DNS ieraksts `_dmarc.lumiq.cam` (`p=none`, apkopojumu galamērķis `support@lumiq.cam`). Tas nemaina MX, SPF, DKIM vai Worker maršrutu; jāapstiprina DMARC apkopojumu saņemšanas atbalsts.
 3. [x] 2026-09-30 ar īpašnieka iepriekšēju apstiprinājumu atjaunināts tikai `workers.dev` kandidāts, skaidri norādot Production Supabase/R2 izmantošanu, sintētisku testa datu prasību un simulētus maksājumus; `support@` kontaktinformācija izlabota. Cloudflare Access un DLQ consumer saglabāts, `lumiq.cam` maršruts nav mainīts.
-4. [ ] Kandidātā aiz Access pārbaudīt konta/Auth plūsmas un visu foto ciklu ar QA datiem.
-5. [ ] Pārbaudīt divu organizatoru izolāciju, anonīmo piekļuvi, Queue/DLQ, rezerves kopijas, brīdinājumus un žurnālus.
-6. [ ] Pabeigt kandidāta pieņemšanas pārbaudi un gaidīt TET atbildi. Atbilde gaidāma līdz 2026-10-02; ja tās nav, 2026-10-05 nosūtīt atgādinājumu.
-7. [ ] Tikai pēc TET atbloķēšanas pārbaudīt domēnu no Tet un cita tīkla, pievienot precīzos Auth callback URL un ar īpašnieka apstiprinājumu pārslēgt `lumiq.cam` uz Production.
+4. [ ] Atrisināt Supabase Production Auth 047 atbalstītā veidā; pēc tam pārbaudīt reset, invite, login, callback un logout tieši uz `lumiq.cam`.
+5. [ ] Pārbaudīt divu organizatoru izolāciju, foto pilno ciklu, Queue/DLQ, rezerves kopijas/restore, brīdinājumus un žurnālus Production vidē.
+6. [ ] Pabeigt juridisko, operatora datu un izmaksu pārbaudi; publisku piekļuvi un reālus maksājumus neieslēgt bez īpašnieka lēmuma.
+7. [ ] Pēc visu atkarību, datu un atjaunošanas pierādījumu pārbaudes izņemt nevajadzīgos candidate/test resursus; paturēt `app-images` un `event-photo-media` neskartus.
+8. [ ] Kad TET atbild, salīdzināt `lumiq.cam` no Tet tīkla un neatkarīga tīkla; tas ir atsevišķs DNS reputācijas/piekļuves tests un nemaina Production maršrutu.
 
-TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lumiq.cam` pieslēgšanu.
+TET statuss nebloķē Production darbus un nenosaka domēna maršruta maiņu; tas var ietekmēt tikai piekļuvi no konkrētā TET pieslēguma.
 
-## A. Pabeigt tagad, kamēr TET izskata pieteikumu
+## A. Kandidāta darba vēsture (2026-09-30; nav aktuāla izpildes vide)
 
 ### 1. E-pasta sūtīšana
 
@@ -88,9 +89,9 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 - [x] 2026-09-30 atkārtoti anonīmi pārbaudīti kandidāta `/`, `/app`, `/api/auth/session`, `/api/events` un `/healthz`: visi atgrieza `302` uz `lumiq-closed-test.cloudflareaccess.com`. Tas pierāda Access vārtus bez sesijas, nevis to, ka atļaujas politika joprojām ir tikai īpašnieka e-pastam vai ka autentificētā plūsma darbojas.
 - [x] 2026-09-30 pēc Auth diagnostikas deploy `wrangler deployments list` apstiprināja versiju `f1ccfb45-ec57-438e-98f6-75cda2f51501` ar 100% trafiku. Anonīmi `curl` pieprasījumi uz `/`, `/app`, `/api/auth/session` un `/healthz` katrs atgrieza HTTP `302` ar `WWW-Authenticate: Cloudflare-Access`; redirect query dati netika izvadīti/saglabāti. Tas apstiprina pašreizējā kandidāta Access robežu bezsesijas pieprasījumiem, nevis īpašnieka sesijas vai `lumiq.cam` politiku.
 - [x] 2026-09-30 bezsesijas `curl` atkārtojums uz tiem pašiem pieciem ceļiem atkal atgrieza tikai HTTP `302`; `Location` URL un īslaicīgos Access metadatus neiekļāvu žurnālos.
-- [x] 2026-09-30 Cloudflare Worker `Access` avota skatā pārbaudīts, ka kandidāta `lumiq-production-candidate.gkarans-events.workers.dev` hostname politika ir `Lumiq closed test - owner` ar `Allow` tikai `guntars.karans@gmail.com`. Tas pierāda kandidāta hostname politiku; `lumiq.cam` maršruts nav mainīts un tā politika jāpārbauda cutover posmā.
+- [x] 2026-09-30 (vēsturisks) Cloudflare Worker Access skatā kandidāta hostname politika bija `Lumiq closed test - owner` ar `Allow` tikai `guntars.karans@gmail.com`. Tas nav pašreizējā `lumiq.cam` Access maršruta aktuāls pārbaudes pierādījums.
 - [x] 2026-09-30 īpašnieka Access sesijā kandidātā ielādējās `/login`, `/register` un `/reset` formas. Neiesniedzu nevienu formu; konts netika izveidots un e-pasts netika nosūtīts. Auth piegāde un pilnā konta plūsma vēl nav verificēta.
-- [x] 2026-09-30 Supabase Production Auth `URL Configuration` tikai-lasāmi pārbaudīta pēc kandidāta izvietošanas: Site URL ir `https://lumiq-production-candidate.gkarans-events.workers.dev`; atļauti tikai četri precīzi kandidāta callback URL (`/auth/verify`, `/auth/reset`, `/auth/email`, Google callback). `lumiq.cam` nav pievienots pirms TET atbloķēšanas.
+- [x] 2026-09-30 (vēsturisks) Supabase Production Auth `URL Configuration` rādīja kandidāta `workers.dev` Site URL un precīzos callback URL. Tie tika aizstāti ar `lumiq.cam` URL 2026-09-30; aktuālais konfigurācijas fakts ir `PRODUCTION-GOAL-LV.md`.
 - [x] 2026-09-30 kandidāta `/app` ar derīgu Cloudflare Access, bet bez Lumiq lietotnes sesijas, novirzīja uz `/login`; tas tieši apstiprina app līmeņa auth prasību, nevis testa konta pilno plūsmu vai divu organizatoru datu izolāciju.
 
 ### 4. Produkta pilnais foto cikls
@@ -146,26 +147,30 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 - [x] 2026-09-30 pilnais `npm test` izturēja 171/171 testu; `npm run build` validēja 60 publiskos failus. Būvējums neveica izvietošanu un neaizstāj Production integrācijas pārbaudi.
 - [ ] Pārskatīt resursu lietojumu un atkarības. Nekādu R2, Worker, Hyperdrive vai Supabase projektu nedzēst, kamēr nav pierādīts, ka tie nav vajadzīgi un nav atsevišķa īpašnieka apstiprinājuma.
 
-## B. TET atbildes sagaidīšana
+## B. TET tīkla piekļuves jautājums (neatkarīgs no Production cutover)
 
 - Pieteikums nosūtīts **2026-09-25**; TET solītais termiņš ir līdz piecām darbdienām, neieskaitot nedēļas nogali, aptuveni līdz **2026-10-02**.
 - Ja līdz termiņam nav atbildes, **2026-10-05** nosūtīt atkārtotu pieprasījumu ar sākotnējā STOP ekrāna attēlu un skenējumu rezultātiem.
 - [x] Sagatavots nesūtīts atkārtotā pieprasījuma melnraksts `platform/docs/TET-FOLLOWUP-DRAFT-LV.md`; 5. oktobrī vispirms pārbaudīt, vai sākotnējai vēstulei nav pienākusi atbilde, un pirms sūtīšanas pievienot STOP ekrānattēlu un svaigus skenējumu rezultātus.
-- [ ] Saņemt TET atbildi un skaidru apstiprinājumu par `lumiq.cam` atbloķēšanu. Ja līdz piecu darbdienu termiņam nav atbildes, sekot līdzi 2026-10-05.
-- [ ] Pēc apstiprinājuma pārbaudīt `lumiq.cam` no Tet tīkla un vēl viena neatkarīga tīkla; pārliecināties, ka STOP pāradresācija vairs nenotiek. Līdz šai pārbaudei domēna cutover nav atļauts.
-- [x] 2026-09-30 Cloudflare Access lietotņu panelī `Lumiq Closed Development - lumiq.cam` hostname ir tieši `lumiq.cam` ar tukšu Path lauku; piesaistītā `Lumiq closed test - owner` Allow politika ietver tikai `guntars.karans@gmail.com`. Tas pārbauda Access konfigurāciju, bet nepierāda, ka Tet tīkls vairs nerāda STOP lapu vai ka Worker maršruts ir pārslēgts.
+- [ ] Pārbaudīt, vai TET ir atbildējis uz 2026-09-25 pieteikumu, un vajadzības gadījumā nosūtīt sagatavoto 2026-10-05 follow-up. Šī atbilde nav Production maršruta maiņas priekšnoteikums.
+- [ ] Pēc TET atbildes vai tīkla piekļuves atjaunošanās pārbaudīt `lumiq.cam` no Tet pieslēguma un viena neatkarīga tīkla; fiksēt, vai STOP pāradresācija vēl notiek. Maršrutu neaiztikt un STOP lapā neievadīt konta datus.
+- [x] 2026-09-30 Cloudflare Access lietotņu panelī hostname bija tieši `lumiq.cam` ar tukšu Path lauku; politika atļāva tikai īpašnieka e-pastu. 2026-10-01 lietotnes nosaukums mainīts uz Production nosaukumu, galamērķis un owner-only politika saglabāti; Production Worker maršruts uz `lumiq.cam` ir izveidots. Šis konfigurācijas pierādījums pats par sevi nepierāda piekļuvi caur TET tīklu.
 - [x] 2026-09-30 anonīmi `curl` uz kandidāta `/`, `/api/auth/session`, `/assets/app.js` un `/healthz` katram atgrieza HTTP `302` uz Cloudflare Access pieteikšanos; `/healthz` atbildē bija arī `WWW-Authenticate: Cloudflare-Access`. Atkārtots bezsesijas `GET /healthz` saņēma `302` uz `lumiq-closed-test.cloudflareaccess.com` ar to pašu Access izaicinājumu. Pieprasījumos nebija sesijas sīkdatņu; parakstītais novirzījuma metadatu tokens netika saglabāts. Tas pierāda kandidāta anonīmās piekļuves bloķēšanu, nevis autorizēta īpašnieka lietotnes darbību.
-- Līdz šim brīdim `lumiq.cam` maršrutu nemainīt un STOP lapā neievadīt konta datus.
+- 2026-09-30 lēmums toreiz bija nemainīt `lumiq.cam` maršrutu. Tas ir aizstāts ar 2026-09-30 Production-only lēmumu; 2026-10-01 maršruts piesaistīts `lumiq-production`. STOP lapā konta datus neievadīt.
 
-## C. Pēdējais darbs pēc TET atbloķēšanas: `lumiq.cam` pieslēgšana Production
+## C. Pabeigtais Production cutover un atlikusī QA
 
 - [x] 2026-09-30 Supabase Production Auth `URL Configuration` tikai-lasāmajā pārbaudē `Site URL` ir kandidāta `workers.dev`; atļautas četras precīzas kandidāta saites: `/auth/verify`, `/auth/reset`, `/auth/email` un Google callback. `lumiq.cam` vēl nav sarakstā un iestatījumus nemainīju, jo TET bloķējums nav atrisināts.
-- [ ] Pārbaudīt kandidāta gatavību: veselība, īpašnieka vienīgā Access politika, SMTP/Auth saites, foto plūsma un atgriešanas plāns.
-- [ ] Supabase Production Auth atļautajos URL pievienot precīzos `https://lumiq.cam` callback/redirect maršrutus, nepievienojot plašus wildcard.
-- [ ] Pēc īpašnieka apstiprinājuma pārslēgt `lumiq.cam` Worker maršrutu no Closed Test uz Production, saglabājot Access un īpašnieka ierobežojumu.
-- [ ] Uzreiz pārbaudīt pieteikšanos, e-pasta callback, anonīmu bloķēšanu un foto pilno ciklu.
-- [ ] Ja pārbaude neizdodas, atjaunot iepriekšējo Worker maršrutu; publisku piekļuvi neatvērt.
+- [x] 2026-09-30 Production Supabase Auth `Site URL` un precīzie callback URL nomainīti uz `https://lumiq.cam`.
+- [x] 2026-10-01 Cloudflare `lumiq.cam` Custom Domain piesaistīts `lumiq-production`; `workers.dev`/Preview Production URL izslēgti; anonīmais `/healthz` atgriež Access `302`.
+- [ ] Autorizēta Production QA vēl nav pabeigta; skatīt aktuālo [PRODUCTION-GOAL-LV.md](PRODUCTION-GOAL-LV.md). Maršruta maiņa nav jādara vēlreiz.
 
 ## Pabeigšanas kritērijs
 
-Production kandidāts ir lietojams īpašniekam aiz Access, e-pasti pienāk un foto pilnais cikls ir pārbaudīts. Tikai pēc TET atbloķēšanas un īpašnieka apstiprinājuma izpilda pēdējo `lumiq.cam` maršruta maiņu. `app-images` un `event-photo-media` netiek aiztikti.
+Goal nav pabeigts, līdz `lumiq.cam` Production autorizētā sesijā ir pārbaudītas Auth/e-pasta un pilnās foto/event/QR/gallery/delete/ZIP plūsmas, drošība, backup/restore, izmaksas un juridiskie palaišanas vārti, kā norādīts autoritatīvajā goal failā. TET ir atsevišķs piekļuves jautājums. `app-images` un `event-photo-media` netiek aiztikti.
+
+## 2026-10-01 turpinājums
+
+- Aktuālais Supabase statusa momentuzņēmums: Auth un `eu-central-1` ir `Operational`; API Gateway `Degraded Performance`; incidents `Intermittent latency in Eastern US` joprojām atvērts ar pēdējo redzēto atjauninājumu 2026-09-30 21:26 UTC. Tas nav pierādījums par vai pret konkrēto Production Auth shēmas grant kļūmi, un neaizstāj `SU-490545` tehnisko atbildi. Avots: [Supabase Status](https://status.supabase.com/).
+- Current-tree `npm run check` izturēja: secret scan 281 tracked/unignored failam, `npm audit` 0 ievainojamību, 188/188 testus, 60 publisko failu build, 9 pārlūka izmērus no 320 līdz 1440 px, lokālo Auth/event/20 foto galerijas plūsmu, invite callback, guest design editor, billing UI un axe/keyboard/reduced-motion/200% zoom. Visi pārlūka dati bija izolēti un sintētiski; tas nepierāda Production Supabase/Auth, R2 vai dzīvu e-pasta plūsmu.
+- Production backup verifikatorim vajadzīga Windows DPAPI glabātuve un R2 lasīšanas noslēpumi. Tie šajā izpildes vidē nav pieejami kā lokāla DPAPI glabātuve vai procesa mainīgie, tādēļ svaiguma/integritātes pārbaude netika palaista; jaunākais iepriekšējais pierādījums paliek 2026-10-01 pieraksts `PRODUCTION-GOAL-LV.md` un nav uzskatāms par šodienas backup verifikāciju.
