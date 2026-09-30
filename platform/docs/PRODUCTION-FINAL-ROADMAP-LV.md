@@ -29,6 +29,7 @@ TET statuss neaiztur pārējos kandidāta darbus; tas aiztur tikai pēdējo `lum
 - [x] 2026-09-30 Supabase Production SMTP pārbaudīts pēc pārlādes: custom SMTP ieslēgts, `smtp.resend.com:465`, sūtītājs `Lumiq <noreply@lumiq.cam>`, lietotājvārds `resend`; saglabātā parole ir noslēpta un netika mainīta.
 - [ ] Nosūtīt kontrolētu Auth testa vēstuli uz savu testa pastkasti; pārbaudīt piegādi, saites un kļūdu žurnālus. Pirms īstas vēstules nosūtīšanas apstiprināt konkrēto testa sūtījumu.
 - [ ] Ar apstiprinātu testa vēstuli pārbaudīt piegādāto MIME: Auth ziņojumiem pārliecināties, ka ir salasāma `text/plain` alternatīva; ja tās nav, izvērtēt Supabase Send Email Hook ar Resend un multipart `text`/`html`, vispirms izveidojot integrācijas testus un atgriešanās plānu. Worker transakciju vēstulēm pārbaudīt abus variantus.
+- [ ] Pirms Supabase Send Email Hook ieslēgšanas Production izolēti notestēt paraksta pārbaudi, katru Auth darbības tipu, `text`/`html` saturu, piegādes kļūmes un atgriešanās plānu. Hook aizstāj iebūvēto SMTP, tas nav rezerves kanāls; kamēr pārbaudes un īpašnieka apstiprinājuma nav, atstāt Production SMTP aktīvu.
 - [ ] Pārbaudīt Auth e-pastus Gmail un vēl vienā pasta klientā: Lumiq dizainu, attēlojumu mobilajā izkārtojumā, LV/EN tekstu, saites un derīguma termiņu.
 - [x] Sagatavotas sešas Lumiq tēmas Supabase Auth HTML veidnes: reģistrācija, uzaicinājums, paroles atjaunošana, e-pasta maiņa un drošības paziņojumi.
 - [x] Worker transakciju vēstules veidnes atbalsta HTML un teksta variantu; lokālie e-pasta testi izturēti.
