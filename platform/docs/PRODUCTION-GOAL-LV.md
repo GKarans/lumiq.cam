@@ -6,6 +6,8 @@
 
 ### Resursu tīrīšana — 2026-10-01
 
+- [x] 2026-10-01 08:41 UTC (11:41 Rīgas laiks) Supabase Production SQL Editor izpildīts tikai-lasāms `pg_roles`/`has_schema_privilege` vaicājums. `lumiq_api_owner`, `lumiq_billing_owner`, `lumiq_payment_owner`, `lumiq_preview_owner`, `lumiq_admin_owner` un `lumiq_support_owner` visiem `auth` shēmai ir `USAGE=false`; `postgres` ir `USAGE=true`, bet `USAGE WITH GRANT OPTION=false`; tikai `supabase_admin` ir abi `true`. Tas apstiprina, kāpēc migrācija 047 apstājas un kāpēc `/api/auth/consume`/JWT balstītās RPC darbības ir bloķētas. Vaicājums nemainīja DB; grants, migrācija vai cita konfigurācija netika izpildīta.
+
 - [x] Pēc īpašnieka skaidra apstiprinājuma neatgriezeniski izdzēsti tikai testi resursi: Supabase `Lumiq.cam - test` (`cpweowosocjuccjsyyic`) un `Lumiq Restore Drill 2026-09-25` (`sprzlvywzpeyuzbsyplz`), Cloudflare Hyperdrive `lumiq-restore-drill` (`7dce888394a3484bafbbe58d3ac329b4`) un tukšais R2 `lumiq-restore-drill-20260925`. Supabase projekti pēc tam pārbaudīti Projects sarakstā ar dzēšanas paziņojumiem; Hyperdrive sarakstā palicis tikai `lumiq-production`, un dzēstā R2 `bucket info` atgriež “does not exist”.
 - [x] Atkārtoti pārbaudīts, ka Supabase `Lumiq Production` un `Lumiq Production Recovery` paliek. `lumiq-production-backups` saglabā 36 objektus (419 kB), `lumiq-production-recovery` ir neskarts tukšs restore mērķis, `lumiq-production-photos` saglabāts. `app-images` un `event-photo-media` netika dzēsti vai mainīti.
 
