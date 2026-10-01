@@ -1,5 +1,11 @@
 # Lumiq Production palaišanas kontrolsaraksts
 
+> **Aizstāts kontrolsaraksts (2026-10-01).** Šī dokumenta turpmākie punkti
+> ietver veco kandidāta/TET maršruta pārslēgšanas plānu; `lumiq.cam` jau ir
+> piesaistīts `lumiq-production` un paliek aiz Cloudflare Access. Neizpildi
+> tālākos maršruta pārslēgšanas norādījumus. Aktuālais uzdevumu saraksts ir
+> [PRODUCTION-GOAL-LV.md](PRODUCTION-GOAL-LV.md).
+
 Pēdējā statusa pārbaude: 2026-09-30. Katrs punkts jāatzīmē par pabeigtu tikai pēc norādītā pierādījuma. Jaunākā kandidāta versija ir `9f44ffa6-32df-4e31-bc22-6be125d189c8` ar 100% trafika; deploy pārbaudīja owner-only Access, Production DB/R2 un Queue/DLQ piesaisti. `lumiq.cam` maršrutu nepārslēgt, kamēr TET nav noņēmis bloķējumu. `app-images` un `event-photo-media` neaiztikt. Plašākais un jaunākais statuss ir [Production pabeigšanas roadmap](PRODUCTION-FINAL-ROADMAP-LV.md).
 
 ## 1. E-pasta adreses un saņemšana

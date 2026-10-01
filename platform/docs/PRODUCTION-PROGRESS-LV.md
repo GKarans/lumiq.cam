@@ -1,5 +1,11 @@
 # Lumiq production migrācijas progress
 
+> **Vēsturisks žurnāls, nevis operatīvs runbook (2026-10-01).** Zemākie
+> ieraksti atspoguļo dažādus iepriekšējos maršruta/deploy stāvokļus; vēlākie
+> datētie ieraksti tos aizstāj. Pašreizējais `lumiq.cam` maršruts ir uz
+> `lumiq-production`, Access paliek ieslēgts. Pirms jebkādas darbības izmanto
+> [PRODUCTION-GOAL-LV.md](PRODUCTION-GOAL-LV.md).
+
 ## 2026-10-01 - Kandidāta publiskā hostname izslēgšana
 
 Cloudflare `lumiq-production-candidate` → Domains: izslēgts tikai `Production Worker URL` (`lumiq-production-candidate.gkarans-events.workers.dev`); Preview URL jau bija izslēgts un paliek izslēgts. Panelī pēc saglabāšanas abi pārslēgi ir `off`. Neizdzēsu Worker, nemainīju tā Production DB/Hyperdrive/Queue/R2 bindings, noslēpumus vai `lumiq.cam` Custom Domain/Access konfigurāciju. Svaigs anonīms GET uz kandidāta `/healthz` tagad atgriež HTTP `404`; `https://lumiq.cam/healthz` turpina atgriezt Cloudflare Access HTTP `302`. Tas samazina nejaušu tiešu piekļuvi kandidātam, taču nepierāda, ka Worker vai visi tā trigeri ir izņemti; jāpabeidz pilnā atkarību/backup pārbaude un tikai tad jāizlemj par resursa dzēšanu.

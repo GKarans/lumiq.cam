@@ -1,6 +1,12 @@
 # Production cost plan
 
-## Current owner decision — 2026-09-29
+> **Vēsturisks izmaksu momentuzņēmums (2026-10-01).** Tālāk minētais “candidate”
+> un pirms-maršrutēšanas lēmums vairs nav pašreizējā arhitektūra. `lumiq.cam`
+> tiek apkalpots ar `lumiq-production`; šis dokuments nav atļauja mainīt dzīvos
+> resursus vai atvērt publisku piekļuvi. Izmanto aktuālo statusu un atlikušās
+> izmaksu pārbaudes [PRODUCTION-GOAL-LV.md](PRODUCTION-GOAL-LV.md).
+
+## Historical owner decision — 2026-09-29
 
 - Cloudflare Workers Paid at USD 5/month is approved for the isolated
   production candidate. The `lumiq.cam` domain and closed-test Worker remain

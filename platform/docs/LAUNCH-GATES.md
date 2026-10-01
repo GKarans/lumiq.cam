@@ -1,6 +1,13 @@
 # Launch gates
 
-## Current production status (2026-09-29)
+> **Historical launch snapshot; superseded 2026-10-01.** The live custom
+> domain is now attached to `lumiq-production` behind Cloudflare Access; the
+> candidate `workers.dev` hostname is disabled. The dated status and procedures
+> below describe earlier cutover stages and must not be run as current
+> instructions. See [PRODUCTION-GOAL-LV.md](PRODUCTION-GOAL-LV.md) for the
+> authoritative remaining gates.
+
+## Historical production status (2026-09-29)
 
 The complete Production application is deployed as `lumiq-production-candidate`
 at `https://lumiq-production-candidate.gkarans-events.workers.dev`, version
