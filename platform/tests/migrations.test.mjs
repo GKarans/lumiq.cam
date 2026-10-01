@@ -86,6 +86,7 @@ test('organizer JWT policies isolate reads and expose only narrow RPCs',async()=
   await db.query("delete from platform_migrations where version='045-runtime-table-access-hardening'");
   await db.query("delete from platform_migrations where version='046-production-runtime-access-hardening'");
   await db.query("delete from platform_migrations where version='047-sync-account-auth-schema-usage'");
+  await db.query("delete from platform_migrations where version='048-support-email-notifications'");
   await db.query('create role authenticated');await db.query('create role anon');await db.query('create role lumiq_restore_runtime login noinherit nobypassrls');await db.query('create role lumiq_production_runtime login noinherit nobypassrls');
   await db.query('create schema auth');
   await db.query("create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$");
@@ -174,6 +175,8 @@ test('organizer JWT policies isolate reads and expose only narrow RPCs',async()=
   for(const role of authRpcOwners) assert.equal((await db.query('select has_schema_privilege($1,\'auth\',\'usage\') as allowed',[role])).rows[0].allowed,false);
   await migrate(db,[{version:'047-sync-account-auth-schema-usage',sql:authSchemaUsageSql}]);
   await migrate(db,[{version:'047-sync-account-auth-schema-usage',sql:authSchemaUsageSql}]);
+  const supportNoticeSql=await readFile(new URL('../server/migrations/048-support-email-notifications.sql',import.meta.url),'utf8');
+  await migrate(db,[{version:'048-support-email-notifications',sql:supportNoticeSql}]);
   for(const role of authRpcOwners) assert.equal((await db.query('select has_schema_privilege($1,\'auth\',\'usage\') as allowed',[role])).rows[0].allowed,true);
   for(const role of ['lumiq_guest_owner','lumiq_job_owner','lumiq_limit_owner','lumiq_payment_owner','lumiq_storage_owner']) assert.equal((await db.query('select has_schema_privilege($1,\'auth\',\'usage\') as allowed',[role])).rows[0].allowed,false);
   assert.equal((await db.query("select has_schema_privilege('authenticated','auth','usage') as allowed")).rows[0].allowed,true);
@@ -264,7 +267,15 @@ test('organizer JWT policies isolate reads and expose only narrow RPCs',async()=
   await db.query('reset role');await db.query('set role anon');await db.query("select set_config('request.jwt.claim.sub','',false)");
   const publicCase=(await db.query("select public.create_support_case('guest@example.test','Public question','Please help') as result")).rows[0].result;
   assert.ok(publicCase.id);assert.equal((await db.query('select has_table_privilege(\'anon\',\'support_cases\',\'select\') as can_read')).rows[0].can_read,false);
+  const publicCaseWithNotice=(await db.query("select public.create_support_case('guest@example.test','Email question','Please reply','support@example.test') as result")).rows[0].result;
+  assert.ok(publicCaseWithNotice.id);
+  await assert.rejects(db.query("select public.create_support_case('guest@example.test',E'Bad\\nSubject','Please help','support@example.test')"),/Invalid support request/);
+  assert.equal((await db.query("select has_table_privilege('anon','deliveries','select') as can_read")).rows[0].can_read,false);
+  const replyColumnAccess=(await db.query("select has_column_privilege('lumiq_job_owner','deliveries','reply_to','select') as can_read,has_column_privilege('lumiq_support_owner','deliveries','reply_to','insert') as can_insert,has_table_privilege('lumiq_support_owner','deliveries','select') as can_select")).rows[0];
+  assert.deepEqual(replyColumnAccess,{can_read:true,can_insert:true,can_select:false});
   await db.query('reset role');
+  const supportNotice=(await db.query("select recipient,reply_to,subject,body,dedupe_key from deliveries where dedupe_key=$1",[`support-case:${publicCaseWithNotice.id}`])).rows[0];
+  assert.deepEqual(supportNotice,{recipient:'support@example.test',reply_to:'guest@example.test',subject:'Lumiq support: Email question',body:`Request: ${publicCaseWithNotice.id}\nFrom: guest@example.test\n\nPlease reply`,dedupe_key:`support-case:${publicCaseWithNotice.id}`});
   assert.equal((await db.query('select status,attempts,error from jobs where id=$1',[failedJob])).rows[0].status,'queued');
   assert.equal((await db.query("select count(*)::int as n from audit where action='admin.job.retry' and target_id=$1",[failedJob])).rows[0].n,1);
   await db.query('set role authenticated');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[ownerA]);
@@ -472,9 +483,11 @@ test('organizer JWT policies isolate reads and expose only narrow RPCs',async()=
   assert.equal((await db.query("select public.reserve_r2_budget(1,0,8,3,5,20) as reserved")).rows[0].reserved,true);
   assert.equal((await db.query("select public.reserve_r2_budget(3,0,8,3,5,20) as reserved")).rows[0].reserved,false);
   await assert.rejects(db.query('select * from r2_usage_guard'),/permission denied/);
-  const claimedDeliveries=(await db.query('select public.claim_platform_deliveries(1) as messages')).rows[0].messages;
-  assert.equal(claimedDeliveries.length,1);
-  assert.equal((await db.query('select public.settle_platform_delivery($1::uuid,true) as settled',[claimedDeliveries[0].id])).rows[0].settled,true);
+  const claimedDeliveries=(await db.query('select public.claim_platform_deliveries(10) as messages')).rows[0].messages;
+  assert.ok(claimedDeliveries.length>=1);
+  const claimedSupportNotice=claimedDeliveries.find(message=>message.reply_to==='guest@example.test'&&message.recipient==='support@example.test');
+  assert.ok(claimedSupportNotice);
+  assert.equal((await db.query('select public.settle_platform_delivery($1::uuid,true) as settled',[claimedSupportNotice.id])).rows[0].settled,true);
   await assert.rejects(db.query('select * from deliveries'),/permission denied/);
   await db.query('reset role');
   assert.equal((await db.query("select count(*)::int as n from event_passes where order_id='71000000-0000-4000-8000-000000000044'")).rows[0].n,1);

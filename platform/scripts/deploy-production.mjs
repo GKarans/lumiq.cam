@@ -39,6 +39,7 @@ export function prepareProductionDeployment(source, closedTestHyperdriveId) {
   base.vars.PLATFORM_ORIGIN = "https://lumiq.cam";
   base.vars.PLATFORM_EMAIL_FROM = "Lumiq <noreply@lumiq.cam>";
   base.vars.PLATFORM_EMAIL_REPLY_TO = "support@lumiq.cam";
+  base.vars.PLATFORM_SUPPORT_EMAIL = "support@lumiq.cam";
 
   const initialConfig = structuredClone(base);
   delete initialConfig.routes;

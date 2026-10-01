@@ -25,7 +25,7 @@ export function assertMigrationsApplied(applied) {
 }
 let migrationsVerified = false;
 async function getApp(env, {authCallbackOnly = false} = {}) {
-  for (const name of [...requiredEnvironment, "PLATFORM_EMAIL_KEY", "PLATFORM_EMAIL_FROM"]) {
+  for (const name of [...requiredEnvironment, "PLATFORM_EMAIL_KEY", "PLATFORM_EMAIL_FROM", "PLATFORM_SUPPORT_EMAIL"]) {
     if (typeof env[name] === "string") process.env[name] = env[name];
   }
   if (!env.PLATFORM_ORIGIN || !env.HYPERDRIVE?.connectionString || !env.R2_PHOTOS) {

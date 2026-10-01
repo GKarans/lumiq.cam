@@ -25,7 +25,8 @@ export function mailDelivery(db,{local=true,fetcher=fetch}){
     requireThat(process.env.PLATFORM_EMAIL_KEY&&process.env.PLATFORM_EMAIL_FROM,503,'Email sender is not configured.');
     const replyTo=process.env.PLATFORM_EMAIL_REPLY_TO?email(process.env.PLATFORM_EMAIL_REPLY_TO):null;
     const message={from:process.env.PLATFORM_EMAIL_FROM,to:[m.recipient],subject:m.subject,text:m.body,html:renderLumiqEmail(m.subject,m.body)};
-    if(replyTo)message.reply_to=replyTo;
+    if(m.reply_to)message.reply_to=email(m.reply_to);
+    else if(replyTo)message.reply_to=replyTo;
     const r=await fetcher('https://api.resend.com/emails',{
      method:'POST',headers:{Authorization:`Bearer ${process.env.PLATFORM_EMAIL_KEY}`,'Content-Type':'application/json','Idempotency-Key':m.id},
      body:JSON.stringify(message),signal:AbortSignal.timeout(15000)

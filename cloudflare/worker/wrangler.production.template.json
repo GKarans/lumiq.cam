@@ -19,6 +19,7 @@
     "PLATFORM_SUPABASE_PUBLISHABLE_KEY": "REPLACE_WITH_PRODUCTION_PUBLISHABLE_KEY",
     "PLATFORM_EMAIL_FROM": "Lumiq <noreply@lumiq.cam>",
     "PLATFORM_EMAIL_REPLY_TO": "support@lumiq.cam",
+    "PLATFORM_SUPPORT_EMAIL": "support@lumiq.cam",
     "R2_BUDGET_ENABLED": "true",
     "R2_MAX_CLASS_A_OPS_MONTH": "1",
     "R2_MAX_CLASS_B_OPS_MONTH": "1",

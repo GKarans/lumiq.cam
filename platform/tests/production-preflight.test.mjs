@@ -17,6 +17,7 @@ function candidate() {
       PLATFORM_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_synthetic_test_key",
       PLATFORM_EMAIL_FROM: "Lumiq <noreply@lumiq.cam>",
       PLATFORM_EMAIL_REPLY_TO: "support@lumiq.cam",
+      PLATFORM_SUPPORT_EMAIL: "support@lumiq.cam",
       R2_BUDGET_ENABLED: "true",
       R2_MAX_CLASS_A_OPS_MONTH: "10000",
       R2_MAX_CLASS_B_OPS_MONTH: "100000",
@@ -44,6 +45,7 @@ test("production starter template stays locked and has no automatic cleanup sche
   assert.equal(template.triggers?.crons, undefined);
   assert.equal(template.vars.PLATFORM_EMAIL_FROM, "Lumiq <noreply@lumiq.cam>");
   assert.equal(template.vars.PLATFORM_EMAIL_REPLY_TO, "support@lumiq.cam");
+  assert.equal(template.vars.PLATFORM_SUPPORT_EMAIL, "support@lumiq.cam");
   assert.deepEqual(template.queues.consumers.map(consumer => consumer.queue), ["lumiq-production-jobs", "lumiq-production-jobs-dlq"]);
 });
 
@@ -73,6 +75,15 @@ test("production Auth and notification mail replies route to the support address
   const wrong = candidate();
   wrong.vars.PLATFORM_EMAIL_REPLY_TO = "owner@example.com";
   assert.throws(() => validateProductionConfig(wrong, testHyperdriveId), /verified Lumiq support address/);
+});
+
+test("production contact notifications require the Lumiq support address", () => {
+  const missing = candidate();
+  delete missing.vars.PLATFORM_SUPPORT_EMAIL;
+  assert.throws(() => validateProductionConfig(missing, testHyperdriveId), /support notifications must route/);
+  const wrong = candidate();
+  wrong.vars.PLATFORM_SUPPORT_EMAIL = "other@example.com";
+  assert.throws(() => validateProductionConfig(wrong, testHyperdriveId), /support notifications must route/);
 });
 
 test("production R2 binding must explicitly target the EU jurisdiction", () => {

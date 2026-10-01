@@ -75,10 +75,11 @@ test('service notices deduplicate and delivery retries survive worker restarts',
   await deliver();assert.equal((await db.query("select status from deliveries where dedupe_key='last'")).rows[0].status,'failed');
   fail=false;process.env.PLATFORM_EMAIL_REPLY_TO='support@lumiq.cam';
   await queueMessage(db,owner,'HTML <fixture>','<img src=x onerror=alert(1)>\n\nhttps://lumiq.cam/reset?token=x&next=ok','html');
+  await db.query("update deliveries set reply_to='guest@example.test' where dedupe_key='html'");
   assert.equal((await deliver()).sent,1);
   const message=payloads.at(-1);
   assert.equal(message.text,'<img src=x onerror=alert(1)>\n\nhttps://lumiq.cam/reset?token=x&next=ok');
-  assert.equal(message.reply_to,'support@lumiq.cam');
+  assert.equal(message.reply_to,'guest@example.test');
   assert.match(message.html,/HTML &lt;fixture&gt;/);
   assert.match(message.html,/&lt;img src=x onerror=alert\(1\)&gt;/);
   assert.doesNotMatch(message.html,/<img src=x/);

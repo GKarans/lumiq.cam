@@ -19,6 +19,7 @@ function sourceConfig() {
       PLATFORM_SUPABASE_PROJECT_REF: "prodproject123",
       PLATFORM_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_synthetic_test_key",
       PLATFORM_EMAIL_FROM: "Lumiq <noreply@send.lumiq.cam>",
+      PLATFORM_SUPPORT_EMAIL: "support@lumiq.cam",
       R2_BUDGET_ENABLED: "true",
       R2_MAX_CLASS_A_OPS_MONTH: "10000",
       R2_MAX_CLASS_B_OPS_MONTH: "100000",
@@ -54,6 +55,7 @@ test("Production adoption prepares an unexposed Worker and a root-domain route w
   assert.equal(routedConfig.vars.PLATFORM_ORIGIN, "https://lumiq.cam");
   assert.equal(routedConfig.vars.PLATFORM_EMAIL_FROM, "Lumiq <noreply@lumiq.cam>");
   assert.equal(routedConfig.vars.PLATFORM_EMAIL_REPLY_TO, "support@lumiq.cam");
+  assert.equal(routedConfig.vars.PLATFORM_SUPPORT_EMAIL, "support@lumiq.cam");
   assert.equal(validated.worker, "lumiq-production");
 });
 
