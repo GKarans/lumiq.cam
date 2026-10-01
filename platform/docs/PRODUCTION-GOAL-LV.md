@@ -6,6 +6,8 @@
 
 ### Svaigā pārbaude — 2026-10-01
 
+- [x] 2026-10-01 09:23 Rīgas laiks Wrangler `deployments status --name lumiq-production` apstiprina pašreizējo 100% Production versiju `c685f77b-68ea-42f0-a2c3-264966f1bdd8`, kas atgriezta uz saderīgu versiju, kamēr 047/048 gaida Supabase atbalstu. Tajā pašā laikā tikai-lasāmā autorizētā pārlūka cilne ielādē `https://lumiq.cam/login` un rāda Production e-pasta/paroles, Google, reģistrācijas un paroles reset ieejas punktus. Anonīmi `lumiq.cam/healthz` joprojām atgriež Access `302`, `www` atgriež `301` uz sakni. Netika nosūtīti login dati, netika pārbaudīta Supabase sesija, un esošā Access sesija nav svaigas īpašnieka autentifikācijas pierādījums; UI renderēšana neaizstāj Auth/E2E.
+
 - [x] 2026-10-01 09:24 Rīgas laiks DPAPI `check-production-backup` no jauna lejupielādēja/pārbaudīja pēdējo Production kopu `production/2026-09-30T23-32-07-795Z`: 21 tabula, migrācijas `001–046`, derīgs manifests un SHA-256 kontrolsummas, 0 foto/R2 objekti. `Lumiq Production Daily Backup` Scheduler stāvoklis `Ready`, pēdējais izpildes kods `0` (2026-10-01 02:30), nākamais izpildes laiks 2026-10-02 02:30. Tas apliecina pārbaudāmas DB/Auth kopijas un grafika sekmīgu izpildi, ne pilnu restore vai foto atjaunošanas ķēdi. Restore tests paliek atvērts, jo esošos Recovery/Restore Drill mērķus nedrīkst pārrakstīt un jauns tukšs izolēts Supabase/R2 mērķis vēl nav izveidots.
 - [x] 2026-10-01 09:24 Rīgas laiks atkārtoti pārbaudīts Gmail `from:(supabase.com) newer_than:7d`: `SU-490493` un `SU-490545` joprojām ir tikai automātiskas saņemšanas kvītis, tehniskas atbildes nav. Jauns vai dublējošs pieteikums netika sūtīts; 047 un Production Auth turpina gaidīt Supabase atbalstītu privilēģiju risinājumu.
 
