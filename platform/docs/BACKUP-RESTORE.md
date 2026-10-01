@@ -42,10 +42,18 @@ integrity, not that a database and its objects can be restored successfully.
 The `lumiq-production-backups` bucket is EU and public access is disabled. Its
 Settings page has no object lifecycle or bucket-lock retention rule; only
 Cloudflare's default 7-day incomplete multipart-upload abort rule is enabled.
-The local `prune-production-backups.mjs` tool enforces a minimum 30-day
-retention and protects the newest complete backup, but no scheduled prune task
-was found. Do not delete backups or enable automatic pruning until the owner
-approves a retention period and a restore has been demonstrated.
+Retention is implemented in the Production backup job itself: after a new
+upload has been read back and checksum-verified, `backup-production.mjs` calls
+`prune-production-backups.mjs`. The daily Windows task therefore runs pruning
+after each successful backup; there is no separate prune task or Cloudflare
+lifecycle rule. The pruner enforces at least 30 days, removes only fully
+verified expired backup sets, and always keeps the newest complete set. If the
+newest dated set is incomplete, it fails closed instead of pruning. The latest
+recorded live prune removed 0 sets. The Oct 1, 2026 read-only check verified
+the latest backup (`production/2026-09-30T23-32-07-795Z`, 21 DB/Auth tables,
+46 migrations, 0 photo objects); this did not run a restore or prove that the
+backup contains any Production photos. Do not lower the retention period or
+remove the newest backup without owner approval and a demonstrated restore.
 
 The restore drill is still incomplete. Do not reuse the closed-test restore
 project or the existing Recovery project/bucket unless their emptiness and
