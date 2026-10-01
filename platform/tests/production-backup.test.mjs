@@ -25,12 +25,15 @@ const [backup,wrapper,vaultWrapper,vaultTest,packageJson,verifyRuntime,rotateRun
 
 test('Production email key and session key use fixed Worker bindings and stdin only',()=>{
  assert.match(vaultWrapper,/save-production-email/);
- assert.match(vaultWrapper,/set-candidate-email-secret/);
+ assert.match(vaultWrapper,/set-production-email-secret/);
+ assert.match(vaultWrapper,/set-production-session-secret/);
+ assert.doesNotMatch(vaultWrapper,/set-candidate-(?:email|session)-secret/);
  assert.match(vaultWrapper,/LUMIQ_PRODUCTION_EMAIL_KEY/);
  assert.match(putWorkerSecret,/PLATFORM_EMAIL_KEY/);
  assert.match(putWorkerSecret,/PLATFORM_SESSION_ENCRYPTION_KEY/);
  assert.match(putWorkerSecret,/--name',targetWorker\]/);
- assert.match(putWorkerSecret,/\['lumiq-production-candidate','lumiq-production'\]/);
+ assert.match(putWorkerSecret,/const targetWorker='lumiq-production'/);
+ assert.doesNotMatch(putWorkerSecret,/lumiq-production-candidate/);
  assert.match(putWorkerSecret,/child\.stdin\.end\(`\$\{secret\}\\n`\)/);
  assert.match(putWorkerSecret,/name!==source\.name/);
  assert.doesNotMatch(putWorkerSecret,/--text|console\.log\([^\n]*secret/);

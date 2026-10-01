@@ -9,10 +9,9 @@ const sources={
  PLATFORM_EMAIL_KEY:{name:'LUMIQ_PRODUCTION_EMAIL_KEY',valid:value=>typeof value==='string'&&value.length>0}
 };
 const binding=process.env.LUMIQ_PRODUCTION_WORKER_SECRET_BINDING;
-const targetWorker=process.env.LUMIQ_PRODUCTION_WORKER_NAME||'lumiq-production-candidate';
+const targetWorker='lumiq-production';
 const source=sources[binding];
 const secret=source&&process.env[source.name];
-if(!['lumiq-production-candidate','lumiq-production'].includes(targetWorker))throw new Error('Unexpected Production Worker target.');
 if(!source||!source.valid(secret))throw new Error('DPAPI Worker secret is missing or has an invalid format.');
 
 const wrangler=path.join(root,'node_modules/wrangler/bin/wrangler.js');

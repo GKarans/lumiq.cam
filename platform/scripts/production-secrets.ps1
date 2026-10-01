@@ -1,6 +1,6 @@
 param(
   [Parameter(Mandatory = $true, Position = 0)]
-  [ValidateSet('save-backup', 'save-runtime', 'create-production-safe-runtime', 'copy-production-safe-runtime', 'create-production-session-key', 'save-production-email', 'provision-production-safe-runtime', 'rotate-production-safe-runtime', 'apply-production-migrations', 'inspect-production-auth-grants', 'save-recovery-r2', 'check-recovery-r2', 'save-recovery', 'save-recovery-db-password', 'create-recovery-db-password', 'create-recovery-runtime', 'run-recovery-restore', 'apply-recovery-migrations', 'save-restore-drill', 'save-restore-drill-r2', 'create-restore-drill-runtime', 'audit-restore-drill-migrations', 'apply-restore-drill-migrations', 'apply-restore-drill-runtime', 'apply-production-runtime', 'show', 'run-backup', 'check-production-backup', 'set-candidate-session-secret', 'set-candidate-email-secret', 'set-production-session-secret', 'set-production-email-secret', 'run-runtime-check', 'run-safe-runtime-check', 'run-safe-runtime-bootstrap-check')]
+  [ValidateSet('save-backup', 'save-runtime', 'create-production-safe-runtime', 'copy-production-safe-runtime', 'create-production-session-key', 'save-production-email', 'provision-production-safe-runtime', 'rotate-production-safe-runtime', 'apply-production-migrations', 'inspect-production-auth-grants', 'save-recovery-r2', 'check-recovery-r2', 'save-recovery', 'save-recovery-db-password', 'create-recovery-db-password', 'create-recovery-runtime', 'run-recovery-restore', 'apply-recovery-migrations', 'save-restore-drill', 'save-restore-drill-r2', 'create-restore-drill-runtime', 'audit-restore-drill-migrations', 'apply-restore-drill-migrations', 'apply-restore-drill-runtime', 'apply-production-runtime', 'show', 'run-backup', 'check-production-backup', 'set-production-session-secret', 'set-production-email-secret', 'run-runtime-check', 'run-safe-runtime-check', 'run-safe-runtime-bootstrap-check')]
   [string]$Action
 )
 
@@ -516,40 +516,6 @@ switch ($Action) {
     Save-Vault $vault
     foreach ($value in $vault.Values) { if ($value -is [System.Security.SecureString]) { $value.Dispose() } }
     Write-Output "Saved encrypted Lumiq production email credential to $vaultPath"
-  }
-  'set-candidate-session-secret' {
-    $vault = Read-Vault
-    if (-not $vault.Contains($productionSessionKeyName) -or $vault[$productionSessionKeyName] -isnot [System.Security.SecureString]) {
-      foreach ($value in $vault.Values) { if ($value -is [System.Security.SecureString]) { $value.Dispose() } }
-      throw "Missing encrypted credential '$productionSessionKeyName'. Run create-production-session-key first."
-    }
-    Set-ProcessSecret $productionSessionKeyName $vault[$productionSessionKeyName]
-    $env:LUMIQ_PRODUCTION_WORKER_SECRET_BINDING = 'PLATFORM_SESSION_ENCRYPTION_KEY'
-    $env:LUMIQ_PRODUCTION_WORKER_NAME = 'lumiq-production-candidate'
-    try {
-      & node (Join-Path $PSScriptRoot 'put-production-worker-secret.mjs')
-      if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    } finally {
-      foreach ($name in @($productionSessionKeyName, 'LUMIQ_PRODUCTION_WORKER_SECRET_BINDING', 'LUMIQ_PRODUCTION_WORKER_NAME')) { [Environment]::SetEnvironmentVariable($name, $null, 'Process') }
-      foreach ($value in $vault.Values) { if ($value -is [System.Security.SecureString]) { $value.Dispose() } }
-    }
-  }
-  'set-candidate-email-secret' {
-    $vault = Read-Vault
-    if (-not $vault.Contains($productionEmailKeyName) -or $vault[$productionEmailKeyName] -isnot [System.Security.SecureString]) {
-      foreach ($value in $vault.Values) { if ($value -is [System.Security.SecureString]) { $value.Dispose() } }
-      throw "Missing encrypted credential '$productionEmailKeyName'. Run save-production-email first."
-    }
-    Set-ProcessSecret $productionEmailKeyName $vault[$productionEmailKeyName]
-    $env:LUMIQ_PRODUCTION_WORKER_SECRET_BINDING = 'PLATFORM_EMAIL_KEY'
-    $env:LUMIQ_PRODUCTION_WORKER_NAME = 'lumiq-production-candidate'
-    try {
-      & node (Join-Path $PSScriptRoot 'put-production-worker-secret.mjs')
-      if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    } finally {
-      foreach ($name in @($productionEmailKeyName, 'LUMIQ_PRODUCTION_WORKER_SECRET_BINDING', 'LUMIQ_PRODUCTION_WORKER_NAME')) { [Environment]::SetEnvironmentVariable($name, $null, 'Process') }
-      foreach ($value in $vault.Values) { if ($value -is [System.Security.SecureString]) { $value.Dispose() } }
-    }
   }
   'set-production-session-secret' {
     $vault = Read-Vault
