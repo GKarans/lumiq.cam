@@ -2,9 +2,9 @@ const BILLING = Object.freeze({
   r2StoragePerGbMonth: 0.015,
   r2ClassAByMillion: 4.5,
   r2ClassBByMillion: 0.36,
-  r2FreeStorageGbMonth: 0,
-  r2FreeClassA: 0,
-  r2FreeClassB: 0,
+  r2FreeStorageGbMonth: 10,
+  r2FreeClassA: 1_000_000,
+  r2FreeClassB: 10_000_000,
   workerBaseUsd: 5,
   workerIncludedRequests: 10_000_000,
   workerRequestPerMillionUsd: 0.3,
@@ -29,13 +29,15 @@ export function estimateCosts({
   eventDurationDays = 1,
   fullSizeViewsPerPhoto = 100,
   thumbnailViewsPerPhoto = 100,
+  otherWorkerRequests = 0,
   emailUsd = 0,
   billing = BILLING,
+  applyR2FreeTier = false,
 } = {}) {
   if (!plans || !Number.isFinite(subscribers) || subscribers < 0) throw new Error('Invalid plan or subscriber count');
   if (Math.abs(Object.values(mix).reduce((sum, share) => sum + share, 0) - 1) > 1e-9) throw new Error('Plan mix must sum to 1');
   if (![eventUtilization, originalFraction].every((n) => Number.isFinite(n) && n >= 0 && n <= 1)) throw new Error('Utilization and original fraction must be between 0 and 1');
-  if (![averagePhotoPairMiB, eventDurationDays, fullSizeViewsPerPhoto, thumbnailViewsPerPhoto, emailUsd].every((n) => Number.isFinite(n) && n >= 0)) throw new Error('Usage assumptions must be non-negative numbers');
+  if (![averagePhotoPairMiB, eventDurationDays, fullSizeViewsPerPhoto, thumbnailViewsPerPhoto, otherWorkerRequests, emailUsd].every((n) => Number.isFinite(n) && n >= 0)) throw new Error('Usage assumptions must be non-negative numbers');
 
   let revenueEur = 0;
   let paymentCount = 0;
@@ -76,10 +78,10 @@ export function estimateCosts({
   const thumbnailViews = photos * thumbnailViewsPerPhoto;
   const r2Writes = photos * 2 + events;
   const r2Reads = imageViews + thumbnailViews + photos;
-  const r2StorageUsd = ceilBillable(totalGbMonths, billing.r2FreeStorageGbMonth, 1) * billing.r2StoragePerGbMonth;
-  const r2ClassAUsd = ceilBillable(r2Writes, billing.r2FreeClassA, 1_000_000) * billing.r2ClassAByMillion;
-  const r2ClassBUsd = ceilBillable(r2Reads, billing.r2FreeClassB, 1_000_000) * billing.r2ClassBByMillion;
-  const workerRequests = imageViews + thumbnailViews;
+  const r2StorageUsd = Math.max(0, totalGbMonths - (applyR2FreeTier ? billing.r2FreeStorageGbMonth : 0)) * billing.r2StoragePerGbMonth;
+  const r2ClassAUsd = ceilBillable(r2Writes, applyR2FreeTier ? billing.r2FreeClassA : 0, 1_000_000) * billing.r2ClassAByMillion;
+  const r2ClassBUsd = ceilBillable(r2Reads, applyR2FreeTier ? billing.r2FreeClassB : 0, 1_000_000) * billing.r2ClassBByMillion;
+  const workerRequests = imageViews + thumbnailViews + otherWorkerRequests;
   const workerCpuMs = workerRequests * 7;
   const workerUsd = billing.workerBaseUsd
     + ceilBillable(workerRequests, billing.workerIncludedRequests, 1_000_000) * billing.workerRequestPerMillionUsd
@@ -90,7 +92,7 @@ export function estimateCosts({
   const totalCostEur = platformUsd * billing.usdToEur + stripeEur;
 
   return {
-    assumptions: { subscribers, mix, eventUtilization, averagePhotoPairMiB, originalFraction, eventDurationDays, fullSizeViewsPerPhoto, thumbnailViewsPerPhoto, emailUsd, freeR2AllowancesApplied: billing.r2FreeStorageGbMonth > 0 || billing.r2FreeClassA > 0 || billing.r2FreeClassB > 0 },
+    assumptions: { subscribers, mix, eventUtilization, averagePhotoPairMiB, originalFraction, eventDurationDays, fullSizeViewsPerPhoto, thumbnailViewsPerPhoto, otherWorkerRequests, emailUsd, freeR2AllowancesApplied: applyR2FreeTier },
     monthly: {
       revenueEur: +revenueEur.toFixed(2),
       paymentCount: +paymentCount.toFixed(1),
