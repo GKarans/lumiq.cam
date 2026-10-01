@@ -1,5 +1,12 @@
 # Backup and restore drill
 
+> **Current status (2026-10-01):** latest Production backup integrity is
+> verified, but a full restore is not. The existing Recovery project/bucket
+> are not treated as an isolated temporary target. A new cloud drill can have
+> incremental Supabase compute charges; do not create or use billable targets
+> without checking the current estimate and explicit owner approval. See
+> [PRODUCTION-OPERATIONS-LV.md](PRODUCTION-OPERATIONS-LV.md).
+
 ## Scope
 
 The backup contains the Lumiq public application tables, Supabase Auth user/identity rows, every private R2 object, and a manifest with database/object sizes and SHA-256 checksums. It deliberately excludes Supabase-managed schema definitions and extension-owned public tables. Verification rejects missing integrity metadata, altered files, size mismatches and paths escaping the backup directory. Credentials are read only from the process environment and never written to the archive.

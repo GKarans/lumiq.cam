@@ -1,5 +1,52 @@
 # Production cost plan
 
+## Current Production snapshot — 2026-10-01
+
+This dated addendum supersedes the historical deployment/billing assumptions
+below. The application is served by `lumiq-production` on `lumiq.cam`; do not
+use the old candidate/closed-test estimates as the current architecture.
+
+- Supabase organization currently has two ACTIVE projects: Production Nano and
+  Production Recovery Micro. In paid organizations Nano bills at the Micro
+  rate. Current published Pro price is USD 25/month and includes USD 10/month
+  compute credits. At the published approximate USD 10/Micro rate for each of
+  these two projects, the planning baseline is about USD 35/month before other
+  metered usage, tax, or add-ons (25 + 10 + 10 - 10 credit). This is an
+  estimate, not an invoice; the active invoice/cycle amount needs a fresh
+  Dashboard check.
+- Cloudflare dashboard snapshot: Workers Paid, R2 Paid, Images Stream Basic,
+  Zero Trust Teams Free Base. Variable billable usage forecast was USD 0.00 in
+  the checked period, but the latest visible paid invoice was USD 2.50. Do not
+  describe the USD 0.00 usage forecast as a zero total bill. Check the next
+  invoice and subscription line items in Cloudflare Billing.
+- Resend dashboard snapshot: Free transactional, 16/3,000 monthly messages;
+  Free marketing, 0/1,000 contacts; Team Free, 2/3 domains. No invoice/payment
+  method; pay-as-you-go overage disabled. Published Free transactional limits
+  are 3,000 per month and 100 per day. If a limit is reached, mail delivery
+  must not be assumed to continue.
+- No live payment processor has been selected/integrated. The checkout is a
+  simulation. Stripe figures in the model below are scenario assumptions, not
+  actual fees paid by Lumiq.
+- Current reference scenario (`npm run cost -- 100 0.55 1.08 100 0 100 0 free-r2`):
+  100 accounts, 20/60/20 plan mix, 55% event utilization, 1.08 MiB/photo pair,
+  100 full-size and 100 thumbnail views/photo; 275 events, 203,500 photos,
+  40.7M image requests, 284.9M modeled CPU-ms, 407,275 R2 writes and 40.9M
+  R2 reads. Model: USD 16.46 R2, USD 19.40 Workers, USD 25 Supabase base,
+  total USD 60.86 for the modeled monthly platform, plus EUR 73.23 payment
+  fees under its Stripe-like assumption. The model omits the Recovery project's
+  incremental compute and therefore understates the two-project Supabase
+  planning baseline; it also uses no Resend cost and ignores tax, backup,
+  support, refunds and actual invoice timing. Do not quote its margin as profit.
+- The model currently fixes Supabase at USD 25 and payment fees at 1.5% + EUR
+  0.25 per payment. These assumptions need code-level parameterization before
+  the model can match the actual two-project baseline or a selected processor.
+
+Primary current references: [Supabase pricing](https://supabase.com/pricing),
+[Supabase compute billing](https://supabase.com/docs/guides/platform/manage-your-usage/compute),
+[Cloudflare Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/),
+[Cloudflare R2 pricing](https://developers.cloudflare.com/r2/pricing/), and
+[Resend transactional pricing](https://resend.com/pricing?product=transactional).
+
 > **Vēsturisks izmaksu momentuzņēmums (2026-10-01).** Tālāk minētais “candidate”
 > un pirms-maršrutēšanas lēmums vairs nav pašreizējā arhitektūra. `lumiq.cam`
 > tiek apkalpots ar `lumiq-production`; šis dokuments nav atļauja mainīt dzīvos

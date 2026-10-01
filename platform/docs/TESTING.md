@@ -1,5 +1,9 @@
 # Local testing report
 
+> For the current Lumiq Production QA status, including the recorded
+> 2026-10-01 local verification and explicitly untested live flows, see
+> [PRODUCTION-QA-REPORT-LV.md](PRODUCTION-QA-REPORT-LV.md).
+
 Baseline date: 2026-09-13. Repository: `gala-produkts-saas`.
 Environment: Windows, Node, PGlite PostgreSQL engine, local files and headless Chromium.
 Scope: new `platform/` product only. This is not a re-certification of the original MVP or its live services.

@@ -1,5 +1,23 @@
 # Lumiq Production goal
 
+### Darbi, ko var pabeigt, kamēr Auth ir bloķēts — 2026-10-01
+
+- [x] Izveidota ne-noslēpumaina Production operāciju rokasgrāmata ar Worker,
+  Access, DB/Hyperdrive, Queue/DLQ, R2, e-pasta, backup un incidenta
+  konfigurāciju: `PRODUCTION-OPERATIONS-LV.md`.
+- [x] Lokālās un dzīvajā vēl nepārbaudītās foto plūsmas nošķirtas QA
+  atskaitē: `PRODUCTION-QA-REPORT-LV.md`. Īsta Production reģistrācija/foto
+  E2E paliek bloķēta un nav atzīmēta kā izpildīta.
+- [x] Izmaksu plānā atzīmēti divi, nevis trīs aktīvi Supabase projekti,
+  pašreizējie Cloudflare/Resend paneļu momentuzņēmumi, oficiālo cenu
+  atsauces un modeļa ierobežojumi: `PRODUCTION-COST-PLAN.md`.
+- [x] Sagatavots precīzs juridisko faktu ievades saraksts:
+  `LEGAL-FACTS-INTAKE-LV.md`. Publiskās juridiskās lapas nav aizstātas ar
+  izdomātiem datiem un paliek pirms-palaišanas projekti.
+- [ ] Pilns Production backup restore vēl nav izpildīts. Integritātes checks
+  nav restore tests; vajadzīgs izolēts un tukšs mērķis. Production kopā pašlaik
+  ir 0 R2 foto objekti, tāpēc foto atjaunošana netiek pierādīta ar šo backup.
+
 **Mērķis:** viena pilnībā strādājoša, tikai fotogrāfijām paredzēta Lumiq Production lietotne adresē `https://lumiq.cam`, aiz Cloudflare Access ar atļauju tikai īpašnieka e-pastam. Gala arhitektūrā nav aktīvas `candidate` lietotnes. Katru pabeigto darbu pārbaudīt, dokumentēt, commit un push uz `GKarans/lumiq.cam`.
 
 **Statuss 2026-10-01:** `[x]` nozīmē, ka norādītais šaurais fakts ir pārbaudīts; tas nenozīmē, ka visa sadaļa ir gatava. `[ ]` nozīmē, ka rezultāts vēl nav pierādīts. `app-images` neaiztikt. `event-photo-media` neaiztikt, kamēr nav atsevišķi noskaidrotas tā atkarības un īpašnieks nav devis jaunu uzdevumu.
