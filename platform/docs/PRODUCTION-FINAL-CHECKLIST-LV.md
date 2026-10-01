@@ -1,6 +1,8 @@
 # Lumiq Production pabeigšanas saraksts
 
-Mērķis: pabeigt privāti lietojamu Lumiq produktu Production kandidātā, nemainot `lumiq.cam` maršrutu līdz TET bloķējuma atrisināšanai un neatverot publisku piekļuvi. Šis saraksts seko īpašnieka astoņu posmu secībai. Atzīme apliecina tikai norādīto pierādījumu, nevis plašāku dzīvas Production plūsmas darbspēju.
+> **VĒSTURISKS / AIZVIETOTS:** šis 2026-09-30 kontrolsaraksts aprakstīja pirms-cutover stāvokli, kad `lumiq.cam` nedrīkstēja pārslēgt TET dēļ. Tas vairs nav izpildes avots. Pašreizējais avots ir [PRODUCTION-GOAL-LV.md](./PRODUCTION-GOAL-LV.md), kas fiksē `lumiq.cam` maršrutu uz `lumiq-production` aiz owner-only Cloudflare Access. Turpmāk neveikt šī dokumenta 7.–8. posma vecās TET/cutover darbības; izmantojiet tālāk esošos punktus tikai kā vēsturisku QA pierādījumu.
+
+Vēsturiskais mērķis (2026-09-30): pabeigt privāti lietojamu Lumiq produktu atsevišķā Production kandidātā, atliekot `lumiq.cam` maršruta maiņu TET bloķējuma dēļ. Šis plāns ir aizstāts ar Production-only mērķi; atzīmes tālāk ir tā laika šaurie QA pierādījumi, nevis pašreizējā stāvokļa apliecinājums.
 
 **Pēdējā darba pārbaude:** 2026-09-30. Papildu izpildes pierādījumi ir [Production progresa dokumentā](./PRODUCTION-PROGRESS-LV.md).
 
