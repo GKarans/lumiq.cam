@@ -4,6 +4,11 @@
 
 **Statuss 2026-10-01:** `[x]` nozīmē, ka norādītais šaurais fakts ir pārbaudīts; tas nenozīmē, ka visa sadaļa ir gatava. `[ ]` nozīmē, ka rezultāts vēl nav pierādīts. `app-images` neaiztikt. `event-photo-media` neaiztikt, kamēr nav atsevišķi noskaidrotas tā atkarības un īpašnieks nav devis jaunu uzdevumu.
 
+### Resursu tīrīšana — 2026-10-01
+
+- [x] Pēc īpašnieka skaidra apstiprinājuma neatgriezeniski izdzēsti tikai testi resursi: Supabase `Lumiq.cam - test` (`cpweowosocjuccjsyyic`) un `Lumiq Restore Drill 2026-09-25` (`sprzlvywzpeyuzbsyplz`), Cloudflare Hyperdrive `lumiq-restore-drill` (`7dce888394a3484bafbbe58d3ac329b4`) un tukšais R2 `lumiq-restore-drill-20260925`. Supabase projekti pēc tam pārbaudīti Projects sarakstā ar dzēšanas paziņojumiem; Hyperdrive sarakstā palicis tikai `lumiq-production`, un dzēstā R2 `bucket info` atgriež “does not exist”.
+- [x] Atkārtoti pārbaudīts, ka Supabase `Lumiq Production` un `Lumiq Production Recovery` paliek. `lumiq-production-backups` saglabā 36 objektus (419 kB), `lumiq-production-recovery` ir neskarts tukšs restore mērķis, `lumiq-production-photos` saglabāts. `app-images` un `event-photo-media` netika dzēsti vai mainīti.
+
 ### Svaigā pārbaude — 2026-10-01
 
 - [x] 2026-10-01 09:34 Rīgas laiks autorizētajā, tikai-lasāmajā Production pārlūkā apskatītas `/privacy`, `/terms` un `/refunds`. Visas skaidri marķētas `PRE-LAUNCH DRAFT/TEMPLATE`, nevis gala juridiskie dokumenti. Dzīvā Privacy/Terms kopija vēl uzrāda publisko domēnu kā `[not selected]`, lai gan lapas ir `lumiq.cam`; pārdevēja/juridiskais nosaukums, reģistrācijas numurs, adrese un tālrunis ir neaizpildīti. Refunds lapa saka, ka checkout ir simulēts un reāli maksājumi/atmaksas netiek apstrādātas; nav izvēlēts maksājumu sniedzējs, PVN/cenu nodokļu statuss un atmaksu procesa atbildīgais, un digitālā pakalpojuma atteikuma kārtība nav apstiprināta. Formas netika iesniegtas un teksts netika mainīts. Publiskai pārdošanai juridiskais vārtejas punkts paliek atvērts; nedrīkst izdomāt īpašnieka/operatora datus vai noņemt Access.
