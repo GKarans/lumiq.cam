@@ -5,7 +5,7 @@ if(!/^http:\/\/127\.0\.0\.1:\d+$/.test(base||''))throw new Error('Local tests on
  const page=await browser.newPage(),apiCalls=[];
  await page.route('**/api/**',async route=>{
   const url=new URL(route.request().url());apiCalls.push({path:url.pathname,body:route.request().postDataJSON()});
-  if(url.pathname==='/api/auth/consume'&&route.request().method()==='POST')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({message:'Invitation confirmed. The production candidate remains locked.'})});
+  if(url.pathname==='/api/auth/consume'&&route.request().method()==='POST')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({message:'Invitation confirmed. You can now sign in.'})});
   return route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({error:'Locked during callback test.'})});
  });
  await page.goto(`${base}/#access_token=invite-fixture&type=invite&refresh_token=invite-refresh-fixture&expires_in=3600`);

@@ -47,7 +47,7 @@ export function normalizeProductionConfig(source) {
   return base;
 }
 
-export function prepareProductionDeployment(savedConfig, closedTestHyperdriveId) {
+export function prepareProductionDeployment(savedConfig) {
   const source = normalizeProductionConfig(savedConfig);
 
   const initialConfig = structuredClone(source);
@@ -59,7 +59,7 @@ export function prepareProductionDeployment(savedConfig, closedTestHyperdriveId)
   const preflightConfig = structuredClone(routedConfig);
   preflightConfig.queues.consumers = structuredClone(source.queues.consumers);
   preflightConfig.vars.PLATFORM_RELEASE_APPROVED = "NOT_APPROVED";
-  const validated = validateProductionConfig(preflightConfig, closedTestHyperdriveId);
+  const validated = validateProductionConfig(preflightConfig);
   return {initialConfig, routedConfig, validated};
 }
 
@@ -182,11 +182,9 @@ async function main() {
   const dryRunOnly = process.argv.includes("--dry-run-only");
   if (!dryRunOnly) requireThat(process.argv.includes("--owner-approved"), "Run only after explicit owner approval: add --owner-approved.");
   const sourcePath = path.join(workerDir, "wrangler.production.preflight.local.jsonc");
-  const closedTestPath = path.join(workerDir, "wrangler.closed-test.jsonc");
   const savedConfig = JSON.parse(await readFile(sourcePath, "utf8"));
   const source = normalizeProductionConfig(savedConfig);
-  const closedTest = JSON.parse(await readFile(closedTestPath, "utf8"));
-  const {initialConfig, routedConfig, validated} = prepareProductionDeployment(source, closedTest.hyperdrive?.[0]?.id);
+  const {initialConfig, routedConfig, validated} = prepareProductionDeployment(source);
 
   requireThat(!routedConfig.workers_dev && routedConfig.preview_urls === false, "The canonical Worker must not expose workers.dev or preview URLs.");
   requireThat(routedConfig.routes?.length === 1 && routedConfig.routes[0].pattern === "lumiq.cam" && routedConfig.routes[0].custom_domain, "Only the protected lumiq.cam custom domain may route to the canonical Worker.");

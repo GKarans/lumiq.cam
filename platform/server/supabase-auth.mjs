@@ -112,7 +112,7 @@ export function supabaseAuthService(db,{origin,mail,fetcher=fetch,sessionRpc=db.
     requireThat(input.purpose==='verify'&&input.type==='invite'&&typeof input.access_token==='string',400,'This invitation link is invalid. Request a new one.');
     const user=await request('user',null,text(input.access_token,8192));
     requireThat(user?.email_confirmed_at,403,'Verify your email before continuing.');
-    return{message:'Invitation confirmed. The production candidate remains locked.'};
+    return{message:'Invitation confirmed. You can now sign in.'};
    }
    const resetPassword=input.purpose==='reset'?confirmedPassword(input):null;
    if(input.access_token&&input.purpose==='verify'&&['signup','invite'].includes(input.type)){requireThat(typeof input.refresh_token==='string',400,'This confirmation link is invalid. Request a new one.');const providerSession={access_token:text(input.access_token,8192),refresh_token:text(input.refresh_token,8192),expires_at:Math.floor(Date.now()/1000)+Math.min(86400,Math.max(60,Number(input.expires_in)||3600))};const user=await request('user',null,providerSession.access_token);const account=await sync(user,providerSession.access_token),sessionToken=token();await storeSession(account,sessionToken,providerSession);return{message:'Email confirmed. Your account is ready.',cookie:`lumiq_session=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=604800`};

@@ -3,8 +3,6 @@ import assert from "node:assert/strict";
 import {readFile} from "node:fs/promises";
 import {assertOwnerAccessRedirect, assertQueueConsumerState, latestDeployedVersion, normalizeProductionConfig, prepareProductionDeployment} from "../scripts/deploy-production.mjs";
 
-const closedTestId = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
-
 function sourceConfig() {
   return {
     name: "lumiq-production-candidate",
@@ -41,7 +39,7 @@ function sourceConfig() {
 
 test("Production adoption prepares an unexposed Worker and a root-domain route without mutating the source", () => {
   const source = sourceConfig();
-  const {initialConfig, routedConfig, validated} = prepareProductionDeployment(source, closedTestId);
+  const {initialConfig, routedConfig, validated} = prepareProductionDeployment(source);
   assert.equal(source.name, "lumiq-production-candidate");
   assert.equal(source.vars.PLATFORM_ORIGIN, "https://lumiq-production-candidate.gkarans-events.workers.dev");
   assert.equal(initialConfig.name, "lumiq-production");
@@ -76,7 +74,7 @@ test("Production adoption rejects an unreviewed migration source or release stat
 });
 
 test("canonical Production preflight permits only the exact lumiq.cam custom domain", () => {
-  const {routedConfig} = prepareProductionDeployment(sourceConfig(), closedTestId);
+  const {routedConfig} = prepareProductionDeployment(sourceConfig());
   assert.equal(routedConfig.routes.length, 1);
   assert.equal(routedConfig.workers_dev, false);
   assert.equal(routedConfig.preview_urls, false);

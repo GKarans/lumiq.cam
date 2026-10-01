@@ -493,7 +493,7 @@ retain expired guest photos in backups beyond a disclosed and approved window.
 Before cutover, build and run the candidate-only gates:
 
 ```powershell
-npm run production:preflight -- <production-config.jsonc> --closed-test-hyperdrive-id=<current-test-id> [--runtime-role=lumiq_runtime|lumiq_production_runtime]
+npm run production:preflight -- <production-config.jsonc> [--runtime-role=lumiq_runtime|lumiq_production_runtime]
 npx wrangler deploy --dry-run --config <production-config.jsonc>
 ```
 

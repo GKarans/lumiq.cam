@@ -37,8 +37,6 @@ function candidate() {
   };
 }
 
-const testHyperdriveId = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
-
 test("production starter template stays locked and has no automatic cleanup schedule", async () => {
   const template = JSON.parse(await readFile(new URL("../../cloudflare/worker/wrangler.production.template.json", import.meta.url), "utf8"));
   assert.equal(template.vars.PLATFORM_RELEASE_APPROVED, "NOT_APPROVED");
@@ -50,7 +48,7 @@ test("production starter template stays locked and has no automatic cleanup sche
 });
 
 test("production preflight accepts isolated candidate with budget and queue recovery", () => {
-  const result = validateProductionConfig(candidate(), testHyperdriveId);
+  const result = validateProductionConfig(candidate());
   assert.equal(result.worker, "lumiq-production-candidate");
   assert.equal(result.bucket, "lumiq-production-photos");
   assert.equal(result.queue, "lumiq-production-jobs");
@@ -59,106 +57,102 @@ test("production preflight accepts isolated candidate with budget and queue reco
 test("production candidate preflight refuses an approved release state", () => {
   const approved = candidate();
   approved.vars.PLATFORM_RELEASE_APPROVED = "production";
-  assert.throws(() => validateProductionConfig(approved, testHyperdriveId), /must stay release-locked/);
+  assert.throws(() => validateProductionConfig(approved), /must stay release-locked/);
 });
 
 test("production email sender must use the verified Lumiq root domain", () => {
   const unverified = candidate();
   unverified.vars.PLATFORM_EMAIL_FROM = "Lumiq <noreply@unknown.lumiq.cam>";
-  assert.throws(() => validateProductionConfig(unverified, testHyperdriveId), /verified Lumiq root domain/);
+  assert.throws(() => validateProductionConfig(unverified), /verified Lumiq root domain/);
 });
 
 test("production Auth and notification mail replies route to the support address", () => {
   const missing = candidate();
   delete missing.vars.PLATFORM_EMAIL_REPLY_TO;
-  assert.throws(() => validateProductionConfig(missing, testHyperdriveId), /verified Lumiq support address/);
+  assert.throws(() => validateProductionConfig(missing), /verified Lumiq support address/);
   const wrong = candidate();
   wrong.vars.PLATFORM_EMAIL_REPLY_TO = "owner@example.com";
-  assert.throws(() => validateProductionConfig(wrong, testHyperdriveId), /verified Lumiq support address/);
+  assert.throws(() => validateProductionConfig(wrong), /verified Lumiq support address/);
 });
 
 test("production contact notifications require the Lumiq support address", () => {
   const missing = candidate();
   delete missing.vars.PLATFORM_SUPPORT_EMAIL;
-  assert.throws(() => validateProductionConfig(missing, testHyperdriveId), /support notifications must route/);
+  assert.throws(() => validateProductionConfig(missing), /support notifications must route/);
   const wrong = candidate();
   wrong.vars.PLATFORM_SUPPORT_EMAIL = "other@example.com";
-  assert.throws(() => validateProductionConfig(wrong, testHyperdriveId), /support notifications must route/);
+  assert.throws(() => validateProductionConfig(wrong), /support notifications must route/);
 });
 
 test("production R2 binding must explicitly target the EU jurisdiction", () => {
   const missing = candidate();
   delete missing.r2_buckets[0].jurisdiction;
-  assert.throws(() => validateProductionConfig(missing, testHyperdriveId), /EU R2 jurisdiction/);
+  assert.throws(() => validateProductionConfig(missing), /EU R2 jurisdiction/);
   const wrong = candidate();
   wrong.r2_buckets[0].jurisdiction = "default";
-  assert.throws(() => validateProductionConfig(wrong, testHyperdriveId), /EU R2 jurisdiction/);
+  assert.throws(() => validateProductionConfig(wrong), /EU R2 jurisdiction/);
 });
 
 test("production preflight rejects closed-test resources, retired names and missing budget or DLQ consumer", () => {
-  const sharedDb = candidate();
-  sharedDb.hyperdrive[0].id = testHyperdriveId;
-  assert.throws(() => validateProductionConfig(sharedDb, testHyperdriveId), /must not reuse/);
-
   const retiredWorker = candidate();
   retiredWorker.name = "lumiq-cam";
-  assert.throws(() => validateProductionConfig(retiredWorker, testHyperdriveId), /canonical Worker or the existing migration source/);
+  assert.throws(() => validateProductionConfig(retiredWorker), /canonical Worker or the existing migration source/);
 
   for (const bucket of ["lumiq-staging-photos", "lumiq-closed-test-photos", "app-images"]) {
     const sharedBucket = candidate();
     sharedBucket.r2_buckets[0].bucket_name = bucket;
-    assert.throws(() => validateProductionConfig(sharedBucket, testHyperdriveId), /production-\*/);
+    assert.throws(() => validateProductionConfig(sharedBucket), /production-\*/);
   }
 
   const customDomain = candidate();
   customDomain.routes = [{pattern: "lumiq.cam", custom_domain: true}];
-  assert.throws(() => validateProductionConfig(customDomain, testHyperdriveId), /must not claim/);
+  assert.throws(() => validateProductionConfig(customDomain), /must not claim/);
 
   const noBudget = candidate();
   noBudget.vars.R2_BUDGET_ENABLED = "false";
-  assert.throws(() => validateProductionConfig(noBudget, testHyperdriveId), /hard stop/);
+  assert.throws(() => validateProductionConfig(noBudget), /hard stop/);
 
   const noDlq = candidate();
   noDlq.queues.consumers = noDlq.queues.consumers.slice(0, 1);
-  assert.throws(() => validateProductionConfig(noDlq, testHyperdriveId), /DLQ consumer/);
+  assert.throws(() => validateProductionConfig(noDlq), /DLQ consumer/);
 
   const wrongDlq = candidate();
   wrongDlq.queues.consumers[1].queue = "lumiq-production-unrelated";
-  assert.throws(() => validateProductionConfig(wrongDlq, testHyperdriveId), /matching consumer/);
+  assert.throws(() => validateProductionConfig(wrongDlq), /matching consumer/);
 
   const nestedDlq = candidate();
   nestedDlq.queues.consumers[1].dead_letter_queue = "lumiq-production-nested-dlq";
-  assert.throws(() => validateProductionConfig(nestedDlq, testHyperdriveId), /nested DLQ/);
+  assert.throws(() => validateProductionConfig(nestedDlq), /nested DLQ/);
 });
 
 test("production preflight rejects unsafe public variables and disabled preview protection", () => {
   const wrongDbProject = candidate();
   wrongDbProject.vars.PLATFORM_SUPABASE_PROJECT_REF = "otherproject123";
-  assert.throws(() => validateProductionConfig(wrongDbProject, testHyperdriveId), /project reference must match/);
+  assert.throws(() => validateProductionConfig(wrongDbProject), /project reference must match/);
 
   const secretInVars = candidate();
   secretInVars.vars.PLATFORM_SESSION_ENCRYPTION_KEY = "must-not-be-inline";
-  assert.throws(() => validateProductionConfig(secretInVars, testHyperdriveId), /secret bindings/);
+  assert.throws(() => validateProductionConfig(secretInVars), /secret bindings/);
 
   const databaseUrlInVars = candidate();
   databaseUrlInVars.vars.PLATFORM_DATABASE_URL = "postgres://must-not-be-inline";
-  assert.throws(() => validateProductionConfig(databaseUrlInVars, testHyperdriveId), /secret bindings/);
+  assert.throws(() => validateProductionConfig(databaseUrlInVars), /secret bindings/);
 
   const previews = candidate();
   previews.preview_urls = true;
-  assert.throws(() => validateProductionConfig(previews, testHyperdriveId), /preview URLs must remain disabled/);
+  assert.throws(() => validateProductionConfig(previews), /preview URLs must remain disabled/);
 
   const otherWorkersOrigin = candidate();
   otherWorkersOrigin.vars.PLATFORM_ORIGIN = "https://another-worker.example.workers.dev";
-  assert.throws(() => validateProductionConfig(otherWorkersOrigin, testHyperdriveId), /canonical domain or the existing Worker workers.dev origin/);
+  assert.throws(() => validateProductionConfig(otherWorkersOrigin), /canonical domain or the existing Worker workers.dev origin/);
 
   const environmentOverride = candidate();
   environmentOverride.env = {production: {vars: {PLATFORM_MODE: "production"}}};
-  assert.throws(() => validateProductionConfig(environmentOverride, testHyperdriveId), /Named Wrangler environments/);
+  assert.throws(() => validateProductionConfig(environmentOverride), /Named Wrangler environments/);
 
   const extraService = candidate();
   extraService.services = [{binding: "STAGING_WORKER", service: "lumiq-cam"}];
-  assert.throws(() => validateProductionConfig(extraService, testHyperdriveId), /Unexpected services/);
+  assert.throws(() => validateProductionConfig(extraService), /Unexpected services/);
 });
 
 test("remote Hyperdrive identity must match the isolated Supabase project", () => {

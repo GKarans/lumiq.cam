@@ -21,7 +21,7 @@ test('locked invite callback validates the Supabase invite without creating a Lu
    }
   });
   const result=await service.consume({access_token:'invite-access-fixture',refresh_token:'unused-refresh-fixture',type:'invite',purpose:'verify'});
-  assert.deepEqual(result,{message:'Invitation confirmed. The production candidate remains locked.'});
+  assert.deepEqual(result,{message:'Invitation confirmed. You can now sign in.'});
   assert.deepEqual(calls,[{path:'/auth/v1/user',authorization:'Bearer invite-access-fixture'}]);
   await assert.rejects(service.consume({access_token:'invite-access-fixture',type:'signup',purpose:'verify'}),/invitation link is invalid/i);
   await assert.rejects(service.consume({token:'invite-token-fixture',type:'invite',purpose:'verify'}),/invitation link is invalid/i);

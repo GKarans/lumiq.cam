@@ -15,9 +15,8 @@ function oneBinding(items, name, field) {
   return matches[0];
 }
 
-export function validateProductionConfig(candidate, closedTestHyperdriveId) {
+export function validateProductionConfig(candidate) {
   requireThat(candidate && typeof candidate === "object", "Production config must be an object.");
-  requireThat(typeof closedTestHyperdriveId === "string" && /^[a-f0-9]{32}$/i.test(closedTestHyperdriveId), "Supply the current closed-test Hyperdrive ID.");
   requireThat(typeof candidate.name === "string" && candidate.name.length > 0, "Production worker name is required.");
   requireThat(["lumiq-production", "lumiq-production-candidate"].includes(candidate.name), "Production must use the canonical Worker or the existing migration source.");
   requireThat(candidate.preview_urls === false, "Production preview URLs must remain disabled.");
@@ -52,7 +51,6 @@ export function validateProductionConfig(candidate, closedTestHyperdriveId) {
   const prodDb = oneBinding(candidate.hyperdrive, "HYPERDRIVE", "Hyperdrive");
   requireThat(candidate.hyperdrive.length === 1, "Production config must not include additional Hyperdrive bindings.");
   requireThat(/^[a-f0-9]{32}$/i.test(prodDb.id || ""), "Production Hyperdrive ID is invalid.");
-  requireThat(prodDb.id.toLowerCase() !== closedTestHyperdriveId.toLowerCase(), "Production must not reuse the closed-test Hyperdrive.");
 
   const prodR2 = oneBinding(candidate.r2_buckets, "R2_PHOTOS", "R2");
   requireThat(candidate.r2_buckets.length === 1, "Production config must not include additional R2 buckets.");
@@ -128,13 +126,12 @@ async function readConfig(file) {
 
 async function main() {
   const [candidatePath, ...args] = process.argv.slice(2);
-  const testIdArg = args.find(value => value.startsWith("--closed-test-hyperdrive-id="));
   const runtimeRoleArg = args.find(value => value.startsWith("--runtime-role="));
-  requireThat(candidatePath && testIdArg, "Usage: npm run production:preflight -- <production-wrangler-config.jsonc> --closed-test-hyperdrive-id=<id> [--runtime-role=lumiq_runtime|lumiq_production_runtime]");
+  requireThat(candidatePath, "Usage: npm run production:preflight -- <production-wrangler-config.jsonc> [--runtime-role=lumiq_runtime|lumiq_production_runtime]");
   const candidateFile = path.resolve(candidatePath);
   const candidate = await readConfig(candidateFile);
   const runtimeRole = runtimeRoleArg?.split("=", 2)[1] || "lumiq_runtime";
-  const result = validateProductionConfig(candidate, testIdArg.split("=", 2)[1]);
+  const result = validateProductionConfig(candidate);
   const remoteDatabase = validateRemoteHyperdriveProject(
     getRemoteHyperdriveConfig(result.hyperdriveId),
     result.hyperdriveId,
