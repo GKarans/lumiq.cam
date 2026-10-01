@@ -115,4 +115,4 @@
 
 - [x] Anonīms `GET https://lumiq.cam/healthz` no darba vides atgrieza `302` uz Cloudflare Access; kandidāta `workers.dev/healthz` atgrieza `404`. Tas apstiprina pašreizējo Production domēna Access robežu un kandidāta publiskā hostname izslēgšanu, ne autorizētu lietotnes darbību vai Worker resursa izdzēšanu.
 - [x] Windows Scheduled Task `Lumiq Production Daily Backup` ir `Ready`; iepriekšējais izpildes rezultāts `0`, nākamā palaišana 2026-10-02 02:30 pēc Rīgas laika. Tas apstiprina lokālā uzdevuma grafika stāvokli, ne nākamās rezerves kopijas sekmīgu izveidi vai datora pieejamību izpildes brīdī.
-- [ ] Atkārtot backup verifikāciju pēc jaunākās ieplānotās kopijas; pilna izolēta restore pārbaude joprojām vajadzīga.
+- [x] 2026-10-01 00:10 UTC pēc ieplānotās 02:30 Riga kopijas ar `production-secrets.ps1 check-production-backup` nolasīta un pilnībā verificēta jaunākā kopa `production/2026-09-30T23-32-07-795Z`: 21 DB/Auth tabula, migrācijas `001–046`, derīgas kontrolsummas un 0 foto objektu. Pagaidu lokālie faili tika iztīrīti. Šis pārbauda backup integritāti, nevis restore; pilna izolēta restore pārbaude joprojām vajadzīga.
