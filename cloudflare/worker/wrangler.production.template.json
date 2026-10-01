@@ -72,7 +72,10 @@
     ]
   },
   "observability": {
-    "enabled": true
+    "enabled": true,
+    "issues": {
+      "enabled": true
+    }
   },
   "routes": [
     {

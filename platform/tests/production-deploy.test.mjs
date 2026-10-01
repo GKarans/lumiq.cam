@@ -56,6 +56,10 @@ test("Production adoption prepares an unexposed Worker and a root-domain route w
   assert.equal(routedConfig.vars.PLATFORM_EMAIL_FROM, "Lumiq <noreply@lumiq.cam>");
   assert.equal(routedConfig.vars.PLATFORM_EMAIL_REPLY_TO, "support@lumiq.cam");
   assert.equal(routedConfig.vars.PLATFORM_SUPPORT_EMAIL, "support@lumiq.cam");
+  assert.equal(initialConfig.observability.enabled, true);
+  assert.equal(initialConfig.observability.issues.enabled, true);
+  assert.equal(routedConfig.observability.issues.enabled, true);
+  assert.equal(source.observability, undefined);
   assert.equal(validated.worker, "lumiq-production");
 });
 

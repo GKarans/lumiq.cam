@@ -43,6 +43,7 @@ export function normalizeProductionConfig(source) {
   base.vars.PLATFORM_EMAIL_FROM = "Lumiq <noreply@lumiq.cam>";
   base.vars.PLATFORM_EMAIL_REPLY_TO = "support@lumiq.cam";
   base.vars.PLATFORM_SUPPORT_EMAIL = "support@lumiq.cam";
+  base.observability = {...(base.observability || {}), enabled: true, issues: {...(base.observability?.issues || {}), enabled: true}};
   return base;
 }
 
