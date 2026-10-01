@@ -4,6 +4,12 @@
 
 **Statuss 2026-10-01:** `[x]` nozīmē, ka norādītais šaurais fakts ir pārbaudīts; tas nenozīmē, ka visa sadaļa ir gatava. `[ ]` nozīmē, ka rezultāts vēl nav pierādīts. `app-images` neaiztikt. `event-photo-media` neaiztikt, kamēr nav atsevišķi noskaidrotas tā atkarības un īpašnieks nav devis jaunu uzdevumu.
 
+### Svaigā pārbaude — 2026-10-01
+
+- [x] `npm run check` pilnībā izturēja: noslēpumu skenēšana aptvēra 288 workspace failus un bija tīra, `npm audit --audit-level=high` ziņoja 0 ievainojamības, visi 201 testi izturēja, build validēja 60 publiskos failus, un izolētās pārlūka pārbaudes izturēja deviņos platumos, invite callback, viesu foto plūsmu, norēķinu/plānu saskarni, redaktoru un pieejamības pārbaudes. Pārlūka pārbaude neizmantoja ārējus pieprasījumus vai Production datus; deploy netika veikts.
+- [x] Atkārtots tikai-lasāmais `platform/scripts/production-secrets.ps1 run-safe-runtime-check` apstājās `Auth RPC owner privileges check (CHECK_FAILED)` posmā un ziņoja, ka DB izmaiņas netika veiktas. Production migrācijas 047/048 un Worker deploy paliek bloķēti līdz atbalstītam Auth shēmas piekļuves risinājumam.
+- [x] Gmail pārbaudē `from:(supabase.com) newer_than:7d` biļetēm `SU-490493` un `SU-490545` bija tikai automātiskās saņemšanas kvītis; tehniskas atbildes vēl nav. Abās norādīts 1–2 darba dienu mērķis un iespējama kavēšanās. Netika iesniegta jauna biļete vai pirkts prioritārs atbalsts.
+
 ### Izmaksu modeļa labojums — 2026-10-01 06:53 Rīgas laiks
 
 - `platform/shared/cost-model.js` tagad aprēķina R2 Standard storage kā proporcionālus GB-month, nevis noapaļo katru kopsummu uz veselu GB; R2 Class A/B operācijas tiek noapaļotas uz augšu pa miljonu pēc iekļautās bezmaksas kvotas. Bezmaksas R2 līmeni var ieslēgt ar CLI pēdējo argumentu `free-r2`; pēc noklusējuma paliek konservatīvais bezmaksas kvotu nepiemērošanas scenārijs. Pievienota `otherWorkerRequests` ievade, jo produkcijas API pieprasījumi nav tikai attēlu pieprasījumi.
