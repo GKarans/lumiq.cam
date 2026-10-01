@@ -24,6 +24,8 @@ if(!/^http:\/\/127\.0\.0\.1:\d+$/.test(base))throw new Error('Local tests only')
   await page.goto(base+'/event/'+e.slug);await page.getByLabel('Your name',{exact:true}).fill('Photographer');await page.getByRole('button',{name:'Join the gathering'}).click();await page.getByRole('button',{name:'Choose photos'}).waitFor();
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   const fixture=await sharp({create:{width:80,height:60,channels:3,background:'#2e866f'}}).jpeg().toBuffer();
+  await page.locator('#choose').setInputFiles(Array.from({length:21},(_,i)=>({name:`rejected-${i}.jpg`,mimeType:'image/jpeg',buffer:fixture})));
+  await page.getByRole('alert').filter({hasText:'Choose up to 20 photos at a time.'}).waitFor();assert.equal(await page.locator('.queue-item').count(),0,'an over-limit batch must not enter the upload queue');
   let failOnce=true;await page.route('**/content/*/photo',async route=>{if(failOnce){failOnce=false;return route.abort('failed');}return route.continue();});
   await page.locator('#choose').setInputFiles(Array.from({length:20},(_,i)=>({name:`photo-${i}.jpg`,mimeType:'image/jpeg',buffer:fixture})));
   await page.locator('.queue > strong').filter({hasText:'20 uploaded'}).waitFor({timeout:90000});
