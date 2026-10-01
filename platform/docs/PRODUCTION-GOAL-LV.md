@@ -4,6 +4,13 @@
 
 **Statuss 2026-10-01:** `[x]` nozīmē, ka norādītais šaurais fakts ir pārbaudīts; tas nenozīmē, ka visa sadaļa ir gatava. `[ ]` nozīmē, ka rezultāts vēl nav pierādīts. `app-images` neaiztikt. `event-photo-media` neaiztikt, kamēr nav atsevišķi noskaidrotas tā atkarības un īpašnieks nav devis jaunu uzdevumu.
 
+### Aktuālais kontrolpunkts — 2026-10-01 06:12 Rīgas laiks
+
+- Cloudflare Workers & Pages dzīvajā sarakstā ir `lumiq-production`, `lumiq-closed-test`, `lumiq-restore-drill-candidate` un aizsargātais `event-photo-media`. `lumiq-production-candidate` nav sarakstā un `lumiq.cam` maršruts joprojām ir uz `lumiq-production`, bet atsevišķais Restore Drill Worker vēl ir aktīvs; gala nosacījums par visu candidate vidi neesamību tādēļ vēl nav izpildīts. Restore Drill izmanto atsevišķus Recovery resursus un tam ir Cloudflare Access politika; to neizdzēst pirms pilna restore testa un atkarību pārbaudes.
+- Autorizētajā pārlūkā `https://lumiq.cam/contact` joprojām rāda “Requests are stored locally; no email leaves this device”. Tas apliecina, ka jaunais kontaktformas/outbox ceļš Production nav izvietots.
+- Gmail meklējumā Supabase ziņojumiem pēdējās 7 dienās biļetēm `SU-490545` un `SU-490493` ir tikai saņemšanas kvītis (1–2 darba dienu atbildes mērķis), nav tehniska risinājuma `auth` shēmas grantam.
+- Koda atkarību pārbaude apstiprina, ka 048 nevar izvietot atsevišķi no 047: `create_support_case` izpildās kā `lumiq_support_owner` un sauc `auth.uid()`, bet šai lomai nav `USAGE ON SCHEMA auth`. 047/048 un Worker izmaiņas nav veiktas. Nākamais drošais solis ir gaidīt Supabase atbalstīto grant risinājumu; pēc tam secīgi pārbaudīt/lietot 047, 048, Production konfigurāciju un kontrolētu Auth/kontaktformas sūtīšanas testu.
+
 ## 1. Viena Production arhitektūra
 
 - [x] Ir atsevišķs Supabase Production projekts `baqebydtinysosueksgr`, Production Hyperdrive, ierobežotā `lumiq_production_runtime` loma, EU foto R2 un Production Queue/DLQ. Iepriekšējais `lumiq-production-candidate` bija pārejas avots, ne gala Worker.
