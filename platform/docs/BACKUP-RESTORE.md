@@ -29,10 +29,30 @@ uploaded object back and verifies size and SHA-256. Temporary local files are
 removed only after all remote checks pass. On failure, the script warns that
 the temporary directory remains and must be secured before investigation.
 
-This command has not yet been run against production. It does not complete a
-restore drill: do not reuse the closed-test restore project or bucket. First
-create a separate empty recovery Supabase project and R2 bucket for Lumiq
-Production, then download this exact R2 backup and restore/verify it there.
+The scheduled task `Lumiq Production Daily Backup` runs this command daily.
+Task Scheduler reported a successful run on 2026-10-01 (exit code 0), with the
+next run scheduled for 2026-10-02 02:30 local time. The read-only
+`production-secrets.ps1 check-production-backup` command was also run on
+2026-10-01: it downloaded the newest private backup to a temporary directory,
+verified the manifest, migration prefix, file sizes and SHA-256 checksums, then
+removed the temporary files. It reported format v4, 21 database/Auth tables,
+46 migrations and 0 photo objects in the newest snapshot. This verifies backup
+integrity, not that a database and its objects can be restored successfully.
+
+The `lumiq-production-backups` bucket is EU and public access is disabled. Its
+Settings page has no object lifecycle or bucket-lock retention rule; only
+Cloudflare's default 7-day incomplete multipart-upload abort rule is enabled.
+The local `prune-production-backups.mjs` tool enforces a minimum 30-day
+retention and protects the newest complete backup, but no scheduled prune task
+was found. Do not delete backups or enable automatic pruning until the owner
+approves a retention period and a restore has been demonstrated.
+
+The restore drill is still incomplete. Do not reuse the closed-test restore
+project or the existing Recovery project/bucket unless their emptiness and
+target authorization are first proven. A new isolated Supabase project and
+empty private R2 bucket may incur additional cost; obtain owner approval before
+creating them. Restore the exact verified backup there and run the listed
+application smoke tests before claiming recoverability.
 
 ## Restore drill
 
