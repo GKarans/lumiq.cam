@@ -8,8 +8,8 @@ import {getRemoteHyperdriveConfig, validateProductionConfig, validateRemoteHyper
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const workerDir = path.join(root, "cloudflare/worker");
-const sourceWorkerName = "lumiq-production-candidate";
 const workerName = "lumiq-production";
+const legacyConfigName = "lumiq-production-candidate";
 const productionProject = "baqebydtinysosueksgr";
 const productionRuntime = "lumiq_production_runtime";
 const queueName = "lumiq-production-jobs";
@@ -27,10 +27,13 @@ function parseJson(output, label) {
   catch { throw new Error(`Cloudflare returned invalid ${label}.`); }
 }
 
-export function prepareProductionDeployment(source, closedTestHyperdriveId) {
-  requireThat(source?.name === sourceWorkerName, "Only the reviewed Production migration source may supply the live bindings.");
-  requireThat(source.vars?.PLATFORM_MODE === "production" && source.vars.PLATFORM_RELEASE_APPROVED === "production", "The migration source must retain its approved Production release state.");
-
+export function normalizeProductionConfig(source) {
+  requireThat(source && [workerName, legacyConfigName].includes(source.name), "Only the canonical Worker or its saved Production config may supply bindings.");
+  requireThat(source.vars?.PLATFORM_MODE === "production" && source.vars.PLATFORM_RELEASE_APPROVED === "production", "The saved config must retain its approved Production release state.");
+  requireThat(source.vars.PLATFORM_SERVICE_NAME === source.name, "The saved config service name does not match its Worker name.");
+  const origin = source.vars.PLATFORM_ORIGIN;
+  const expectedOrigin = source.name === workerName ? "https://lumiq.cam" : "https://lumiq-production-candidate.gkarans-events.workers.dev";
+  requireThat(origin === expectedOrigin, "The saved Production config has an unexpected origin.");
   const base = structuredClone(source);
   base.name = workerName;
   base.workers_dev = false;
@@ -40,11 +43,16 @@ export function prepareProductionDeployment(source, closedTestHyperdriveId) {
   base.vars.PLATFORM_EMAIL_FROM = "Lumiq <noreply@lumiq.cam>";
   base.vars.PLATFORM_EMAIL_REPLY_TO = "support@lumiq.cam";
   base.vars.PLATFORM_SUPPORT_EMAIL = "support@lumiq.cam";
+  return base;
+}
 
-  const initialConfig = structuredClone(base);
+export function prepareProductionDeployment(savedConfig, closedTestHyperdriveId) {
+  const source = normalizeProductionConfig(savedConfig);
+
+  const initialConfig = structuredClone(source);
   delete initialConfig.routes;
   initialConfig.queues.consumers = [];
-  const routedConfig = structuredClone(base);
+  const routedConfig = structuredClone(source);
   routedConfig.routes = [{pattern: "lumiq.cam", custom_domain: true}];
   routedConfig.queues.consumers = [];
   const preflightConfig = structuredClone(routedConfig);
@@ -72,7 +80,7 @@ export function assertQueueConsumerState(main, dlq) {
   const dlqConsumer = Array.isArray(dlq) && dlq.length === 1 ? dlq[0] : null;
   requireThat(mainConsumer && dlqConsumer, "Both Production queues must each have exactly one Worker consumer.");
   requireThat(mainConsumer.dead_letter_queue === dlqName && !dlqConsumer.dead_letter_queue, "Production Queue and DLQ consumer settings are not the reviewed flat pair.");
-  requireThat([sourceWorkerName, workerName].includes(mainConsumer.script) && [sourceWorkerName, workerName].includes(dlqConsumer.script), "Production queues may only use the reviewed migration source and canonical Worker.");
+  requireThat(mainConsumer.script === workerName && dlqConsumer.script === workerName, "Both Production queues must be consumed only by the canonical Worker.");
   return {main: mainConsumer.script, dlq: dlqConsumer.script};
 }
 
@@ -169,49 +177,23 @@ function assertQueueState() {
   return assertQueueConsumerState(main, dlq);
 }
 
-function addConsumer(queue, options = {}) {
-  const args = ["queues", "consumer", "add", queue, workerName, "--batch-size", "1", "--batch-timeout", "5", "--message-retries", "10", "--max-concurrency", "1", "--retry-delay-secs", "0"];
-  if (options.deadLetterQueue) args.push("--dead-letter-queue", options.deadLetterQueue);
-  wrangler(args);
-}
-
-function migrateQueueConsumers() {
-  const state = assertQueueState();
-  if (state.main === workerName && state.dlq === workerName) return;
-  try {
-    if (state.main !== workerName) {
-      wrangler(["queues", "consumer", "remove", queueName, state.main]);
-      addConsumer(queueName, {deadLetterQueue: dlqName});
-    }
-    if (state.dlq !== workerName) {
-      wrangler(["queues", "consumer", "remove", dlqName, state.dlq]);
-      addConsumer(dlqName);
-    }
-  } catch (error) {
-    if (readConsumer(queueName).length === 0) addConsumer(queueName, {deadLetterQueue: dlqName});
-    if (readConsumer(dlqName).length === 0) addConsumer(dlqName);
-    throw error;
-  }
-  const after = assertQueueState();
-  requireThat(after.main === workerName && after.dlq === workerName, "The Production queues did not move to the canonical Worker.");
-}
-
 async function main() {
   const dryRunOnly = process.argv.includes("--dry-run-only");
   if (!dryRunOnly) requireThat(process.argv.includes("--owner-approved"), "Run only after explicit owner approval: add --owner-approved.");
   const sourcePath = path.join(workerDir, "wrangler.production.preflight.local.jsonc");
   const closedTestPath = path.join(workerDir, "wrangler.closed-test.jsonc");
-  const source = JSON.parse(await readFile(sourcePath, "utf8"));
+  const savedConfig = JSON.parse(await readFile(sourcePath, "utf8"));
+  const source = normalizeProductionConfig(savedConfig);
   const closedTest = JSON.parse(await readFile(closedTestPath, "utf8"));
   const {initialConfig, routedConfig, validated} = prepareProductionDeployment(source, closedTest.hyperdrive?.[0]?.id);
 
   requireThat(!routedConfig.workers_dev && routedConfig.preview_urls === false, "The canonical Worker must not expose workers.dev or preview URLs.");
   requireThat(routedConfig.routes?.length === 1 && routedConfig.routes[0].pattern === "lumiq.cam" && routedConfig.routes[0].custom_domain, "Only the protected lumiq.cam custom domain may route to the canonical Worker.");
-  requireThat(routedConfig.queues?.producers?.length === 1 && routedConfig.queues.producers[0].queue === queueName && routedConfig.queues.consumers.length === 0, "The canonical Worker must publish to the existing Production queue while consumers are transferred separately.");
+  requireThat(routedConfig.queues?.producers?.length === 1 && routedConfig.queues.producers[0].queue === queueName && routedConfig.queues.consumers.length === 0, "The canonical Worker must publish to the existing Production queue without changing its verified consumers.");
 
   const remote = validateRemoteHyperdriveProject(getRemoteHyperdriveConfig(validated.hyperdriveId), validated.hyperdriveId, productionProject, productionRuntime);
-  const oldSecrets = readSecretNames(sourceWorkerName);
-  for (const required of ["PLATFORM_EMAIL_KEY", "PLATFORM_SESSION_ENCRYPTION_KEY"]) requireThat(oldSecrets.includes(required), `The migration source is missing the existing ${required} secret.`);
+  const productionSecrets = readSecretNames(workerName);
+  for (const required of ["PLATFORM_EMAIL_KEY", "PLATFORM_SESSION_ENCRYPTION_KEY"]) requireThat(productionSecrets.includes(required), `The canonical Worker is missing the existing ${required} secret.`);
   const queues = wrangler(["queues", "list"]);
   requireThat(queues.includes(queueName) && queues.includes(dlqName), "Both existing Production Queue resources must be present.");
   assertQueueState();
@@ -241,7 +223,7 @@ async function main() {
     requireThat(routedDryRun.includes(`env.LUMIQ_JOBS_QUEUE (${validated.queue})`) && routedDryRun.includes(`env.R2_PHOTOS (${validated.bucket} (eu))`), "The routed Worker dry-run lost a Production binding.");
     wrangler(["deploy", "--config", routedConfigPath]);
     await assertAccess("https://lumiq.cam");
-    migrateQueueConsumers();
+    assertQueueState();
 
     const version = latestDeployedVersion(parseJson(wrangler(["deployments", "list", "--name", workerName, "--json"], {json: true}), "Production deployment list"));
     requireThat(version, "Cloudflare did not report a 100% canonical Production deployment version.");

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFile} from "node:fs/promises";
-import {assertOwnerAccessRedirect, assertQueueConsumerState, latestDeployedVersion, prepareProductionDeployment} from "../scripts/deploy-production.mjs";
+import {assertOwnerAccessRedirect, assertQueueConsumerState, latestDeployedVersion, normalizeProductionConfig, prepareProductionDeployment} from "../scripts/deploy-production.mjs";
 
 const closedTestId = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 
@@ -14,7 +14,7 @@ function sourceConfig() {
       PLATFORM_MODE: "production",
       PLATFORM_RELEASE_APPROVED: "production",
       PLATFORM_SERVICE_NAME: "lumiq-production-candidate",
-      PLATFORM_ORIGIN: "https://lumiq-production-candidate.example.workers.dev",
+      PLATFORM_ORIGIN: "https://lumiq-production-candidate.gkarans-events.workers.dev",
       PLATFORM_SUPABASE_URL: "https://prodproject123.supabase.co",
       PLATFORM_SUPABASE_PROJECT_REF: "prodproject123",
       PLATFORM_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_synthetic_test_key",
@@ -43,7 +43,7 @@ test("Production adoption prepares an unexposed Worker and a root-domain route w
   const source = sourceConfig();
   const {initialConfig, routedConfig, validated} = prepareProductionDeployment(source, closedTestId);
   assert.equal(source.name, "lumiq-production-candidate");
-  assert.equal(source.vars.PLATFORM_ORIGIN, "https://lumiq-production-candidate.example.workers.dev");
+  assert.equal(source.vars.PLATFORM_ORIGIN, "https://lumiq-production-candidate.gkarans-events.workers.dev");
   assert.equal(initialConfig.name, "lumiq-production");
   assert.equal(initialConfig.workers_dev, false);
   assert.equal(initialConfig.preview_urls, false);
@@ -62,10 +62,13 @@ test("Production adoption prepares an unexposed Worker and a root-domain route w
 test("Production adoption rejects an unreviewed migration source or release state", () => {
   const config = sourceConfig();
   config.name = "lumiq-cam";
-  assert.throws(() => prepareProductionDeployment(config, closedTestId), /reviewed Production migration source/);
+  assert.throws(() => normalizeProductionConfig(config), /canonical Worker or its saved Production config/);
   const unapproved = sourceConfig();
   unapproved.vars.PLATFORM_RELEASE_APPROVED = "NOT_APPROVED";
-  assert.throws(() => prepareProductionDeployment(unapproved, closedTestId), /approved Production release state/);
+  assert.throws(() => normalizeProductionConfig(unapproved), /approved Production release state/);
+  const mismatchedService = sourceConfig();
+  mismatchedService.vars.PLATFORM_SERVICE_NAME = "lumiq-production";
+  assert.throws(() => normalizeProductionConfig(mismatchedService), /service name does not match/);
 });
 
 test("canonical Production preflight permits only the exact lumiq.cam custom domain", () => {
@@ -89,13 +92,15 @@ test("deployment verification selects the newest fully deployed version", () => 
   assert.equal(latestDeployedVersion([]), null);
 });
 
-test("Queue handoff accepts only reviewed source/canonical combinations and flat DLQ settings", () => {
-  const main = [{script: "lumiq-production-candidate", dead_letter_queue: "lumiq-production-jobs-dlq"}];
-  const dlq = [{script: "lumiq-production-candidate"}];
-  assert.deepEqual(assertQueueConsumerState(main, dlq), {main: "lumiq-production-candidate", dlq: "lumiq-production-candidate"});
-  assert.deepEqual(assertQueueConsumerState([{...main[0], script: "lumiq-production"}], dlq), {main: "lumiq-production", dlq: "lumiq-production-candidate"});
-  assert.throws(() => assertQueueConsumerState([{script: "unknown-worker", dead_letter_queue: "lumiq-production-jobs-dlq"}], dlq), /reviewed migration source and canonical Worker/);
-  assert.throws(() => assertQueueConsumerState(main, [{script: "lumiq-production-candidate", dead_letter_queue: "nested"}]), /flat pair/);
+test("Production deploy requires canonical queue consumers and never transfers queue ownership", async () => {
+  const main = [{script: "lumiq-production", dead_letter_queue: "lumiq-production-jobs-dlq"}];
+  const dlq = [{script: "lumiq-production"}];
+  assert.deepEqual(assertQueueConsumerState(main, dlq), {main: "lumiq-production", dlq: "lumiq-production"});
+  assert.throws(() => assertQueueConsumerState([{...main[0], script: "lumiq-production-candidate"}], dlq), /consumed only by the canonical Worker/);
+  assert.throws(() => assertQueueConsumerState(main, [{script: "lumiq-production", dead_letter_queue: "nested"}]), /flat pair/);
+  const deploy = await readFile(new URL("../scripts/deploy-production.mjs", import.meta.url), "utf8");
+  assert.match(deploy, /readSecretNames\(workerName\)/);
+  assert.doesNotMatch(deploy, /queues",\s*"consumer",\s*"remove/);
 });
 
 test("deployment command targets canonical Production and keeps generic deployment blocked", async () => {
