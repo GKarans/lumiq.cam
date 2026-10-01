@@ -215,6 +215,18 @@ async function main() {
       return;
     }
 
+    try {
+      execFileSync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path.join(root, "platform/scripts/production-secrets.ps1"), "run-safe-runtime-check"], {
+        cwd: root,
+        encoding: "utf8",
+        timeout: 120000,
+        windowsHide: true,
+        stdio: ["ignore", "ignore", "ignore"]
+      });
+    } catch {
+      throw new Error("Production database readiness verification failed; no Worker deployment was started. Resolve migration/runtime checks with Supabase, then rerun the read-only Production check.");
+    }
+
     wrangler(["deploy", "--config", initialConfigPath]);
     setProductionSecrets();
     const newSecrets = readSecretNames(workerName);

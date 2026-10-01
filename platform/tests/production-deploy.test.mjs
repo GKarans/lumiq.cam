@@ -107,6 +107,16 @@ test("Production deploy requires canonical queue consumers and never transfers q
   assert.doesNotMatch(deploy, /queues",\s*"consumer",\s*"remove/);
 });
 
+test("actual Production deploy checks the live read-only migration and runtime state first", async () => {
+  const deploy = await readFile(new URL("../scripts/deploy-production.mjs", import.meta.url), "utf8");
+  const dryRunReturn = deploy.indexOf("if (dryRunOnly)");
+  const readinessCheck = deploy.indexOf('"run-safe-runtime-check"');
+  const firstDeployment = deploy.indexOf('wrangler(["deploy", "--config", initialConfigPath])');
+  assert.ok(dryRunReturn >= 0 && readinessCheck > dryRunReturn, "configuration-only dry run remains independent of DB credentials");
+  assert.ok(firstDeployment > readinessCheck, "live Production readiness must pass before the first Worker version is deployed");
+  assert.match(deploy, /Production database readiness verification failed; no Worker deployment was started/);
+});
+
 test("deployment command targets canonical Production and keeps generic deployment blocked", async () => {
   const packageJson = JSON.parse(await readFile(new URL("../../package.json", import.meta.url), "utf8"));
   const guard = await readFile(new URL("../scripts/block-deploy.mjs", import.meta.url), "utf8");
