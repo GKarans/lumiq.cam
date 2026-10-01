@@ -46,7 +46,20 @@ try {
     where r.rolname like 'lumiq\\_%\\_owner' escape '\\'
     order by r.rolname
   `)).rows;
-  console.log(JSON.stringify({ targetProject: projectRef, identity, migrationLedger: ledger, memberships, authSchemaRoles }));
+  const authUidDependencies = (await db.query(`
+    select
+      (select count(*)::integer from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+       where n.nspname not in ('pg_catalog','information_schema')
+         and p.prosrc ilike '%auth.uid(%') as function_count,
+      (select count(*)::integer from pg_policies
+       where coalesce(qual,'') ilike '%auth.uid(%' or coalesce(with_check,'') ilike '%auth.uid(%') as policy_count,
+      (select coalesce(jsonb_agg(format('%I.%I(%s)',n.nspname,p.proname,pg_get_function_identity_arguments(p.oid)) order by n.nspname,p.proname),'[]'::jsonb)
+       from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+       where n.nspname not in ('pg_catalog','information_schema') and p.prosrc ilike '%auth.uid(%') as functions,
+      (select coalesce(jsonb_agg(format('%I.%I:%I',schemaname,tablename,policyname) order by schemaname,tablename,policyname),'[]'::jsonb)
+       from pg_policies where coalesce(qual,'') ilike '%auth.uid(%' or coalesce(with_check,'') ilike '%auth.uid(%') as policies
+  `)).rows[0];
+  console.log(JSON.stringify({ targetProject: projectRef, identity, migrationLedger: ledger, memberships, authSchemaRoles, authUidDependencies }));
 } catch (error) {
   console.error(`Production Auth-grant inspection failed (${typeof error?.code === 'string' ? error.code.replace(/[^A-Z0-9_]/g, '').slice(0, 32) : 'CHECK_FAILED'}). No database changes were made.`);
   process.exitCode = 1;
