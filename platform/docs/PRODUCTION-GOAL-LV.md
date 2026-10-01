@@ -12,6 +12,7 @@
 ### Turpinājuma QA — 2026-10-01
 
 - [x] Pašreizējā gala produkta checkout palaists `npm run check`: secret scan 277 failiem tīrs, `npm audit --audit-level=high` bez ievainojamībām, 179 testi izturēti, build validēja 60 publiskos failus, pārlūka pārbaudes izturēja 320–1440 px, auth/invite simulāciju, 20 sintētisku foto augšupielādi ar retry, galeriju, redaktoru, billing un pieejamības pārbaudes. Darbība bija lokāla/izolēta, ārējie pieprasījumi netika veikti; tas neaizstāj dzīvu Production Auth, reālu e-pasta vai R2 E2E pārbaudi. Deploy netika veikts.
+- [x] Cloudflare Workers & Pages tiešajā sarakstā redzami tieši `lumiq-production` (Production custom domain `lumiq.cam`) un nesaistītais, saglabājamais `event-photo-media`. `lumiq-closed-test` un candidate tur nav; Wrangler deployment vaicājums `lumiq-closed-test` saņēma API 10007 Worker does not exist. Atvērtā Cloudflare vecā servisa detaļu lapa bija novecojusi, tāpēc to neizmantoju kā pierādījumu aktīvam resursam. Netika dzēsti vai mainīti citi Worker/Access resursi.
 
 ### Svaigā pārbaude — 2026-10-01
 
