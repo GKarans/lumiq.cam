@@ -54,7 +54,10 @@ test('Supabase RPC failures log only safe status metadata',async()=>{
     :Response.json({code:'42501',message:'private@example.test bearer private-database-detail'},
      {status:403,headers:{'sb-request-id':'request-fixture'}})
   });
-  await assert.rejects(service.login({email:user.email,password:'private-password'}),/account could not be synchronized/i);
+  await assert.rejects(service.login({email:user.email,password:'private-password'}),error=>{
+   assert.equal(error.message,'Lumiq account access is temporarily unavailable because account setup could not finish. If this happened after a password reset, your password may already have changed. Do not request another reset; contact Lumiq support.');
+   return true;
+  });
   assert.equal(warnings.length,1);
   assert.deepEqual(JSON.parse(warnings[0]),{
    level:'warn',component:'supabase-auth-rpc',rpc:'sync_own_account',status:403,code:'42501',requestId:'request-fixture'
