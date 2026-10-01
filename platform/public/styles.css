@@ -111,3 +111,4 @@ body.dark{color-scheme:dark;--bg:#151d19;--surface:#1e2822;--ink:#eef3ed;--muted
 .canvas-editor-dialog .dialog-body{flex:1;min-height:0;height:auto;overflow:hidden}
 .canvas-editor-tools .qr-tool-actions>.emoji-picker-anchor>button{min-width:42px;min-height:42px;height:42px;font-size:12px;padding:8px 12px}
 @media(max-width:760px){.canvas-editor-tools .qr-tool-actions>.emoji-picker-anchor>button{min-height:42px;height:42px;font-size:11px;padding:7px 9px}}
+.queue-actions{display:flex;align-items:center;gap:4px}
