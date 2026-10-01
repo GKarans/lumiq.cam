@@ -6,9 +6,11 @@
 
 ### Svaigā pārbaude — 2026-10-01
 
+- [x] 2026-10-01 08:10 Rīgas laiks Cloudflare `lumiq-production` → Domains panelī redzams `lumiq.cam` kā Production Custom Domain; Production `workers.dev` URL un preview URL slēdži ir izslēgti. Cloudflare Deployments panelī `c685f77b` ir aktīvā versija ar 100% trafika; pēdējā brīdī panelis rādīja `0 req/sec`, `0%` kļūdu un `3.31 ms` median CPU. Neatkarīgā anonīmā HTTP pārbaudē `lumiq.cam/healthz` atgrieza Access `302`, `www.lumiq.cam/healthz` `301` uz sakni, bet tiešais `lumiq-production.gkarans-events.workers.dev/healthz` `404` (saskan ar izslēgtu `workers.dev`). DNS atrisinājās Cloudflare A ierakstos. Saknes pieprasījumam Access atbildēja pirms Worker, tāpēc ar anonīmo curl nepārbaudīju iekšējo `/healthz` atbildi; netika sekots Access redirect.
+- [ ] Jau atvērtā `https://lumiq.cam/contact` lapa ielādējas, bet rāda “Pre-launch support inbox. Requests are stored locally; no email leaves this device.” un `Send request` formu. Tātad URL un Production Custom Domain ir piesaistīti, bet kontaktu atbalsta plūsma nav Production-ready; formu neiesniedzu.
 - [x] `npm run check` pilnībā izturēja: noslēpumu skenēšana aptvēra 288 workspace failus un bija tīra, `npm audit --audit-level=high` ziņoja 0 ievainojamības, visi 201 testi izturēja, build validēja 60 publiskos failus, un izolētās pārlūka pārbaudes izturēja deviņos platumos, invite callback, viesu foto plūsmu, norēķinu/plānu saskarni, redaktoru un pieejamības pārbaudes. Pārlūka pārbaude neizmantoja ārējus pieprasījumus vai Production datus; deploy netika veikts.
 - [x] Atkārtots tikai-lasāmais `platform/scripts/production-secrets.ps1 run-safe-runtime-check` apstājās `Auth RPC owner privileges check (CHECK_FAILED)` posmā un ziņoja, ka DB izmaiņas netika veiktas. Production migrācijas 047/048 un Worker deploy paliek bloķēti līdz atbalstītam Auth shēmas piekļuves risinājumam.
-- [x] Gmail pārbaudē `from:(supabase.com) newer_than:7d` biļetēm `SU-490493` un `SU-490545` bija tikai automātiskās saņemšanas kvītis; tehniskas atbildes vēl nav. Abās norādīts 1–2 darba dienu mērķis un iespējama kavēšanās. Netika iesniegta jauna biļete vai pirkts prioritārs atbalsts.
+- [x] Gmail pārbaudē `from:(supabase.com) newer_than:1d` biļetēm `SU-490493` un `SU-490545` joprojām bija tikai 2026-09-30 automātiskās saņemšanas kvītis; tehniskas atbildes vēl nav. Abās norādīts 1–2 darba dienu mērķis un iespējama kavēšanās. Netika iesniegta jauna biļete vai pirkts prioritārs atbalsts.
 
 ### Izmaksu modeļa labojums — 2026-10-01 06:53 Rīgas laiks
 
