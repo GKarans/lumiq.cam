@@ -1,5 +1,11 @@
 # Lumiq pārbaudes un Windows DNS/TLS pamācība
 
+> **Novecojis runbook (2026-10-01).** Tālāk minētais `lumiq-closed-test` kā
+> `lumiq.cam` maršruta īpašnieks un tam piesaistītie QA soļi vairs neatbilst
+> dzīvajai konfigurācijai. Saknes domēns ir pie `lumiq-production`. Pirms
+> jebkādas dzīvas pārbaudes izmanto aktuālo
+> [PRODUCTION-GOAL-LV.md](PRODUCTION-GOAL-LV.md); vecās darbības neveic.
+
 Atjaunināts: 2026-09-26. Šī ir īpašnieka izpildāmo pārbaužu rokasgrāmata.
 Izmanto tikai slēgtā testa vidi, sintētiskus notikumus un attēlus, kuru
 augšupielādei ir piekrišana. Paroles, tokenus, datubāzes URL un R2 atslēgas

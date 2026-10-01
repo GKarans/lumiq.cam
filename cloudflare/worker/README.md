@@ -1,5 +1,13 @@
 # Cloudflare Worker deployment safety
 
+> **Superseded operational note (2026-10-01):** The live `lumiq.cam` custom
+> domain is attached to `lumiq-production`, not `lumiq-closed-test`. Production
+> resources exist and the domain remains behind Cloudflare Access. The dated
+> closed-test and pre-Production statements below are historical; do not follow
+> their domain-cutover or deploy instructions. Use
+> [`platform/docs/PRODUCTION-GOAL-LV.md`](../../platform/docs/PRODUCTION-GOAL-LV.md)
+> as the current status and follow-up checklist.
+
 The legacy `lumiq-cam` Worker, its `lumiq-supabase` Hyperdrive config, and both
 `lumiq-staging-photos` R2 buckets (default and EU jurisdictions) were deleted
 on 2026-09-25. The owner reports that the underlying Supabase staging project

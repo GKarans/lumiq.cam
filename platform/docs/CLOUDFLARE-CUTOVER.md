@@ -1,5 +1,11 @@
 # Cloudflare Production Cutover
 
+> **Historical procedure; cutover already superseded (2026-10-01).** The live
+> `lumiq.cam` custom domain is attached to `lumiq-production` and is behind
+> Cloudflare Access. Do not run the old closed-test-to-production cutover steps
+> below. They are retained only as historical context. Current verified state
+> and remaining work are tracked in [PRODUCTION-GOAL-LV.md](PRODUCTION-GOAL-LV.md).
+
 Status (2026-09-25): `lumiq.cam` is served by the Access-gated closed-test
 Worker, not production. Production resources and a public-production cutover
 remain unapproved/unprovisioned. Old staging Worker, Hyperdrive and both

@@ -1,5 +1,11 @@
 # Bezmaksas slēgtais tests
 
+> **Vēsturiska vide; nav aktuālais `lumiq.cam` produkts (2026-10-01).** Saknes
+> domēns tagad ir piesaistīts `lumiq-production`; `lumiq-closed-test` ir
+> atsevišķa izolēta testa vide. Neizpildīt tālāk esošos soļus, kas iesaka
+> mainīt `lumiq.cam` maršrutu. Aktuālais Production stāvoklis un darbi ir
+> [PRODUCTION-GOAL-LV.md](PRODUCTION-GOAL-LV.md).
+
 Updated: 2026-09-25. Current scope approved by the owner: $0 closed test only.
 This is not production approval. Do not start paid plans, invite public users,
 accept payments, or collect real guest photos.
