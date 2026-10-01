@@ -4,7 +4,7 @@
 
 **Statuss 2026-10-01:** `[x]` nozīmē, ka norādītais šaurais fakts ir pārbaudīts; tas nenozīmē, ka visa sadaļa ir gatava. `[ ]` nozīmē, ka rezultāts vēl nav pierādīts. `app-images` neaiztikt. `event-photo-media` neaiztikt, kamēr nav atsevišķi noskaidrotas tā atkarības un īpašnieks nav devis jaunu uzdevumu.
 
-### Aktuālais kontrolpunkts — 2026-10-01 06:40 Rīgas laiks
+### Aktuālais kontrolpunkts — 2026-10-01 06:46 Rīgas laiks
 
 - Cloudflare Workers & Pages dzīvajā sarakstā ir `lumiq-production`, `lumiq-closed-test`, `lumiq-restore-drill-candidate` un aizsargātais `event-photo-media`. `lumiq-production-candidate` nav sarakstā un `lumiq.cam` maršruts joprojām ir uz `lumiq-production`, bet atsevišķais Restore Drill Worker vēl ir aktīvs; gala nosacījums par visu candidate vidi neesamību tādēļ vēl nav izpildīts. Restore Drill izmanto atsevišķus Recovery resursus un tam ir Cloudflare Access politika; to neizdzēst pirms pilna restore testa un atkarību pārbaudes.
 - Autorizētajā pārlūkā `https://lumiq.cam/contact` joprojām rāda “Requests are stored locally; no email leaves this device”. Tas apliecina, ka jaunais kontaktformas/outbox ceļš Production nav izvietots.
@@ -20,6 +20,7 @@
 - 2026-10-01 03:36 UTC lokālā `npm run security` pārbaude izturēja: slepeno atslēgu skeneris pārbaudīja 288 tracked/unignored failus, `npm audit --audit-level=high` ziņoja 0 vulnerabilities. `npm run build` validēja 60 publiskos failus. `npm run browser` izolētā pārlūka QA izturēja 320–1440 px skatus, auth reģistrācijas/ielūguma callback, pasākumu/foto galerijas plūsmu, atsevišķas funkciju pārbaudes un axe/keyboard/reduced-motion/200% zoom. Browser tests izmanto izolētus datus un nesūtīja ārējus pieprasījumus; tas nepierāda dzīvu Production, reālu pastkasti, telefonu vai divu Production organizatoru izolāciju.
 - 2026-10-01 03:39 UTC no darba vides svaigs DNS/HTTP tests: `lumiq.cam` atrisinās Cloudflare A/AAAA ierakstos; `https://lumiq.cam/healthz` saņēma Access `302`, `www.lumiq.cam/healthz` saņēma `301`, savukārt `lumiq-production.gkarans-events.workers.dev/healthz` un vecais `lumiq-production-candidate.gkarans-events.workers.dev/healthz` abi atbildēja `404`. Tas ir viena tīkla novērojums, nevis divu neatkarīgu tīklu tests vai autentificētas lietotnes pārbaude; Access redirect query netika atvērts vai saglabāts.
 - 2026-10-01 03:39 UTC Gmail vaicājumā `from:(supabase.com) newer_than:7d` biļetēm `SU-490493` un `SU-490545` redzamas tikai automātiskās saņemšanas kvītis; tehniskas atbildes nav. Atsvaidzinātajā Production Auth Logs skatā jaunākais redzamais notikums bija `2026-10-01 00:11:24` (admin/users); paroles `/token` login `200` plkst. `00:01:21`. Auth Logs rāda līdz 100 rezultātiem un brīdina, ka jaunu datu ielāde var aizņemt līdz 24 stundām, tāpēc nav pierādīts, ka pēc tam nav citu Auth darbību vai ka lietotnes sesija izdevās.
+- 2026-10-01 03:45 UTC izolētā integrācijas testā viesu `PUT /api/guest/:slug/convert` ar sintētisku `video/mp4` saņēma `415` un saprotamu “Only HEIC or HEIF photos need conversion” kļūdu. Tātad foto-only servera konversijas robeža lokāli noraida video; reāla Production vai telefona kameras plūsma ar šo testu nav pierādīta.
 
 ## 1. Viena Production arhitektūra
 
@@ -98,6 +99,7 @@
 ## 6. Pasākumi, QR un foto
 
 - [ ] Pirmais organizators izveido, rediģē, publicē, aptur un beidz QA pasākumu; pārbauda dashboard, statusu, unikālo `lumiq.cam` saiti un lejuplādējamu/drukājamu QR.
+- [x] 2026-10-01 03:45 UTC izolētais API tests apstiprina, ka viesa attēla konversijas maršruts noraida `video/mp4` ar `415`; šis ir tikai foto-only servera robežas tests, ne pilns viesu/Production QA.
 - [ ] Viesis telefonā noskenē QR, ievada vārdu, atver kameru, uzņem foto un augšupielādē to bez konta. Lietotnē nav video augšupielādes vai video apstrādes.
 - [ ] Pārbaudīt faila tipu/izmēra limitus, upload progresu, atkārtojumu pēc tīkla kļūdas un dubultas iesniegšanas aizsardzību. Apstiprināt, ka Production EU R2 ir gan oriģināls, gan sīktēls, DB metadati un galerijas priekšskatījums.
 - [ ] Pārbaudīt galerijas atjaunošanos, foto lejupielādi, slēgta pasākuma uzvedību, koplietošanas atcelšanu un tukšas galerijas stāvokli.
